@@ -34,6 +34,7 @@ export const GIT_COMMIT_SHA = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA?.sli
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 export const LENSPROTOCOL_HANDLE = 'lensprotocol';
 export const HANDLE_SUFFIX = IS_MAINNET ? '.lens' : '.test';
+export const OLD_LENS_RELAYER_ADDRESS = '0xD1FecCF6881970105dfb2b654054174007f0e07E';
 
 // Mixpanel
 export const MIXPANEL_TOKEN = process.env.NEXT_PUBLIC_MIXPANEL_TOKEN ?? '';
@@ -58,7 +59,7 @@ export const METADATA_WORKER_URL = IS_PRODUCTION ? 'https://metadata.lenster.xyz
 export const FRESHDESK_WORKER_URL = IS_PRODUCTION ? 'https://freshdesk.lenster.xyz' : 'http://localhost:8084';
 
 // Web3
-export const ALCHEMY_KEY = 'HHfOFn8jsYguteTVvL0cz4g9aydrbjTV';
+export const ALCHEMY_KEY = '7jxlM7yIx-aJXDivcEZxsLFFRKQS6-ue';
 export const WALLETCONNECT_PROJECT_ID = 'cd542acc70c2b548030f9901a52e70c8';
 
 // Regex

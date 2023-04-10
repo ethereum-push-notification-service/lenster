@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, synchronize]
   workflow_dispatch:
 
 jobs:
@@ -17,17 +18,11 @@ jobs:
       - name: Setup node 🍀
         uses: actions/setup-node@v3
         with:
-          node-version-file: '.nvmrc'
-          cache: 'yarn'
+          node-version-file: ".nvmrc"
+          cache: "yarn"
 
-      - name: Install dependencies 📦
-        run: yarn install --frozen-lockfile
-
-      - name: Install Playwright browsers 🕹️
-        run: npx playwright install --with-deps
-
-      - name: GraphQL Codegen 🕸
-        run: yarn codegen
+      - name: Bootstrap 📦
+        run: script/bootstrap
 
       - name: Typecheck 🔡
         run: yarn typecheck

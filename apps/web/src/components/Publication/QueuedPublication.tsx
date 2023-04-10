@@ -1,4 +1,3 @@
-import { useApolloClient } from '@apollo/client';
 import Attachments from '@components/Shared/Attachments';
 import IFramely from '@components/Shared/IFramely';
 import Markup from '@components/Shared/Markup';
@@ -11,6 +10,7 @@ import {
   useHasTxHashBeenIndexedQuery,
   usePublicationLazyQuery
 } from 'lens';
+import { useApolloClient } from 'lens/apollo';
 import getURLs from 'lib/getURLs';
 import type { FC } from 'react';
 import { useAppStore } from 'src/store/app';
@@ -39,12 +39,12 @@ const QueuedPublication: FC<QueuedPublicationProps> = ({ txn }) => {
   };
 
   const [getPublication] = usePublicationLazyQuery({
-    onCompleted: (data) => {
-      if (data?.publication) {
+    onCompleted: ({ publication }) => {
+      if (publication) {
         cache.modify({
           fields: {
             publications() {
-              cache.writeQuery({ data: data?.publication as any, query: PublicationDocument });
+              cache.writeQuery({ data: publication as any, query: PublicationDocument });
             }
           }
         });
@@ -56,13 +56,13 @@ const QueuedPublication: FC<QueuedPublicationProps> = ({ txn }) => {
   useHasTxHashBeenIndexedQuery({
     variables: { request: { txHash, txId } },
     pollInterval: 1000,
-    onCompleted: (data) => {
-      if (data.hasTxHashBeenIndexed.__typename === 'TransactionError') {
+    onCompleted: ({ hasTxHashBeenIndexed }) => {
+      if (hasTxHashBeenIndexed.__typename === 'TransactionError') {
         return removeTxn();
       }
 
-      if (data.hasTxHashBeenIndexed.__typename === 'TransactionIndexedResult') {
-        const status = data.hasTxHashBeenIndexed.metadataStatus?.status;
+      if (hasTxHashBeenIndexed.__typename === 'TransactionIndexedResult') {
+        const status = hasTxHashBeenIndexed.metadataStatus?.status;
 
         if (
           status === PublicationMetadataStatusType.MetadataValidationFailed ||
@@ -71,10 +71,10 @@ const QueuedPublication: FC<QueuedPublicationProps> = ({ txn }) => {
           return removeTxn();
         }
 
-        if (data.hasTxHashBeenIndexed.indexed) {
+        if (hasTxHashBeenIndexed.indexed) {
           getPublication({
             variables: {
-              request: { txHash: data.hasTxHashBeenIndexed.txHash },
+              request: { txHash: hasTxHashBeenIndexed.txHash },
               reactionRequest: currentProfile ? { profileId: currentProfile?.id } : null,
               profileId: currentProfile?.id ?? null
             }

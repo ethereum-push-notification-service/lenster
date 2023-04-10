@@ -50,12 +50,11 @@ const ViewProfile: NextPage = () => {
   const [following, setFollowing] = useState<boolean | null>(null);
   const [showFollowModal, setShowFollowModal] = useState(false);
 
-  // workaround for that profile.isFollowedByMe == true when signed out
-  const isFollowedByMe = !!currentProfile && !!profile?.isFollowedByMe;
+  const isFollowedByMe = Boolean(currentProfile) && Boolean(profile?.isFollowedByMe);
 
   const followType = profile?.followModule?.__typename;
 
-  const initState = following == null;
+  const initState = following === null;
   // profile is not defined until the second render
   if (initState && profile) {
     const canFollow = followType !== 'RevertFollowModuleSettings' && !isFollowedByMe;
@@ -114,7 +113,7 @@ const ViewProfile: NextPage = () => {
       />
       <GridLayout className="pt-6">
         <GridItemFour>
-          <Details profile={profile as any} following={!!following} setFollowing={setFollowing} />
+          <Details profile={profile as any} following={Boolean(following)} setFollowing={setFollowing} />
         </GridItemFour>
         <GridItemEight className="space-y-5">
           <FeedType setFeedType={setFeedType} feedType={feedType} />
