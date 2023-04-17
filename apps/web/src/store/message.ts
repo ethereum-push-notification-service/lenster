@@ -3,6 +3,7 @@ import type { Client, Conversation, DecodedMessage } from '@xmtp/xmtp-js';
 import { toNanoString } from '@xmtp/xmtp-js';
 import { Localstorage } from 'data/storage';
 import type { Profile } from 'lens';
+import { MESSAGING_PROVIDER } from 'src/constants';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -10,6 +11,8 @@ type TabValues = 'Following' | 'Requested';
 
 interface MessageState {
   client: Client | undefined;
+  provider: string;
+  setProvider: (provider: string) => void;
   setClient: (client: Client | undefined) => void;
   conversations: Map<string, Conversation>;
   setConversations: (conversations: Map<string, Conversation>) => void;
@@ -33,6 +36,8 @@ interface MessageState {
 export const useMessageStore = create<MessageState>((set) => ({
   client: undefined,
   setClient: (client) => set(() => ({ client })),
+  provider: MESSAGING_PROVIDER.PUSH,
+  setProvider: (provider) => set(() => ({ provider })),
   conversations: new Map(),
   setConversations: (conversations) => set(() => ({ conversations })),
   addConversation: (key: string, newConversation: Conversation) => {
