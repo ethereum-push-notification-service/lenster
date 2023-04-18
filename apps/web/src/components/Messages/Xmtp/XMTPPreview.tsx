@@ -1,4 +1,3 @@
-import Preview from '@components/Messages/Preview';
 import Following from '@components/Profile/Following';
 import Loader from '@components/Shared/Loader';
 import Search from '@components/Shared/Navbar/Search';
@@ -14,21 +13,24 @@ import type { Profile } from 'lens';
 import { useRouter } from 'next/router';
 import type { FC } from 'react';
 import { useState } from 'react';
+import { MESSAGING_PROVIDER } from 'src/constants';
 import { useAppStore } from 'src/store/app';
-import { useMessageStore } from 'src/store/message';
+import { useXmtpMessageStore } from 'src/store/xmtp-message';
 import { MESSAGES } from 'src/tracking';
 import { Card, EmptyState, ErrorMessage, Modal } from 'ui';
+
+import Preview from './Preview';
 
 interface PreviewListProps {
   selectedConversationKey?: string;
 }
-const PushPreview: FC<PreviewListProps> = ({ selectedConversationKey }) => {
+const XMTPPreview: FC<PreviewListProps> = ({ selectedConversationKey }) => {
   const router = useRouter();
 
   const currentProfile = useAppStore((state) => state.currentProfile);
-  const addProfileAndSelectTab = useMessageStore((state) => state.addProfileAndSelectTab);
-  const selectedTab = useMessageStore((state) => state.selectedTab);
-  const setSelectedTab = useMessageStore((state) => state.setSelectedTab);
+  const addProfileAndSelectTab = useXmtpMessageStore((state) => state.addProfileAndSelectTab);
+  const selectedTab = useXmtpMessageStore((state) => state.selectedTab);
+  const setSelectedTab = useXmtpMessageStore((state) => state.setSelectedTab);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const { authenticating, loading, messages, profilesToShow, requestedCount, profilesError } =
     useMessagePreviews();
@@ -51,7 +53,7 @@ const PushPreview: FC<PreviewListProps> = ({ selectedConversationKey }) => {
     const conversationId = buildConversationId(currentProfile?.id, profile.id);
     const conversationKey = buildConversationKey(profile.ownedBy, conversationId);
     addProfileAndSelectTab(conversationKey, profile);
-    router.push(`/messages/${conversationKey}`);
+    router.push(`/messages/${MESSAGING_PROVIDER.XMTP}/${conversationKey}`);
     setShowSearchModal(false);
   };
 
@@ -163,4 +165,4 @@ const PushPreview: FC<PreviewListProps> = ({ selectedConversationKey }) => {
   );
 };
 
-export default PushPreview;
+export default XMTPPreview;

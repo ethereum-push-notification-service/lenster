@@ -1,3 +1,3 @@
-import Message from '@components/Messages/Message';
+import Message from '@components/Messages/Xmtp/Message';
 
 export default Message;

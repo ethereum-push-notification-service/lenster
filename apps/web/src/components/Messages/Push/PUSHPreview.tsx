@@ -3,7 +3,7 @@ import type { FC } from 'react';
 interface PreviewListProps {
   selectedConversationKey?: string;
 }
-const PushPreview: FC<PreviewListProps> = ({ selectedConversationKey }) => {
+const PUSHPreview: FC<PreviewListProps> = () => {
   return (
     <div className="flex h-full flex-col justify-between">
       show push conversations to redirect to push conversation page
@@ -11,4 +11,4 @@ const PushPreview: FC<PreviewListProps> = ({ selectedConversationKey }) => {
   );
 };
 
-export default PushPreview;
+export default PUSHPreview;

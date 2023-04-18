@@ -18,7 +18,7 @@ const usePushAuth = () => {
       return;
     }
 
-    const { ownedBy } = currentProfile;
+    // const { ownedBy } = currentProfile;
     const checkIsPushUser = async () => {
       try {
         // const user = await PushAPI.user.get({

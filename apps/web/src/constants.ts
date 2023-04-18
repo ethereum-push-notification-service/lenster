@@ -17,6 +17,6 @@ export const SIMPLEANALYTICS_API_ENDPOINT = 'https://simpleanalytics.com/lenster
 
 // messaging provider
 export const MESSAGING_PROVIDER = {
-  XMTP: 'XMTP',
-  PUSH: 'PUSH'
+  XMTP: 'xmtp',
+  PUSH: 'push'
 };
