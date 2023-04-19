@@ -9,6 +9,8 @@ import { useAppStore } from 'src/store/app';
 import { Card, GridItemEight, GridLayout } from 'ui';
 
 import PreviewList from '../PreviewList';
+import MessageBody from './MessageBody';
+import MessageHeader from './MessageHeader';
 
 interface MessageProps {
   conversationKey: string;
@@ -29,7 +31,10 @@ const Message: FC<MessageProps> = ({ conversationKey }) => {
               <Loader message={t`Loading messages`} />
             </div>
           ) : (
-            <p>render push messaging components</p>
+            <div className="h-full">
+              <MessageHeader />
+              <MessageBody />
+            </div>
           )}
         </Card>
       </GridItemEight>
