@@ -9,7 +9,6 @@ interface PreviewListProps {
 const activeIndex = 1;
 
 const PUSHPreview: FC<PreviewListProps> = () => {
-  // const [activeTab, setActiveTab] = useState(PUSH_TABS.REQUESTS);
   const activeTab = usePushChatStore((state) => state.activeTab);
   const setActiveTab = usePushChatStore((state) => state.setActiveTab);
   return (
