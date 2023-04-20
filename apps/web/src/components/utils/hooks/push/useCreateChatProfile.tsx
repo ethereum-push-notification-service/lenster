@@ -46,6 +46,8 @@ const useCreateChatProfile = () => {
     });
     if (progress.level === 'INFO') {
       setModalClosable(false);
+    } else {
+      setModalClosable(true);
     }
   };
 
