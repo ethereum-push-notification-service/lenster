@@ -20,6 +20,8 @@ interface IPushChatStore {
   setSelectedChatId: (selectedChatId: string) => void;
   selectedTab: TabValues;
   setSelectedTab: (selectedTab: TabValues) => void;
+  showCreateChatProfileModal: boolean;
+  setShowCreateChatProfileModal: (showCreateChatProfileModal: boolean) => void;
 }
 
 export const usePushChatStore = create<IPushChatStore>((set) => ({
@@ -56,6 +58,8 @@ export const usePushChatStore = create<IPushChatStore>((set) => ({
   setSelectedChatId: (selectedChatId) => set(() => ({ selectedChatId })),
   selectedTab: 'Chats',
   setSelectedTab: (selectedTab) => set(() => ({ selectedTab })),
+  showCreateChatProfileModal: false,
+  setShowCreateChatProfileModal: (showCreateChatProfileModal) => set(() => ({ showCreateChatProfileModal })),
   reset: () =>
     set((state) => {
       return {
