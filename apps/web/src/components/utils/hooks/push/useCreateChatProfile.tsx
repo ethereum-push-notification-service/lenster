@@ -2,12 +2,12 @@ import { XIcon } from '@heroicons/react/outline';
 import type { ProgressHookType } from '@pushprotocol/restapi';
 import * as PushAPI from '@pushprotocol/restapi';
 import { ENV } from '@pushprotocol/restapi/src/lib/constants';
-import { LENSHUB_PROXY } from 'data';
+import { IS_MAINNET, LENSHUB_PROXY } from 'data';
 import { useState } from 'react';
 import { CHAIN_ID } from 'src/constants';
 import { useAppStore } from 'src/store/app';
 import { usePushChatStore } from 'src/store/push-chat';
-import { Button, Input, Spinner } from 'ui';
+import { Button, Image, Input, Spinner } from 'ui';
 import { useSigner } from 'wagmi';
 
 type handleSetPassFunc = () => void;
@@ -47,6 +47,12 @@ const useCreateChatProfile = () => {
     if (progress.level === 'INFO') {
       setModalClosable(false);
     } else {
+      if (progress.level === 'SUCCESS') {
+        const timeout = 2000; // after this time, modal will be closed
+        setTimeout(() => {
+          setShowCreateChatProfileModal(false);
+        }, timeout);
+      }
       setModalClosable(true);
     }
   };
@@ -58,6 +64,7 @@ const useCreateChatProfile = () => {
       info: 'Please set a password to recover your chats if you transfer your Lens NFT to another wallet.',
       type: ProgressType.INITIATE
     });
+    setPassword('');
     setModalClosable(true);
   };
 
@@ -67,21 +74,19 @@ const useCreateChatProfile = () => {
     }
 
     try {
-      const did = password; // use the input value in the next step
-      console.log(did);
-      console.log(currentProfile);
+      const PUSH_ENV = IS_MAINNET ? ENV.PROD : ENV.STAGING;
       await PushAPI.user.createNFTProfile({
         signer: signer,
         password: password,
         did: `eip155:${CHAIN_ID}:${LENSHUB_PROXY}:nft:${currentProfile.id}`,
         progressHook: handleProgress,
-        env: ENV.STAGING
+        env: PUSH_ENV
       });
       setStep(2);
     } catch (error) {
       console.log(error);
       // handle error here
-      const timeout = 2000; // after this time, show modal state to 1st step
+      const timeout = 3000; // after this time, show modal state to 1st step
       setTimeout(() => {
         initiateProcess();
       }, timeout);
@@ -141,6 +146,42 @@ const useCreateChatProfile = () => {
               className="bg-brand-500 h-2 rounded-full p-0.5 leading-none"
               style={{ width: `${(step * 100) / totalSteps}%` }}
             />
+          </div>
+        </div>
+      );
+      break;
+    case ProgressType.SUCCESS:
+      modalContent = (
+        <div className="flex w-full flex-col px-4 py-6">
+          <div className="flex items-center justify-center pb-4 text-center text-base font-medium">
+            <Image
+              src="/checkcircle.png"
+              loading="lazy"
+              className="mr-2 h-7 w-7 rounded-full"
+              alt="Check circle"
+            />{' '}
+            {step}/{totalSteps} - {modalInfo.title}
+          </div>
+          <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+            <div
+              className="bg-brand-500 h-2 rounded-full p-0.5 leading-none"
+              style={{ width: `${(step * 100) / totalSteps}%` }}
+            />
+          </div>
+        </div>
+      );
+      break;
+    case ProgressType.ERROR:
+      modalContent = (
+        <div className="flex w-full flex-col px-4 py-6">
+          <div className="flex items-center justify-center pb-4 text-center text-sm font-medium text-[#EF4444]">
+            <Image
+              src="/xcircle.png"
+              loading="lazy"
+              className="mr-2 h-7 w-7 rounded-full"
+              alt="Check circle"
+            />{' '}
+            {modalInfo.info} Redirecting...
           </div>
         </div>
       );
