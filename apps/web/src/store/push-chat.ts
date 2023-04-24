@@ -2,10 +2,15 @@ import type { IFeeds, IMessageIPFS, IUser } from '@pushprotocol/restapi';
 import { create } from 'zustand';
 
 type TabValues = 'Chats' | 'Requests';
-
+export const PUSH_TABS = {
+  CHATS: 'CHATS',
+  REQUESTS: 'REQUESTS'
+};
 interface IPushChatStore {
   connectedProfile: IUser | undefined;
   setConnectedProfile: (connectedProfile: IUser) => void;
+  activeTab: String;
+  setActiveTab: (tabName: string) => void;
   chats: Map<string, Array<IMessageIPFS>>; // chatId -> chat messages array
   setChats: (chats: Map<string, Array<IMessageIPFS>>) => void;
   addChat: (key: string, newChat: Array<IMessageIPFS>) => void;
@@ -27,6 +32,8 @@ interface IPushChatStore {
 export const usePushChatStore = create<IPushChatStore>((set) => ({
   connectedProfile: undefined,
   setConnectedProfile: (connectedProfile) => set(() => ({ connectedProfile })),
+  activeTab: PUSH_TABS.CHATS,
+  setActiveTab: (activeTab) => set(() => ({ activeTab })),
   chats: new Map(),
   setChats: (chats) => set(() => ({ chats })),
   addChat: (key: string, newChat: Array<IMessageIPFS>) => {
