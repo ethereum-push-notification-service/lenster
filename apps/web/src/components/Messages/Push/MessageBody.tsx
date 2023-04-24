@@ -1,7 +1,7 @@
 import EmojiPicker from 'emoji-picker-react';
 import GifPicker from 'gif-picker-react';
 import React, { useState } from 'react';
-import { Input } from 'ui';
+import { Image, Input } from 'ui';
 
 type GIFType = {
   url: String;
@@ -45,44 +45,44 @@ export default function MessageBody() {
                 <span className="absolute bottom-1.5	right-1.5 text-xs text-gray-500">8:25</span>
               </div>
               <div className="relative w-fit rounded-xl rounded-tl-sm border">
-                <img
+                <Image
                   className="font-medium0 relative w-fit rounded-xl rounded-tl-sm border"
                   src={gifSample.url}
                   alt=""
                 />
-                <img className="absolute right-2.5 top-2.5" src="/push/giticon.svg" alt="" />
+                <Image className="absolute right-2.5 top-2.5" src="/push/giticon.svg" alt="" />
               </div>
               <div className="relative w-fit	max-w-[80%] self-end rounded-xl rounded-tr-sm border bg-violet-500 py-3 pl-4 pr-9 font-medium">
                 <p className="text-sm	text-white">Group chats, video calls... I wonder what’s next</p>
                 <span className="absolute bottom-1.5	right-1.5 text-xs text-white">8:25</span>
               </div>
               <div className="relative self-end overflow-hidden rounded-xl rounded-tr-sm border bg-violet-500">
-                <img
+                <Image
                   className={`relative w-fit self-end rounded-xl rounded-tr-sm border bg-violet-500`}
                   src={gifSample.url}
                   alt=""
                 />
-                <img className="absolute right-2.5 top-2.5" src="/push/giticon.svg" alt="" />
+                <Image className="absolute right-2.5 top-2.5" src="/push/giticon.svg" alt="" />
               </div>
             </div>
           </section>
         ))}
       </div>
       <div className="relative mt-2">
-        <img
+        <Image
           onClick={() => setEmojiOpen((o) => !o)}
           className="absolute left-2 top-2.5 cursor-pointer"
           src="/push/emoji.svg"
           alt=""
         />
         <div className="absolute right-4 top-2 flex items-center gap-5">
-          <img
+          <Image
             onClick={() => setGifOpen((o) => !o)}
             className="relative cursor-pointer"
             src="/push/gif.svg"
             alt="gif"
           />
-          <img onClick={submitText} className="relative cursor-pointer" src="/push/send.svg" alt="send" />
+          <Image onClick={submitText} className="relative cursor-pointer" src="/push/send.svg" alt="send" />
         </div>
         {emojiOpen ? (
           <div className="absolute bottom-[50px]">

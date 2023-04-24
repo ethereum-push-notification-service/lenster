@@ -1,4 +1,5 @@
 import React from 'react';
+import { Image } from 'ui';
 
 export default function MessageHeader() {
   return (
@@ -15,7 +16,7 @@ export default function MessageHeader() {
       <div className="flex items-center gap-4	">
         <img className="cursor-pointer" src="/push/video.svg" alt="video icon" />
         <div className="flex	 h-8 w-20 cursor-pointer items-center	justify-center gap-2 rounded-lg border border-violet-500">
-          <img className="h-3	w-3" src="/push/addfriend.svg" alt="" />
+          <Image className="h-3	w-3" src="/push/addfriend.svg" alt="" />
           <span className="text-sm text-violet-500">Follow</span>
         </div>
       </div>
