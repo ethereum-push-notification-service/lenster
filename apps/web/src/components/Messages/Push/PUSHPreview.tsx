@@ -9,12 +9,12 @@ interface PreviewListProps {
 const PUSHPreview: FC<PreviewListProps> = () => {
   const showCreateChatProfileModal = usePushChatStore((state) => state.showCreateChatProfileModal);
   const setShowCreateChatProfileModal = usePushChatStore((state) => state.setShowCreateChatProfileModal);
-  const { createChatProfile, modalContent, isModalClosable } = useCreateChatProfile();
+  const { modalContent, isModalClosable } = useCreateChatProfile();
 
   return (
     <div className="flex h-full flex-col justify-between">
       show push conversations to redirect to push conversation page
-      <button onClick={createChatProfile}>Create Profile</button>
+      {/* <button onClick={createChatProfile}>Create Profile</button> */}
       <div>
         <Modal
           size="xs"
