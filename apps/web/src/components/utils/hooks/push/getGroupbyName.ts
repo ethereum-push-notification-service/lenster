@@ -3,6 +3,7 @@ import { ENV } from '@pushprotocol/restapi/src/lib/constants';
 import { IS_MAINNET } from 'data';
 import { useCallback, useEffect, useState } from 'react';
 import { useAppStore } from 'src/store/app';
+import { GroupDTO } from '@pushprotocol/restapi';
 
 interface GroupByName {
   name: string;
@@ -14,7 +15,7 @@ const useGroupByName = ({ name }: GroupByName) => {
   const [error, setError] = useState<string>();
 
   const fetchGroupByName = useCallback(
-    async ({ name }: GroupByName) => {
+    async ({ name }: GroupByName): Promise<GroupDTO | undefined> => {
       setLoading(true);
       try {
         const PUSH_ENV = IS_MAINNET ? ENV.PROD : ENV.STAGING;
@@ -39,7 +40,7 @@ const useGroupByName = ({ name }: GroupByName) => {
     fetchGroupByName({ name });
   }, [fetchGroupByName, name]);
 
-  return { fetchGroupByName,loading, error };
+  return { fetchGroupByName, loading, error };
 };
 
 export default useGroupByName;
