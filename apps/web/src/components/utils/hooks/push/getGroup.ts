@@ -12,7 +12,6 @@ interface fetchGroup {
 
 const useGetGroup = () => {
 
-    const [group, setGroup] = useState<GroupDTO | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>();
 
@@ -22,14 +21,14 @@ const useGetGroup = () => {
         setLoading(true);
         try {
             const PUSH_ENV = IS_MAINNET ? ENV.PROD : ENV.STAGING;
-            const fetchGroup = await PushAPI.chat.getGroup({
+            const response = await PushAPI.chat.getGroup({
                 chatId: `eip155:${account}`,
                 env: PUSH_ENV,
             });
             if (!fetchGroup) {
-                return
+                return;
             }
-            setGroup(fetchGroup)
+            return response;
         } catch (error: Error | any) {
             setLoading(false);
             console.log(error)
@@ -38,7 +37,7 @@ const useGetGroup = () => {
     },
         [ownedBy]
     );
-    return { group, fetchGroup, loading, error };
+    return { fetchGroup, loading, error };
 }
 
 export default useGetGroup;

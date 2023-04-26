@@ -1,9 +1,8 @@
-import * as PushAPI from "@pushprotocol/restapi";
-import { useCallback, useEffect, useState } from "react";
-import { useAppStore } from "src/store/app";
-import { ENV } from "@pushprotocol/restapi/src/lib/constants";
+import * as PushAPI from '@pushprotocol/restapi';
+import { ENV } from '@pushprotocol/restapi/src/lib/constants';
 import { IS_MAINNET } from 'data';
-import { GroupDTO } from "@pushprotocol/restapi";
+import { useCallback, useEffect, useState } from 'react';
+import { useAppStore } from 'src/store/app';
 
 interface GroupByName {
   name: string;
@@ -11,34 +10,36 @@ interface GroupByName {
 
 const useGroupByName = ({ name }: GroupByName) => {
   const currentProfile = useAppStore((state) => state.currentProfile);
-  const [group, setGroup] = useState<GroupDTO | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>();
 
-  const fetchGroupByName = useCallback(async ({ name }: { name: string }) => {
-    setLoading(true);
-    try {
-      const PUSH_ENV = IS_MAINNET ? ENV.PROD : ENV.STAGING;
-      const fetchedGroup = await PushAPI.chat.getGroupByName({
-        groupName: `eip155:${name}`,
-        env: PUSH_ENV,
-      });
-      if (!fetchedGroup) {
-        return;
+  const fetchGroupByName = useCallback(
+    async ({ name }: GroupByName) => {
+      setLoading(true);
+      try {
+        const PUSH_ENV = IS_MAINNET ? ENV.PROD : ENV.STAGING;
+        const response = await PushAPI.chat.getGroupByName({
+          groupName: name,
+          env: PUSH_ENV
+        });
+        if (!response) {
+          return;
+        }
+        return response;
+      } catch (error: Error | any) {
+        setLoading(false);
+        console.log(error);
+        setError(error.message);
       }
-      setGroup(fetchedGroup);
-    } catch (error: Error | any) {
-      setLoading(false);
-      console.log(error);
-      setError(error.message);
-    }
-  }, [currentProfile, name]);
+    },
+    [currentProfile, name]
+  );
 
   useEffect(() => {
     fetchGroupByName({ name });
   }, [fetchGroupByName, name]);
 
-  return { group, loading, error };
+  return { fetchGroupByName,loading, error };
 };
 
 export default useGroupByName;
