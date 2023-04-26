@@ -1,6 +1,5 @@
 import * as PushAPI from '@pushprotocol/restapi';
-import { ENV } from '@pushprotocol/restapi/src/lib/constants';
-import { IS_MAINNET } from 'data';
+import { PUSH_ENV } from 'src/store/push-chat';
 import { useCallback, useState } from 'react';
 import { useAppStore } from 'src/store/app';
 import type { GroupDTO } from '@pushprotocol/restapi';
@@ -19,7 +18,6 @@ const useGetGroup = () => {
     async ({ account }: fetchGroup): Promise<GroupDTO | undefined> => {
       setLoading(true);
       try {
-        const PUSH_ENV = IS_MAINNET ? ENV.PROD : ENV.STAGING;
         const response = await PushAPI.chat.getGroup({
           chatId: `eip155:${account}`,
           env: PUSH_ENV

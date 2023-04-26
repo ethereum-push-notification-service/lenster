@@ -1,5 +1,5 @@
 import * as PushAPI from '@pushprotocol/restapi';
-import { ENV } from '@pushprotocol/restapi/src/lib/constants';
+import { PUSH_ENV } from 'src/store/push-chat';
 import { IS_MAINNET } from 'data';
 import { useCallback, useEffect, useState } from 'react';
 import { useAppStore } from 'src/store/app';
@@ -18,10 +18,9 @@ const useGroupByName = ({ name }: GroupByName) => {
     async ({ name }: GroupByName): Promise<GroupDTO | undefined> => {
       setLoading(true);
       try {
-        const PUSH_ENV = IS_MAINNET ? ENV.PROD : ENV.STAGING;
         const response = await PushAPI.chat.getGroupByName({
           groupName: name,
-          env: PUSH_ENV
+          env: PUSH_ENV,
         });
         if (!response) {
           return;
