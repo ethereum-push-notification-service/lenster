@@ -19,8 +19,8 @@ const useGroupByName = ({ name }: GroupByName) => {
     setLoading(true);
     try {
       const PUSH_ENV = IS_MAINNET ? ENV.PROD : ENV.STAGING;
-      const fetchedGroup = await PushAPI.chat.getGroup({
-        chatId: `eip155:${name}`,
+      const fetchedGroup = await PushAPI.chat.getGroupByName({
+        groupName: `eip155:${name}`,
         env: PUSH_ENV,
       });
       if (!fetchedGroup) {
