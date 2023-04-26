@@ -10,7 +10,7 @@ interface fetchGroup {
     account: string;
 }
 
-const getGroup = () => {
+const useGetGroup = () => {
 
     const [group, setGroup] = useState<GroupDTO | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
@@ -41,4 +41,4 @@ const getGroup = () => {
     return { group, fetchGroup, loading, error };
 }
 
-export default getGroup;
+export default useGetGroup;
