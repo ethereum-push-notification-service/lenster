@@ -47,7 +47,6 @@ const PUSHPreview: FC<PreviewListProps> = () => {
           </div>
 
           <div className="flex gap-x-2">
-            {/* <Input placeholder="Search name.eth or 0x123..." /> */}
             <Search
               placeholder='Search name.eth or 0x123...'
               modalWidthClassName='w-80'
