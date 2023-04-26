@@ -1,3 +1,4 @@
+import Search from '@components/Shared/Navbar/Search';
 import useCreateChatProfile from '@components/utils/hooks/push/useCreateChatProfile';
 import { Trans } from '@lingui/macro';
 import { type FC } from 'react';
@@ -46,7 +47,11 @@ const PUSHPreview: FC<PreviewListProps> = () => {
           </div>
 
           <div className="flex gap-x-2">
-            <Input placeholder="Search name.eth or 0x123..." />
+            {/* <Input placeholder="Search name.eth or 0x123..." /> */}
+            <Search
+              placeholder='Search name.eth or 0x123...'
+              modalWidthClassName='w-80'
+            />
             <div className="">
               <img className="h-10 w-11" src="/push/requestchat.svg" alt="plus icon" />
             </div>
