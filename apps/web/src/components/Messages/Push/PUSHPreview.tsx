@@ -27,7 +27,7 @@ const PUSHPreview: FC<PreviewListProps> = () => {
           <div className="mb-6 flex gap-x-5 border-b border-b-gray-300">
             <div
               onClick={() => setActiveTab(PUSH_TABS.CHATS)}
-              className={`w-6/12 cursor-pointer border-b-4 pb-3.5 text-center  font-bold ${activeTab === PUSH_TABS.CHATS ? 'border-b-violet-500' : 'border-b-transparent text-gray-500'
+              className={`w-6/12 cursor-pointer border-b-4 pb-3.5 text-center  font-bold ${activeTab === PUSH_TABS.CHATS ? 'border-b-brand-500' : 'border-b-transparent text-gray-500'
                 }`}
             >
               <Trans>Chats</Trans>
@@ -35,12 +35,12 @@ const PUSHPreview: FC<PreviewListProps> = () => {
             <div
               onClick={() => setActiveTab(PUSH_TABS.REQUESTS)}
               className={`align-items-center flex w-6/12 cursor-pointer justify-center gap-x-1.5 border-b-4 pb-3.5 font-bold ${activeTab === PUSH_TABS.REQUESTS
-                  ? 'border-b-violet-500'
+                  ? 'border-b-brand-500'
                   : 'border-b-transparent text-gray-500'
                 }`}
             >
               <Trans>Requests</Trans>
-              <div className=" flex h-5 w-7 justify-center rounded-full bg-violet-500 text-sm text-white">
+              <div className=" flex h-5 w-7 justify-center rounded-full bg-brand-500 text-sm text-white">
                 2
               </div>
             </div>
@@ -60,7 +60,7 @@ const PUSHPreview: FC<PreviewListProps> = () => {
             {[1, 2].map((number) => (
               <div
                 key={number}
-                className={`flex h-16 cursor-pointer gap-2.5 rounded-lg  p-2.5 pr-3 transition-all hover:bg-gray-100 ${activeIndex === number && 'bg-violet-100'
+                className={`flex h-16 cursor-pointer gap-2.5 rounded-lg  p-2.5 pr-3 transition-all hover:bg-gray-100 ${activeIndex === number && 'bg-brand-100'
                   }`}
               >
                 <img className="h-12	w-12 rounded-full" src="/user.svg" alt="" />
