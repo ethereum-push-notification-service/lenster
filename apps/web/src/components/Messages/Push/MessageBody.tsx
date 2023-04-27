@@ -1,7 +1,9 @@
 import EmojiPicker from 'emoji-picker-react';
 import GifPicker from 'gif-picker-react';
-import React, { useState } from 'react';
+import { useRouter } from 'next/router';
+import React, { useEffect, useState } from 'react';
 import { Image, Input } from 'ui';
+// import useCreateChatProfile from '@components/utils/hooks/push/useGetHistoryMessages';
 
 type GIFType = {
   url: String;
@@ -10,9 +12,11 @@ type GIFType = {
 };
 
 export default function MessageBody() {
+  const router = useRouter();
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [gifOpen, setGifOpen] = useState(false);
   const [inputText, setInputText] = useState('');
+  const [conversationId] = router.query.conversationKey as string[];
 
   const appendEmoji = ({ emoji }: { emoji: string }) => setInputText(`${inputText}${emoji}`);
   const appendGIF = (emojiObject: GIFType) => {
@@ -25,6 +29,10 @@ export default function MessageBody() {
   const gifSample = {
     url: 'https://media.tenor.com/YGNEnwUYCf4AAAAC/annoyed-irritated.gif'
   };
+
+  useEffect(() => {
+    // const chathistory = useCreateChatProfile()
+  }, [conversationId]);
 
   return (
     <section className="h-full	p-5 pb-3">
