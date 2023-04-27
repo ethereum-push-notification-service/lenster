@@ -29,11 +29,13 @@ interface IPushChatStore {
   selectedChatId: string;
   setSelectedChatId: (selectedChatId: string) => void;
   showCreateChatProfileModal: boolean;
+  showCreateGroupModal: boolean;
   setShowCreateChatProfileModal: (showCreateChatProfileModal: boolean) => void;
   showDecryptionModal: boolean;
   setShowDecryptionModal: (showDecryptionModal: boolean) => void;
   showUpgradeChatProfileModal: boolean;
   setShowUpgradeChatProfileModal: (showUpgradeChatProfileModal: boolean) => void;
+  setShowCreateGroupModal: (showCreateGroupModal: boolean) => void;
   password: {
     encrypted: string | null;
     decrypted: string | null;
@@ -81,12 +83,14 @@ export const usePushChatStore = create<IPushChatStore>((set) => ({
   selectedChatId: '',
   setSelectedChatId: (selectedChatId) => set(() => ({ selectedChatId })),
   showCreateChatProfileModal: false,
+  showCreateGroupModal: false,
   setShowCreateChatProfileModal: (showCreateChatProfileModal) => set(() => ({ showCreateChatProfileModal })),
   showDecryptionModal: false,
   setShowDecryptionModal: (showDecryptionModal) => set(() => ({ showDecryptionModal })),
   showUpgradeChatProfileModal: false,
   setShowUpgradeChatProfileModal: (showUpgradeChatProfileModal) =>
     set(() => ({ showUpgradeChatProfileModal })),
+  setShowCreateGroupModal: (showCreateGroupModal) => set(() => ({ showCreateGroupModal })),
   password: {
     encrypted: null,
     decrypted: null

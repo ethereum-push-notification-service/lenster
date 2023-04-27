@@ -61,8 +61,9 @@ const useCreateChatProfile = () => {
   );
   console.log(modalInfo);
   const initiateProcess = useCallback(() => {
-    setStep(1);
     console.log('initiate');
+    setStep(1);
+    
     setModalInfo({
       title: 'Create Password',
       info: 'Please set a password to recover your chats if you transfer your Lens NFT to another wallet.',
@@ -77,23 +78,23 @@ const useCreateChatProfile = () => {
       return;
     }
 
-    try {
-      await PushAPI.user.create({
-        signer: signer,
-        additionalMeta: { password: password },
-        account: `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${currentProfile.id}`,
-        progressHook: handleProgress,
-        env: PUSH_ENV
-      });
-      setStep(2);
-    } catch (error) {
-      console.log(error);
-      // handle error here
-      const timeout = 3000; // after this time, show modal state to 1st step
-      setTimeout(() => {
-        initiateProcess();
-      }, timeout);
-    }
+    // try {
+    //   await PushAPI.user.create({
+    //     signer: signer,
+    //     additionalMeta: { password: password },
+    //     account: `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${currentProfile.id}`,
+    //     progressHook: handleProgress,
+    //     env: PUSH_ENV
+    //   });
+    //   setStep(2);
+    // } catch (error) {
+    //   console.log(error);
+    //   // handle error here
+    //   const timeout = 3000; // after this time, show modal state to 1st step
+    //   setTimeout(() => {
+    //     initiateProcess();
+    //   }, timeout);
+    // }
   }, [currentProfile, handleProgress, initiateProcess, password, signer]);
 
   const createChatProfile = useCallback(async () => {

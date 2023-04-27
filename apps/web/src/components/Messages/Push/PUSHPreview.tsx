@@ -1,5 +1,6 @@
 import useCreateChatProfile from '@components/utils/hooks/push/useCreateChatProfile';
 import useGetChatProfile from '@components/utils/hooks/push/useGetChatProfile';
+import useCreateGroup from '@components/utils/hooks/push/usePushCreateGroupChat';
 import usePushDecryption from '@components/utils/hooks/push/usePushDecryption';
 import useUpgradeChatProfile from '@components/utils/hooks/push/useUpgradeChatProfile';
 import { Trans } from '@lingui/macro';
@@ -51,6 +52,14 @@ const PUSHPreview: FC<PreviewListProps> = () => {
     };
     connectUser();
   }, [currentProfile, decryptKey, fetchChatProfile, setPgpPrivateKey, upgradeChatProfile]);
+  const setShowCreateGroupModal = usePushChatStore((state) => state.setShowCreateGroupModal);
+  const showCreateGroupModal = usePushChatStore((state) => state.showCreateGroupModal);
+  const { modalContent, isModalClosable } = useCreateChatProfile();
+  const {
+    createGroup,
+    modalContent: createGroupModalContent,
+    isModalClosable: isCreateModalClosable
+  } = useCreateGroup();
 
   return (
     <div className="flex h-full flex-col justify-between">
@@ -120,6 +129,15 @@ const PUSHPreview: FC<PreviewListProps> = () => {
       </Card>
       <button onClick={createChatProfile}>Create Profile</button>
       <button onClick={upgradeChatProfile}>Upgrade Profile</button>
+      {/* <button onClick={createChatProfile}>Create Profile</button> */}
+      <button onClick={createGroup}>Create Group</button>
+      <Modal
+        size="xs"
+        show={showCreateGroupModal}
+        onClose={isCreateModalClosable ? () => setShowCreateGroupModal(false) : () => {}}
+      >
+        {createGroupModalContent}
+      </Modal>
       <Modal
         size="xs"
         show={showCreateChatProfileModal}
