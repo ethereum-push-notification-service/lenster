@@ -1,8 +1,8 @@
 import * as PushAPI from '@pushprotocol/restapi';
-import { PUSH_ENV } from 'src/store/push-chat';
 import type { IFeeds } from '@pushprotocol/restapi/src/lib/types';
 import { useEffect, useState } from 'react';
 import { useAppStore } from 'src/store/app';
+import { PUSH_ENV } from 'src/store/push-chat';
 
 const useGetPushConversations = (decryptedKeys: string | null) => {
   const currentProfile = useAppStore((state) => state.currentProfile);
