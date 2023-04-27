@@ -31,14 +31,15 @@ const useCreateChatProfile = () => {
     info: string;
     type: string;
   }>({
-    title: 'Create Password',
-    info: 'Please set a password to recover your chats if you transfer your Lens NFT to another wallet.',
+    title: '',
+    info: '',
     type: ProgressType.INITIATE
   });
 
   const handleProgress = useCallback(
     (progress: ProgressHookType) => {
       setStep((step) => step + 1);
+      console.log("handleProgress")
       setModalInfo({
         title: progress.progressTitle,
         info: progress.progressInfo,
@@ -58,9 +59,10 @@ const useCreateChatProfile = () => {
     },
     [setShowCreateChatProfileModal]
   );
-
+console.log(modalInfo)
   const initiateProcess = useCallback(() => {
     setStep(1);
+    console.log("initiate")
     setModalInfo({
       title: 'Create Password',
       info: 'Please set a password to recover your chats if you transfer your Lens NFT to another wallet.',
@@ -121,7 +123,7 @@ const useCreateChatProfile = () => {
             className="px-4 py-4 text-sm"
             value={password}
             autoComplete="off"
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {console.log(modalInfo);setPassword(e.target.value)}}
           />
           <Button
             className="mt-7 self-center text-center"

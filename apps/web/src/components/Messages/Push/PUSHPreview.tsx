@@ -34,7 +34,7 @@ const PUSHPreview: FC<PreviewListProps> = () => {
     useUpgradeChatProfile();
   const { modalContent: decryptionModalContent, isModalClosable: isDecryptionModalClosable } =
     usePushDecryption();
-
+console.log("push preview")
   useEffect(() => {
     const connectUser = async () => {
       const connectedProfile = await fetchChatProfile();
