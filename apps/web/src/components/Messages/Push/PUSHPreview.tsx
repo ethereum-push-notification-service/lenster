@@ -14,7 +14,12 @@ const PUSHPreview: FC<PreviewListProps> = () => {
   const setActiveTab = usePushChatStore((state) => state.setActiveTab);
   const showCreateChatProfileModal = usePushChatStore((state) => state.showCreateChatProfileModal);
   const setShowCreateChatProfileModal = usePushChatStore((state) => state.setShowCreateChatProfileModal);
-  const { modalContent, isModalClosable } = useCreateChatProfile();
+  const showUpgradeChatProfileModal = usePushChatStore((state) => state.showUpgradeChatProfileModal);
+  const setShowUpgradeChatProfileModal = usePushChatStore((state) => state.setShowUpgradeChatProfileModal);
+  const { modalContent: createChatProfileModalContent, isModalClosable: isCreateChatProfileModalClosable } =
+    useCreateChatProfile();
+  const { modalContent: upgradeChatProfileModalContent, isModalClosable: isUpgradeChatProfileModalClosable } =
+    useCreateChatProfile();
 
   return (
     <div className="flex h-full flex-col justify-between">
@@ -86,9 +91,16 @@ const PUSHPreview: FC<PreviewListProps> = () => {
       <Modal
         size="xs"
         show={showCreateChatProfileModal}
-        onClose={isModalClosable ? () => setShowCreateChatProfileModal(false) : () => {}}
+        onClose={isCreateChatProfileModalClosable ? () => setShowCreateChatProfileModal(false) : () => {}}
       >
-        {modalContent}
+        {createChatProfileModalContent}
+      </Modal>
+      <Modal
+        size="xs"
+        show={showUpgradeChatProfileModal}
+        onClose={isUpgradeChatProfileModalClosable ? () => setShowUpgradeChatProfileModal(false) : () => {}}
+      >
+        {upgradeChatProfileModalContent}
       </Modal>
     </div>
   );

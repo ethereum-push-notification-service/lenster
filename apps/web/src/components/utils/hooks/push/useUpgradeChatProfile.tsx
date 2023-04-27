@@ -19,7 +19,7 @@ enum ProgressType {
   WARN = 'WARN'
 }
 
-const useCreateChatProfile = () => {
+const useUpgradeChatProfile = () => {
   const { data: signer } = useSigner();
   const currentProfile = useAppStore((state) => state.currentProfile);
   const setShowCreateChatProfileModal = usePushChatStore((state) => state.setShowCreateChatProfileModal);
@@ -59,7 +59,7 @@ const useCreateChatProfile = () => {
   const initiateProcess = () => {
     setStep(1);
     setModalInfo({
-      title: 'Create Password',
+      title: 'Existing Profile Detected',
       info: 'Please set a password to recover your chats if you transfer your Lens NFT to another wallet.',
       type: ProgressType.INITIATE
     });
@@ -92,8 +92,8 @@ const useCreateChatProfile = () => {
   };
 
   const createChatProfile = async () => {
-    initiateProcess();
     setShowCreateChatProfileModal(true);
+    initiateProcess();
   };
 
   let modalContent: JSX.Element;
@@ -203,4 +203,4 @@ const useCreateChatProfile = () => {
   return { createChatProfile, modalContent, isModalClosable: modalClosable };
 };
 
-export default useCreateChatProfile;
+export default useUpgradeChatProfile;
