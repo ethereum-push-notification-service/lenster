@@ -24,16 +24,16 @@ const usePushDecryption = () => {
   const { data: signer } = useSigner();
   const currentProfile = useAppStore((state) => state.currentProfile);
   const setShowDecryptionModal = usePushChatStore((state) => state.setShowDecryptionModal);
-  const [step, setStep] = useState<number>(1);
+  const [step, setStep] = useState<number>(0);
   const [modalClosable, setModalClosable] = useState<boolean>(true);
   const [modalInfo, setModalInfo] = useState<{
     title: string;
     info: string;
     type: string;
   }>({
-    title: 'Decrypting Profile',
-    info: 'Please sign the transaction to decrypt profile',
-    type: 'INFO'
+    title: '',
+    info: '',
+    type: ''
   });
 
   const handleProgress = useCallback(
@@ -64,35 +64,35 @@ const usePushDecryption = () => {
     async ({
       encryptedText,
       additionalMeta = { password: undefined }
-    }: decryptKeyParams): Promise<string | undefined> => {
-      setStep(1);
+    }: decryptKeyParams): Promise<{
+      decryptedKey?: string | undefined;
+      error?: string | undefined;
+    }> => {
+      setStep(0);
       setModalClosable(true);
       setShowDecryptionModal(true);
-      if (!currentProfile) {
-        return;
+      if (!currentProfile || !signer) {
+        return { decryptedKey: undefined, error: undefined };
       }
 
       const { ownedBy } = currentProfile;
       try {
         const response = await PushAPI.chat.decryptPGPKey({
           encryptedPGPPrivateKey: encryptedText,
-          signer,
+          signer: signer,
           account: ownedBy,
           additionalMeta: additionalMeta,
           progressHook: handleProgress,
           env: PUSH_ENV
         });
         if (!response) {
-          return;
+          return { decryptedKey: undefined, error: undefined };
         }
-        return response;
+        return { decryptedKey: response, error: undefined };
       } catch (error: Error | any) {
         console.log(error);
         // handle error here
-        const timeout = 3000; // after this time, show modal state to 1st step
-        setTimeout(() => {
-          // initiateProcess();
-        }, timeout);
+        return { decryptedKey: undefined, error: error.message };
       }
     },
     [currentProfile, handleProgress, setShowDecryptionModal, signer]
@@ -130,10 +130,7 @@ const usePushDecryption = () => {
             {step}/{totalSteps} - {modalInfo.title}
           </div>
           <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
-            <div
-              className="bg-brand-500 h-2 rounded-full p-0.5 leading-none"
-              style={{ width: `${(step * 100) / totalSteps}%` }}
-            />
+            <div className="bg-brand-500 h-2 rounded-full p-0.5 leading-none" style={{ width: `100%` }} />
           </div>
         </div>
       );
@@ -148,7 +145,7 @@ const usePushDecryption = () => {
               className="mr-2 h-7 w-7 rounded-full"
               alt="Check circle"
             />{' '}
-            {modalInfo.info} Redirecting...
+            {modalInfo.info}
           </div>
         </div>
       );

@@ -114,8 +114,8 @@ const useCreateChatProfile = () => {
           <div className="pb-1.5 text-center text-base font-medium">
             {step}/{totalSteps} - {modalInfo.title}
           </div>
-          <div className="pb-4 text-center text-xs font-[450] text-[#818189]">{modalInfo.info}</div>
-          <div className="pb-2 text-base font-medium">Enter new password</div>
+          <div className="px-5 pb-4 text-center text-xs font-[450] text-[#818189]">{modalInfo.info}</div>
+          <div className="px-1 pb-2 text-base font-medium">Enter new password</div>
           <Input
             type="text"
             className="px-4 py-4 text-sm"
@@ -164,10 +164,7 @@ const useCreateChatProfile = () => {
             {totalSteps}/{totalSteps} - {modalInfo.title}
           </div>
           <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
-            <div
-              className="bg-brand-500 h-2 rounded-full p-0.5 leading-none"
-              style={{ width: `${(step * 100) / totalSteps}%` }}
-            />
+            <div className="bg-brand-500 h-2 rounded-full p-0.5 leading-none" style={{ width: `100%` }} />
           </div>
         </div>
       );
