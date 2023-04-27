@@ -71,7 +71,7 @@ const MessagePage: NextPage = () => {
   //   return <Custom404 />;
   // }
 
-  return <Message conversationKey="" />;
+  return <Message conversationKey={String(conversationKey)} />;
 };
 
 export default MessagePage;

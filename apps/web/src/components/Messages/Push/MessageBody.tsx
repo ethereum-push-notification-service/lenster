@@ -16,7 +16,7 @@ export default function MessageBody() {
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [gifOpen, setGifOpen] = useState(false);
   const [inputText, setInputText] = useState('');
-  const [conversationId] = router.query.conversationKey as string[];
+  const [conversationId] = (router?.query?.conversationKey as string[]) || [];
 
   const appendEmoji = ({ emoji }: { emoji: string }) => setInputText(`${inputText}${emoji}`);
   const appendGIF = (emojiObject: GIFType) => {

@@ -1,10 +1,9 @@
 import * as PushAPI from '@pushprotocol/restapi';
-import { PUSH_ENV } from 'src/store/push-chat';
 import { LENSHUB_PROXY } from 'data';
 import { useEffect } from 'react';
 import { CHAIN_ID } from 'src/constants';
 import { useAppStore } from 'src/store/app';
-import { usePushChatStore } from 'src/store/push-chat';
+import { PUSH_ENV, usePushChatStore } from 'src/store/push-chat';
 
 const useGetChatProfile = () => {
   const currentProfile = useAppStore((state) => state.currentProfile);
