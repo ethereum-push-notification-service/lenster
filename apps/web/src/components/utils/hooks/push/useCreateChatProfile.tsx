@@ -2,7 +2,7 @@ import { XIcon } from '@heroicons/react/outline';
 import type { ProgressHookType } from '@pushprotocol/restapi';
 import * as PushAPI from '@pushprotocol/restapi';
 import { LENSHUB_PROXY } from 'data';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { CHAIN_ID } from 'src/constants';
 import { useAppStore } from 'src/store/app';
 import { PUSH_ENV, usePushChatStore } from 'src/store/push-chat';
@@ -31,32 +31,35 @@ const useCreateChatProfile = () => {
     info: string;
     type: string;
   }>({
-    title: '',
-    info: '',
+    title: 'Create Password',
+    info: 'Please set a password to recover your chats if you transfer your Lens NFT to another wallet.',
     type: ProgressType.INITIATE
   });
 
-  const handleProgress = (progress: ProgressHookType) => {
-    setStep((step) => step + 1);
-    setModalInfo({
-      title: progress.progressTitle,
-      info: progress.progressInfo,
-      type: progress.level
-    });
-    if (progress.level === 'INFO') {
-      setModalClosable(false);
-    } else {
-      if (progress.level === 'SUCCESS') {
-        const timeout = 2000; // after this time, modal will be closed
-        setTimeout(() => {
-          setShowCreateChatProfileModal(false);
-        }, timeout);
+  const handleProgress = useCallback(
+    (progress: ProgressHookType) => {
+      setStep((step) => step + 1);
+      setModalInfo({
+        title: progress.progressTitle,
+        info: progress.progressInfo,
+        type: progress.level
+      });
+      if (progress.level === 'INFO') {
+        setModalClosable(false);
+      } else {
+        if (progress.level === 'SUCCESS') {
+          const timeout = 2000; // after this time, modal will be closed
+          setTimeout(() => {
+            setShowCreateChatProfileModal(false);
+          }, timeout);
+        }
+        setModalClosable(true);
       }
-      setModalClosable(true);
-    }
-  };
+    },
+    [setShowCreateChatProfileModal]
+  );
 
-  const initiateProcess = () => {
+  const initiateProcess = useCallback(() => {
     setStep(1);
     setModalInfo({
       title: 'Create Password',
@@ -65,18 +68,18 @@ const useCreateChatProfile = () => {
     });
     setPassword('');
     setModalClosable(true);
-  };
+  }, []);
 
-  const handleSetPassword: handleSetPassFunc = async () => {
+  const handleSetPassword: handleSetPassFunc = useCallback(async () => {
     if (!signer || !currentProfile) {
       return;
     }
 
     try {
-      await PushAPI.user.createNFTProfile({
+      await PushAPI.user.create({
         signer: signer,
-        password: password,
-        did: `eip155:${CHAIN_ID}:${LENSHUB_PROXY}:nft:${currentProfile.id}`,
+        additionalMeta: { password: password },
+        account: `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${currentProfile.id}`,
         progressHook: handleProgress,
         env: PUSH_ENV
       });
@@ -89,12 +92,12 @@ const useCreateChatProfile = () => {
         initiateProcess();
       }, timeout);
     }
-  };
+  }, [currentProfile, handleProgress, initiateProcess, password, signer]);
 
-  const createChatProfile = async () => {
+  const createChatProfile = useCallback(async () => {
     initiateProcess();
     setShowCreateChatProfileModal(true);
-  };
+  }, [initiateProcess, setShowCreateChatProfileModal]);
 
   let modalContent: JSX.Element;
   switch (modalInfo.type) {
@@ -158,7 +161,7 @@ const useCreateChatProfile = () => {
               className="mr-2 h-7 w-7 rounded-full"
               alt="Check circle"
             />{' '}
-            {step}/{totalSteps} - {modalInfo.title}
+            {totalSteps}/{totalSteps} - {modalInfo.title}
           </div>
           <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
             <div

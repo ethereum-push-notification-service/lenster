@@ -1,44 +1,45 @@
 import { XIcon } from '@heroicons/react/outline';
 import type { ProgressHookType } from '@pushprotocol/restapi';
 import * as PushAPI from '@pushprotocol/restapi';
-// import { LENSHUB_PROXY } from 'data';
 import { useCallback, useState } from 'react';
-// import { CHAIN_ID } from 'src/constants';
 import { useAppStore } from 'src/store/app';
 import { PUSH_ENV, usePushChatStore } from 'src/store/push-chat';
-import { Button, Image, Input, Spinner } from 'ui';
+import { Image, Spinner } from 'ui';
 import { useSigner } from 'wagmi';
 
-type handleSetPassFunc = () => void;
-const totalSteps: number = 6;
+const totalSteps: number = 2;
 enum ProgressType {
-  INITIATE = 'INITIATE',
   INFO = 'INFO',
   SUCCESS = 'SUCCESS',
   ERROR = 'ERROR',
   WARN = 'WARN'
 }
 
-const useUpgradeChatProfile = () => {
+interface decryptKeyParams {
+  encryptedText: string;
+  additionalMeta?: { password?: string };
+}
+
+const usePushDecryption = () => {
   const { data: signer } = useSigner();
   const currentProfile = useAppStore((state) => state.currentProfile);
-  const setShowUpgradeChatProfileModal = usePushChatStore((state) => state.setShowUpgradeChatProfileModal);
+  const setShowDecryptionModal = usePushChatStore((state) => state.setShowDecryptionModal);
   const [step, setStep] = useState<number>(1);
   const [modalClosable, setModalClosable] = useState<boolean>(true);
-  const [password, setPassword] = useState<string>('');
   const [modalInfo, setModalInfo] = useState<{
     title: string;
     info: string;
     type: string;
   }>({
-    title: 'Existing Profile Detected',
-    info: 'We have detected an existing profile with this account. Enter your existing profile password or start fresh with a new profile.',
-    type: ProgressType.INITIATE
+    title: 'Decrypting Profile',
+    info: 'Please sign the transaction to decrypt profile',
+    type: 'INFO'
   });
 
   const handleProgress = useCallback(
     (progress: ProgressHookType) => {
       setStep((step) => step + 1);
+      console.log(progress);
       setModalInfo({
         title: progress.progressTitle,
         info: progress.progressInfo,
@@ -50,90 +51,55 @@ const useUpgradeChatProfile = () => {
         if (progress.level === 'SUCCESS') {
           const timeout = 2000; // after this time, modal will be closed
           setTimeout(() => {
-            setShowUpgradeChatProfileModal(false);
+            setShowDecryptionModal(false);
           }, timeout);
         }
         setModalClosable(true);
       }
     },
-    [setModalClosable, setModalInfo, setStep, setShowUpgradeChatProfileModal]
+    [setShowDecryptionModal, setModalInfo]
   );
 
-  const initiateProcess = useCallback(() => {
-    setModalInfo({
-      title: 'Existing Profile Detected',
-      info: 'We have detected an existing profile with this account. Enter your existing profile password or start fresh with a new profile.',
-      type: ProgressType.INITIATE
-    });
-    setStep(1);
-    setPassword('');
-    setModalClosable(true);
-  }, [setModalClosable, setModalInfo, setStep]);
+  const decryptKey = useCallback(
+    async ({
+      encryptedText,
+      additionalMeta = { password: undefined }
+    }: decryptKeyParams): Promise<string | undefined> => {
+      setStep(1);
+      setModalClosable(true);
+      setShowDecryptionModal(true);
+      if (!currentProfile) {
+        return;
+      }
 
-  const handleContinue: handleSetPassFunc = useCallback(async () => {
-    if (!signer || !currentProfile) {
-      return;
-    }
-
-    try {
-      await PushAPI.user.upgrade({
-        signer: signer,
-        additionalMeta: { password: password },
-        account: `nft:eip155:80001:0x60Ae865ee4C725cd04353b5AAb364553f56ceF82:0x75fa`,
-        progressHook: handleProgress,
-        env: PUSH_ENV
-      });
-      setStep(2);
-    } catch (error) {
-      console.log(error);
-      // handle error here
-      const timeout = 3000; // after this time, show modal state to 1st step
-      setTimeout(() => {
-        initiateProcess();
-      }, timeout);
-    }
-  }, [currentProfile, handleProgress, initiateProcess, password, signer, setStep]);
-
-  const upgradeChatProfile = useCallback(async () => {
-    initiateProcess();
-    setShowUpgradeChatProfileModal(true);
-  }, [initiateProcess, setShowUpgradeChatProfileModal]);
+      const { ownedBy } = currentProfile;
+      try {
+        const response = await PushAPI.chat.decryptPGPKey({
+          encryptedPGPPrivateKey: encryptedText,
+          signer,
+          account: ownedBy,
+          additionalMeta: additionalMeta,
+          progressHook: handleProgress,
+          env: PUSH_ENV
+        });
+        if (!response) {
+          return;
+        }
+        return response;
+      } catch (error: Error | any) {
+        console.log(error);
+        // handle error here
+        const timeout = 3000; // after this time, show modal state to 1st step
+        setTimeout(() => {
+          // initiateProcess();
+        }, timeout);
+      }
+    },
+    [currentProfile, handleProgress, setShowDecryptionModal, signer]
+  );
 
   let modalContent: JSX.Element;
   switch (modalInfo.type) {
-    case ProgressType.INITIATE:
-      modalContent = (
-        <div className="relative flex w-full flex-col px-4 py-6">
-          <button
-            type="button"
-            className="absolute right-0 top-0 p-1 pr-4 pt-6 text-[#82828A] dark:text-gray-100"
-            onClick={() => setShowUpgradeChatProfileModal(false)}
-          >
-            <XIcon className="h-5 w-5" />
-          </button>
-          <div className="pb-1.5 text-center text-base font-medium">
-            {step}/{totalSteps} - {modalInfo.title}
-          </div>
-          <div className="pb-4 text-center text-xs font-[450] text-[#818189]">{modalInfo.info}</div>
-          <div className="pb-2 text-base font-medium">Enter new password</div>
-          <Input
-            type="text"
-            className="px-4 py-4 text-sm"
-            value={password}
-            autoComplete="off"
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <Button
-            className="mt-7 self-center text-center"
-            variant="primary"
-            disabled={password === '' ? true : false}
-            onClick={handleContinue}
-          >
-            Continue
-          </Button>
-        </div>
-      );
-      break;
     case ProgressType.INFO:
       modalContent = (
         <div className="flex w-full flex-col px-4 py-6">
@@ -161,7 +127,7 @@ const useUpgradeChatProfile = () => {
               className="mr-2 h-7 w-7 rounded-full"
               alt="Check circle"
             />{' '}
-            {totalSteps}/{totalSteps} - {modalInfo.title}
+            {step}/{totalSteps} - {modalInfo.title}
           </div>
           <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
             <div
@@ -193,7 +159,7 @@ const useUpgradeChatProfile = () => {
           <button
             type="button"
             className="absolute right-0 top-0 p-1 pr-4 pt-6 text-[#82828A] dark:text-gray-100"
-            onClick={() => setShowUpgradeChatProfileModal(false)}
+            onClick={() => setShowDecryptionModal(false)}
           >
             <XIcon className="h-5 w-5" />
           </button>
@@ -203,7 +169,7 @@ const useUpgradeChatProfile = () => {
       );
   }
 
-  return { upgradeChatProfile, modalContent, isModalClosable: modalClosable };
+  return { decryptKey, modalContent, isModalClosable: modalClosable };
 };
 
-export default useUpgradeChatProfile;
+export default usePushDecryption;

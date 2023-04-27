@@ -30,6 +30,8 @@ interface IPushChatStore {
   setSelectedChatId: (selectedChatId: string) => void;
   showCreateChatProfileModal: boolean;
   setShowCreateChatProfileModal: (showCreateChatProfileModal: boolean) => void;
+  showDecryptionModal: boolean;
+  setShowDecryptionModal: (showDecryptionModal: boolean) => void;
   showUpgradeChatProfileModal: boolean;
   setShowUpgradeChatProfileModal: (showUpgradeChatProfileModal: boolean) => void;
   password: {
@@ -80,6 +82,8 @@ export const usePushChatStore = create<IPushChatStore>((set) => ({
   setSelectedChatId: (selectedChatId) => set(() => ({ selectedChatId })),
   showCreateChatProfileModal: false,
   setShowCreateChatProfileModal: (showCreateChatProfileModal) => set(() => ({ showCreateChatProfileModal })),
+  showDecryptionModal: false,
+  setShowDecryptionModal: (showDecryptionModal) => set(() => ({ showDecryptionModal })),
   showUpgradeChatProfileModal: false,
   setShowUpgradeChatProfileModal: (showUpgradeChatProfileModal) =>
     set(() => ({ showUpgradeChatProfileModal })),
