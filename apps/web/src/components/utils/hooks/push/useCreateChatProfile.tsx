@@ -19,6 +19,16 @@ enum ProgressType {
   WARN = 'WARN'
 }
 
+const initModalInfo: {
+  title: string;
+  info: string;
+  type: string;
+} = {
+  title: 'Create Password',
+  info: 'Please set a password to recover your chats if you transfer your Lens NFT to another wallet.',
+  type: ProgressType.INITIATE
+};
+
 const useCreateChatProfile = () => {
   const { data: signer } = useSigner();
   const currentProfile = useAppStore((state) => state.currentProfile);
@@ -30,11 +40,7 @@ const useCreateChatProfile = () => {
     title: string;
     info: string;
     type: string;
-  }>({
-    title: 'Create Password',
-    info: 'Please set a password to recover your chats if you transfer your Lens NFT to another wallet.',
-    type: ProgressType.INITIATE
-  });
+  }>(initModalInfo);
 
   const handleProgress = useCallback(
     (progress: ProgressHookType) => {
@@ -61,11 +67,7 @@ const useCreateChatProfile = () => {
 
   const initiateProcess = useCallback(() => {
     setStep(1);
-    setModalInfo({
-      title: 'Create Password',
-      info: 'Please set a password to recover your chats if you transfer your Lens NFT to another wallet.',
-      type: ProgressType.INITIATE
-    });
+    setModalInfo(initModalInfo);
     setPassword('');
     setModalClosable(true);
   }, []);

@@ -21,6 +21,16 @@ enum ProgressType {
   WARN = 'WARN'
 }
 
+const initModalInfo: {
+  title: string;
+  info: string;
+  type: string;
+} = {
+  title: 'Existing Profile Detected',
+  info: 'We have detected an existing profile with this account. Enter your existing profile password or start fresh with a new profile.',
+  type: ProgressType.INITIATE
+};
+
 const useUpgradeChatProfile = () => {
   const { data: signer } = useSigner();
   const { createChatProfile } = useCreateChatProfile();
@@ -34,21 +44,13 @@ const useUpgradeChatProfile = () => {
     title: string;
     info: string;
     type: string;
-  }>({
-    title: 'Existing Profile Detected',
-    info: 'We have detected an existing profile with this account. Enter your existing profile password or start fresh with a new profile.',
-    type: ProgressType.INITIATE
-  });
+  }>(initModalInfo);
 
   const reset = () => {
     setStep(1);
     setModalClosable(false);
     setPassword('');
-    setModalInfo({
-      title: 'Existing Profile Detected',
-      info: 'We have detected an existing profile with this account. Enter your existing profile password or start fresh with a new profile.',
-      type: ProgressType.INITIATE
-    });
+    setModalInfo(initModalInfo);
   };
 
   const handleProgress = useCallback(
@@ -75,11 +77,7 @@ const useUpgradeChatProfile = () => {
   );
 
   const initiateProcess = useCallback(() => {
-    setModalInfo({
-      title: 'Existing Profile Detected',
-      info: 'We have detected an existing profile with this account. Enter your existing profile password or start fresh with a new profile.',
-      type: ProgressType.INITIATE
-    });
+    setModalInfo(initModalInfo);
     setStep(1);
     setPassword('');
     setModalClosable(false);
