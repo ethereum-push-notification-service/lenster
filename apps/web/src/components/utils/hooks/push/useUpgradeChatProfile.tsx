@@ -21,11 +21,12 @@ enum ProgressType {
   WARN = 'WARN'
 }
 
-const initModalInfo: {
+type modalInfoType = {
   title: string;
   info: string;
   type: string;
-} = {
+};
+const initModalInfo: modalInfoType = {
   title: 'Existing Profile Detected',
   info: 'We have detected an existing profile with this account. Enter your existing profile password or start fresh with a new profile.',
   type: ProgressType.INITIATE
@@ -40,11 +41,7 @@ const useUpgradeChatProfile = () => {
   const [step, setStep] = useState<number>(1);
   const [modalClosable, setModalClosable] = useState<boolean>(false);
   const [password, setPassword] = useState<string>('');
-  const [modalInfo, setModalInfo] = useState<{
-    title: string;
-    info: string;
-    type: string;
-  }>(initModalInfo);
+  const [modalInfo, setModalInfo] = useState<modalInfoType>(initModalInfo);
 
   const reset = () => {
     setStep(1);

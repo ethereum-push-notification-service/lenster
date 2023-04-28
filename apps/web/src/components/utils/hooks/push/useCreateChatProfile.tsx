@@ -19,11 +19,12 @@ enum ProgressType {
   WARN = 'WARN'
 }
 
-const initModalInfo: {
+type modalInfoType = {
   title: string;
   info: string;
   type: string;
-} = {
+};
+const initModalInfo: modalInfoType = {
   title: 'Create Password',
   info: 'Please set a password to recover your chats if you transfer your Lens NFT to another wallet.',
   type: ProgressType.INITIATE
@@ -36,11 +37,7 @@ const useCreateChatProfile = () => {
   const [step, setStep] = useState<number>(1);
   const [modalClosable, setModalClosable] = useState<boolean>(true);
   const [password, setPassword] = useState<string>('');
-  const [modalInfo, setModalInfo] = useState<{
-    title: string;
-    info: string;
-    type: string;
-  }>(initModalInfo);
+  const [modalInfo, setModalInfo] = useState<modalInfoType>(initModalInfo);
 
   const handleProgress = useCallback(
     (progress: ProgressHookType) => {
