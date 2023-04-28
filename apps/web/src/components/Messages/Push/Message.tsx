@@ -23,6 +23,7 @@ const Message = () => {
   const [profile, setProfile] = useState<Profile | null | ''>('');
 
   const loadProfile = useCallback(async () => {
+    // only for chat for now, for groups, it'll change
     const result = await loadProfiles({ variables: { request: { profileIds: [selectedChatId] } } });
     if (result.data) {
       setProfile(result.data.profiles.items[0] as Profile);
