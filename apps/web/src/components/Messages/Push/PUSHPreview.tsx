@@ -50,7 +50,7 @@ const PUSHPreview: FC<PreviewListProps> = () => {
         setShowDecryptionModal(false);
         await upgradeChatProfile();
         // eslint-disable-next-line no-use-before-define
-        connectProfile();
+        // connectProfile();
       } else {
         console.log(error);
         const time = 3000;
