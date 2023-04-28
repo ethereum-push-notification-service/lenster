@@ -7,6 +7,11 @@ export const PUSH_TABS = {
   CHATS: 'CHATS',
   REQUESTS: 'REQUESTS'
 } as const;
+export const CHAT_TYPES = {
+  CHAT: 'chat',
+  GROUP: 'group',
+} as const;
+type ChatTypes = typeof CHAT_TYPES;
 type PushTabs = typeof PUSH_TABS;
 
 export const PUSH_ENV = IS_MAINNET ? ENV.PROD : ENV.STAGING;
@@ -28,8 +33,8 @@ interface IPushChatStore {
   reset: () => void;
   selectedChatId: string;
   setSelectedChatId: (selectedChatId: string) => void;
-  selectedChatType: string;
-  setSelectedChatType: (selectedChatType: string) => void;
+  selectedChatType: ChatTypes | null;
+  setSelectedChatType: (tabName: ChatTypes) => void;
   showCreateChatProfileModal: boolean;
   setShowCreateChatProfileModal: (showCreateChatProfileModal: boolean) => void;
   showDecryptionModal: boolean;
@@ -81,7 +86,7 @@ export const usePushChatStore = create<IPushChatStore>((set) => ({
     });
   },
   selectedChatId: '',
-  selectedChatType: '',
+  selectedChatType: null,
   setSelectedChatId: (selectedChatId) => set(() => ({ selectedChatId })),
   setSelectedChatType: (selectedChatType) => set(() => ({ selectedChatType })),
   showCreateChatProfileModal: false,

@@ -9,7 +9,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import Custom404 from 'src/pages/404';
 import { useAppStore } from 'src/store/app';
-import { usePushChatStore } from 'src/store/push-chat';
+import { CHAT_TYPES, usePushChatStore } from 'src/store/push-chat';
 import { Card, GridItemEight, GridLayout } from 'ui';
 
 import PreviewList from '../PreviewList';
@@ -83,13 +83,13 @@ const MessagePage: NextPage = () => {
   const [type, conversationId] = conversationKey;
   console.log(type, conversationId);
 
-  if (type !== 'chat' && type !== 'group') {
+  if (type !== CHAT_TYPES.CHAT && type !== CHAT_TYPES.GROUP) {
     return <Custom404 />;
   }
 
   if (conversationId) {
     setSelectedChatId(conversationId);
-    setSelectedChatType(type);
+    // setSelectedChatType(type);
   }
 
   return <Message />;
