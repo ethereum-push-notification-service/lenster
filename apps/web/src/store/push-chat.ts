@@ -9,18 +9,18 @@ export const PUSH_TABS = {
 } as const;
 export const CHAT_TYPES = {
   CHAT: 'chat',
-  GROUP: 'group',
+  GROUP: 'group'
 } as const;
-type ChatTypes = typeof CHAT_TYPES;
-type PushTabs = typeof PUSH_TABS;
+type ChatTypes = (typeof CHAT_TYPES)[keyof typeof CHAT_TYPES];
+type PushTabs = (typeof PUSH_TABS)[keyof typeof PUSH_TABS];
 
 export const PUSH_ENV = IS_MAINNET ? ENV.PROD : ENV.STAGING;
 
 interface IPushChatStore {
   connectedProfile: IUser | undefined;
   setConnectedProfile: (connectedProfile: IUser) => void;
-  activeTab: keyof PushTabs;
-  setActiveTab: (tabName: keyof PushTabs) => void;
+  activeTab: PushTabs;
+  setActiveTab: (tabName: PushTabs) => void;
   chats: Map<string, Array<IMessageIPFS>>; // chatId -> chat messages array
   setChats: (chats: Map<string, Array<IMessageIPFS>>) => void;
   addChat: (key: string, newChat: Array<IMessageIPFS>) => void;
