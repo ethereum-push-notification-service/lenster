@@ -28,6 +28,8 @@ interface IPushChatStore {
   reset: () => void;
   selectedChatId: string;
   setSelectedChatId: (selectedChatId: string) => void;
+  selectedChatType: string;
+  setSelectedChatType: (selectedChatType: string) => void;
   showCreateChatProfileModal: boolean;
   setShowCreateChatProfileModal: (showCreateChatProfileModal: boolean) => void;
   showDecryptionModal: boolean;
@@ -79,7 +81,9 @@ export const usePushChatStore = create<IPushChatStore>((set) => ({
     });
   },
   selectedChatId: '',
+  selectedChatType: '',
   setSelectedChatId: (selectedChatId) => set(() => ({ selectedChatId })),
+  setSelectedChatType: (selectedChatType) => set(() => ({ selectedChatType })),
   showCreateChatProfileModal: false,
   setShowCreateChatProfileModal: (showCreateChatProfileModal) => set(() => ({ showCreateChatProfileModal })),
   showDecryptionModal: false,
