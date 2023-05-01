@@ -45,25 +45,41 @@ export default function MessageBody() {
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [gifOpen, setGifOpen] = useState(false);
   const [inputText, setInputText] = useState('');
+  const [approvedStatus, setApprovedStatus] = useState<String | null>('');
   const rawChats = usePushChatStore((state) => state.chats);
   const pgpPrivateKey = usePushChatStore((state) => state.pgpPrivateKey);
   const connectedProfile = usePushChatStore((state) => state.connectedProfile);
-  const activeTab = usePushChatStore((state) => state.activeTab);
+  const setActiveTab = usePushChatStore((state) => state.setActiveTab);
   const threadHash = usePushChatStore((state) => state.threadHash);
   const selectedChatId = usePushChatStore((state) => state.selectedChatId);
+  const requestsFeed = usePushChatStore((state) => state.requestsFeed);
+  const setRequestsFeed = usePushChatStore((state) => state.setRequestsFeed);
+  const chatFeed = usePushChatStore((state) => state.chatsFeed);
+  const setChatfeed = usePushChatStore((state) => state.setChatsFeed)
   const [chats, setChats] = useState<Record<string, Array<ChatType>>>({});
-
   const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
 
   const { historyMessages, loading } = useGetHistoryMessages();
   const { approveChatRequest, error } = useApproveChatRequest();
-
+  const requestFeedids = Object.keys(requestsFeed)
   const handleApprovechatRequest = async () => {
     console.log(getCAIPFromLensID(selectedChatId))
     if (selectedChatId) {
       try {
         const response = await approveChatRequest({ senderAddress: getCAIPFromLensID(selectedChatId) });
-        console.log({ response });
+        console.log(response);
+        if (response) {
+          // const testing = { ...requestsFeed };
+          // console.log(testing);
+        // const updatedRequestsfeed = { ...requestsFeed };
+        // delete updatedRequestsfeed[selectedChatId];
+        // setRequestsFeed(updatedRequestsfeed);
+
+        // const updatedChatfeed: Record<string, Array<ChatType>> = { ...chatFeed };
+        // updatedChatfeed[selectedChatId] = [];
+        // setChatfeed(updatedChatfeed);
+        setActiveTab(PUSH_TABS.CHATS);
+        }
       } catch (err: Error | any) {
         console.log(err.message)
       }
@@ -153,22 +169,35 @@ export default function MessageBody() {
             </div>
           </section>
         ))}
-        {activeTab === PUSH_TABS.REQUESTS &&
-          <div>
-            <div className='top-52 absolute max-w-xlg border border-solid text-sm font-normal border-gray-300 rounded-e rounded-r-2xl rounded-bl-2xl p-2'>
-              Have you heard the latest collaboration between Push and Lenster? It's amazing!
-            </div>
-            <div className='top-64 absolute w-96 border border-solid border-gray-300 rounded-e rounded-r-2xl rounded-bl-2xl p-2 flex'>
-              <div className='text-sm font-normal'>
-                This is your first conversation with the sender.
-                Please accept to continue.
+        {!loading ? (
+          requestFeedids.includes(selectedChatId) &&
+          Object.keys(requestsFeed).map((id: string) => {
+            const feed = requestsFeed[id];
+            const timeDisplay = parseDate(feed.msg.timestamp ?? 0)
+            return (
+              <div className='relative' key={id}>
+                <div className='text-gray-500 text-sm absolute left-1/2 transform -translate-x-1/2'>
+                  <div>{timeDisplay}</div>
+                </div>
+                <div className='top-8 absolute w-96 border border-solid border-gray-300 rounded-e rounded-r-2xl rounded-bl-2xl p-2 flex'>
+                  <div className='text-sm font-normal'>
+                    This is your first conversation with the sender.
+                    Please accept to continue.
+                  </div>
+                  {/* <div>{moment(feed.msg.timestamp).format('h:mm A')}</div> */}
+                  <Image
+                    className="h-12 cursor-pointer"
+                    onClick={handleApprovechatRequest}
+                    src="/push/CheckCircle.svg" alt='check' />
+                </div>
               </div>
-              <Image
-                className="h-12"
-                onClick={handleApprovechatRequest}
-                src="/push/CheckCircle.svg" alt='check' />
-            </div>
+            )
+          })
+        ) : (
+          <div className="flex justify-center items-center h-full">
+            Loading...
           </div>
+        )
         }
       </div>
       <div className="relative mt-2">
