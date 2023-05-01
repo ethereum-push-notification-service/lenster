@@ -45,7 +45,6 @@ export default function MessageBody() {
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [gifOpen, setGifOpen] = useState(false);
   const [inputText, setInputText] = useState('');
-  const [approvedStatus, setApprovedStatus] = useState<String | null>('');
   const rawChats = usePushChatStore((state) => state.chats);
   const pgpPrivateKey = usePushChatStore((state) => state.pgpPrivateKey);
   const connectedProfile = usePushChatStore((state) => state.connectedProfile);
@@ -67,18 +66,16 @@ export default function MessageBody() {
     if (selectedChatId) {
       try {
         const response = await approveChatRequest({ senderAddress: getCAIPFromLensID(selectedChatId) });
-        console.log(response);
         if (response) {
-          // const testing = { ...requestsFeed };
-          // console.log(testing);
-        // const updatedRequestsfeed = { ...requestsFeed };
-        // delete updatedRequestsfeed[selectedChatId];
-        // setRequestsFeed(updatedRequestsfeed);
+          const updatedRequestsfeed = { ...requestsFeed };
+          const selectedRequest = updatedRequestsfeed[selectedChatId];
+          delete updatedRequestsfeed[selectedChatId];
+          setRequestsFeed(updatedRequestsfeed);
 
-        // const updatedChatfeed: Record<string, Array<ChatType>> = { ...chatFeed };
-        // updatedChatfeed[selectedChatId] = [];
-        // setChatfeed(updatedChatfeed);
-        setActiveTab(PUSH_TABS.CHATS);
+          const chatLe = { ...chatFeed };
+          chatLe[selectedChatId] = selectedRequest;
+          setChatfeed(chatLe);
+          setActiveTab(PUSH_TABS.CHATS);
         }
       } catch (err: Error | any) {
         console.log(err.message)
