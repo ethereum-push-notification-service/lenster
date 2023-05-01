@@ -1,5 +1,7 @@
 // import useGroupByName from '@components/utils/hooks/push/getGroupByName';
 import UserProfile from '@components/Shared/UserProfile';
+// import { GroupDTO } from '@pushprotocol/restapi';
+import useFetchChats from '@components/utils/hooks/push/useFetchChats';
 import useOnClickOutside from '@components/utils/hooks/useOnClickOutside';
 import { SearchIcon, XIcon } from '@heroicons/react/outline';
 import { t, Trans } from '@lingui/macro';
@@ -9,9 +11,9 @@ import { CustomFiltersTypes, SearchRequestTypes, useSearchProfilesLazyQuery } fr
 import formatHandle from 'lib/formatHandle';
 import { useRouter } from 'next/router';
 import type { ChangeEvent, FC } from 'react';
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { usePushChatStore } from 'src/store/push-chat';
 import { Card, Input, Spinner } from 'ui';
-// import { GroupDTO } from '@pushprotocol/restapi';
 
 interface SearchProps {
   hideDropdown?: boolean;
@@ -28,16 +30,38 @@ const Search: FC<SearchProps> = ({
 }) => {
   const { push, pathname, query } = useRouter();
   const [searchText, setSearchText] = useState('');
+  const activeTab = usePushChatStore((state) => state.activeTabNumber);
+  const setActiveTab = usePushChatStore((state) => state.setActiveTabNumber);
+  const [feed, setFeed] = useState<any[]>([]);
   const dropdownRef = useRef(null);
   // const {fetchGroupByName, loading, error} = useGroupByName({ name });
+  const { fetchChats, error, loading } = useFetchChats();
 
   useOnClickOutside(dropdownRef, () => setSearchText(''));
+
+  const getChat = useCallback(async () => {
+    const chatfeed = await fetchChats();
+    if (chatfeed) {
+      const newFeed = [...feed]; // create a copy of the current feed array
+      for (const [key, value] of chatfeed) {
+        const extract = value.intentSentBy;
+        const segments = extract ? extract.split(':') : null;
+        const lensAddress = segments ? segments[3] : null;
+        console.log(lensAddress, 'lensAddress');
+        newFeed.push(lensAddress); // add the new lensAddress to the newFeed array
+      }
+      setFeed(newFeed); // update the feed state with the new array
+    }
+  }, [fetchChats, feed]);
 
   const [searchUsers, { data: searchUsersData, loading: searchUsersLoading }] = useSearchProfilesLazyQuery();
   // const [searchGroups, { data: searchGroupsData, loading: searchGroupsLoading }] = useSearchProfilesLazyQuery();
 
+  const segments = searchText.split(' ');
+  const lensAddress = segments[segments.length - 1];
   const handleSearch = (evt: ChangeEvent<HTMLInputElement>) => {
     const keyword = evt.target.value;
+    getChat();
     setSearchText(keyword);
     if (pathname !== '/search' && !hideDropdown) {
       searchUsers({
@@ -55,14 +79,24 @@ const Search: FC<SearchProps> = ({
     }
   };
 
+  useEffect(() => {
+    if (activeTab === 2) {
+      setActiveTab(1);
+    }
+  }, []);
+
   const handleKeyDown = (evt: ChangeEvent<HTMLFormElement>) => {
     evt.preventDefault();
+    console.log(feed, 'feed');
+    if (!feed.includes(lensAddress) && searchText.length > 0) {
+      setActiveTab(2);
+    } else {
+      setActiveTab(1);
+    }
     if (pathname === '/search') {
       push(`/search?q=${encodeURIComponent(searchText)}&type=${query.type}`);
-    } else if (pathname === '/push') {
-      push(`/search?q=${encodeURIComponent(searchText)}&type=profiles`);
     } else {
-      push(`/search?q=${encodeURIComponent(searchText)}&type=groups`);
+      push(`/search?q=${encodeURIComponent(searchText)}&type=profiles`);
     }
     setSearchText('');
   };

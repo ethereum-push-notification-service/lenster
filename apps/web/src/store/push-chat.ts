@@ -12,6 +12,8 @@ type PushTabs = typeof PUSH_TABS;
 export const PUSH_ENV = IS_MAINNET ? ENV.PROD : ENV.STAGING;
 
 interface IPushChatStore {
+  activeTabNumber: number;
+  setActiveTabNumber: (activeTabNumber: number) => void;
   connectedProfile: IUser | undefined;
   setConnectedProfile: (connectedProfile: IUser) => void;
   activeTab: keyof PushTabs;
@@ -47,6 +49,8 @@ interface IPushChatStore {
 }
 
 export const usePushChatStore = create<IPushChatStore>((set) => ({
+  activeTabNumber: 1,
+  setActiveTabNumber: (activeTabNumber) => set(() => ({ activeTabNumber })),
   connectedProfile: undefined,
   setConnectedProfile: (connectedProfile) => set(() => ({ connectedProfile })),
   activeTab: PUSH_TABS.CHATS,

@@ -1,5 +1,6 @@
 import Search from '@components/Messages/Push/Search';
 import useCreateChatProfile from '@components/utils/hooks/push/useCreateChatProfile';
+import useFetchChats from '@components/utils/hooks/push/useFetchChats';
 import useGetChatProfile from '@components/utils/hooks/push/useGetChatProfile';
 import usePushDecryption from '@components/utils/hooks/push/usePushDecryption';
 import useUpgradeChatProfile from '@components/utils/hooks/push/useUpgradeChatProfile';
@@ -17,6 +18,7 @@ const activeIndex = 1;
 const PUSHPreview: FC<PreviewListProps> = () => {
   const { data: signer } = wagmi.useSigner();
   const { fetchChatProfile } = useGetChatProfile();
+  const { fetchChats, error, loading } = useFetchChats();
   const activeTab = usePushChatStore((state) => state.activeTab);
   const setActiveTab = usePushChatStore((state) => state.setActiveTab);
   const setPgpPrivateKey = usePushChatStore((state) => state.setPgpPrivateKey);
@@ -26,6 +28,9 @@ const PUSHPreview: FC<PreviewListProps> = () => {
   const showDecryptionModal = usePushChatStore((state) => state.showDecryptionModal);
   const setShowUpgradeChatProfileModal = usePushChatStore((state) => state.setShowUpgradeChatProfileModal);
   const setShowDecryptionModal = usePushChatStore((state) => state.setShowDecryptionModal);
+  const activeTabnumber = usePushChatStore((state) => state.activeTabNumber);
+  const setActiveTabNumber = usePushChatStore((state) => state.setActiveTabNumber);
+  console.log(activeTabnumber, 'activeTabnumber');
   const {
     createChatProfile,
     modalContent: createChatProfileModalContent,
@@ -64,6 +69,13 @@ const PUSHPreview: FC<PreviewListProps> = () => {
     [decryptKey, setPgpPrivateKey, setShowDecryptionModal, upgradeChatProfile]
   );
 
+  const getChat = useCallback(async () => {
+    const chatfeed = await fetchChats();
+    if (chatfeed) {
+      console.log(chatfeed);
+    }
+  }, []);
+
   const connectProfile = useCallback(async () => {
     const connectedProfile = await fetchChatProfile();
     if (connectedProfile && connectedProfile.encryptedPrivateKey) {
@@ -78,6 +90,7 @@ const PUSHPreview: FC<PreviewListProps> = () => {
       return;
     }
     connectProfile();
+    getChat();
   }, [connectProfile, signer]);
 
   return (
@@ -88,23 +101,31 @@ const PUSHPreview: FC<PreviewListProps> = () => {
           <div className="mb-6 flex gap-x-5 border-b border-b-gray-300">
             <div
               onClick={() => setActiveTab(PUSH_TABS.CHATS)}
-              className={`w-6/12 cursor-pointer border-b-4 pb-3.5 text-center  font-bold ${
+              className={`${
+                activeTabnumber === 1
+                  ? 'w-6/12 cursor-pointer border-b-4 pb-3.5 text-center  font-bold'
+                  : 'w-full cursor-pointer border-b-4 pb-3.5 font-bold'
+              }  ${
                 activeTab === PUSH_TABS.CHATS ? 'border-b-brand-500' : 'border-b-transparent text-gray-500'
               }`}
             >
-              <Trans>Chats</Trans>
+              <Trans>{activeTabnumber === 1 ? `Chats` : `New Chat`}</Trans>
             </div>
-            <div
-              onClick={() => setActiveTab(PUSH_TABS.REQUESTS)}
-              className={`align-items-center flex w-6/12 cursor-pointer justify-center gap-x-1.5 border-b-4 pb-3.5 font-bold ${
-                activeTab === PUSH_TABS.REQUESTS ? 'border-b-brand-500' : 'border-b-transparent text-gray-500'
-              }`}
-            >
-              <Trans>Requests</Trans>
-              <div className=" bg-brand-500 flex h-5 w-7 justify-center rounded-full text-sm text-white">
-                2
+            {activeTabnumber === 1 && (
+              <div
+                onClick={() => setActiveTab(PUSH_TABS.REQUESTS)}
+                className={`align-items-center flex w-6/12 cursor-pointer justify-center gap-x-1.5 border-b-4 pb-3.5 font-bold ${
+                  activeTab === PUSH_TABS.REQUESTS
+                    ? 'border-b-brand-500'
+                    : 'border-b-transparent text-gray-500'
+                }`}
+              >
+                <Trans>Requests</Trans>
+                <div className=" bg-brand-500 flex h-5 w-7 justify-center rounded-full text-sm text-white">
+                  2
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="flex gap-x-2">
@@ -117,7 +138,7 @@ const PUSHPreview: FC<PreviewListProps> = () => {
         {/* section for header */}
         {/* section for chats */}
         {activeTab === PUSH_TABS.CHATS && (
-          <section className="flex flex-col	gap-2.5	">
+          <section className="flex flex-col gap-2.5 ">
             {[1, 2].map((number) => (
               <div
                 key={number}
@@ -125,11 +146,11 @@ const PUSHPreview: FC<PreviewListProps> = () => {
                   activeIndex === number && 'bg-brand-100'
                 }`}
               >
-                <img className="h-12	w-12 rounded-full" src="/user.svg" alt="" />
-                <div className="flex w-full	justify-between	">
+                <img className="h-12  w-12 rounded-full" src="/user.svg" alt="" />
+                <div className="flex w-full justify-between ">
                   <div>
                     <p className="bold text-base">Sasi</p>
-                    <p className="text-sm text-gray-500	">GMGM!!</p>
+                    <p className="text-sm text-gray-500 ">GMGM!!</p>
                   </div>
                   <div>
                     <span className="text-xs text-gray-500">a minute ago</span>
