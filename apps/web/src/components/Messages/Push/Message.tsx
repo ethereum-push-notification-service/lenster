@@ -80,9 +80,6 @@ const MessagePage: NextPage = () => {
     query: { conversationKey }
   } = useRouter();
   console.log(conversationKey);
-  // useEffect(() => {
-  //   Mixpanel.track(PAGEVIEW, { page: 'conversation' });
-  // }, []);
 
   if (!conversationKey || !currentProfileId || !Array.isArray(conversationKey)) {
     return <Custom404 />;
