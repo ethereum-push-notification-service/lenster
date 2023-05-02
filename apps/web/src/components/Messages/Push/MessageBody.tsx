@@ -2,6 +2,7 @@ import useApproveChatRequest from '@components/utils/hooks/push/useApproveChatRe
 import useCreateChatProfile from '@components/utils/hooks/push/useCreateChatProfile';
 import useFetchChats from '@components/utils/hooks/push/useFetchChats';
 import useGetHistoryMessages from '@components/utils/hooks/push/useFetchHistoryMessages';
+import useFetchRequests from '@components/utils/hooks/push/useFetchRequests';
 import usePushSendMessage from '@components/utils/hooks/push/usePushSendMessage';
 import onError from '@lib/onError';
 import type { IMessageIPFS } from '@pushprotocol/restapi';
@@ -74,7 +75,7 @@ const Messages = ({ chat }: { chat: IMessageIPFS }) => {
   return <MessageCard chat={chat} position={position} />;
 };
 
-const MessageField = ({ getChatCall }: { getChatCall: () => Promise<void> }) => {
+const MessageField = () => {
   const modalRef = useRef(null);
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [gifOpen, setGifOpen] = useState(false);
@@ -84,6 +85,7 @@ const MessageField = ({ getChatCall }: { getChatCall: () => Promise<void> }) => 
   const connectedProfile = usePushChatStore((state) => state.connectedProfile);
   const { createChatProfile } = useCreateChatProfile();
   const { fetchChats } = useFetchChats();
+  const { fetchRequests } = useFetchRequests();
 
   const appendEmoji = ({ emoji }: { emoji: string }) => setInputText(`${inputText}${emoji}`);
 
@@ -99,7 +101,7 @@ const MessageField = ({ getChatCall }: { getChatCall: () => Promise<void> }) => 
       });
       // after a message has been sent, we can refetch all messages and chats
       await fetchChats();
-      // await getChatCall(); wierd, calling this does not fetch the latest chat as it should
+      await fetchRequests();
     } catch (error) {
       onError(error);
     }
@@ -289,22 +291,13 @@ export default function MessageBody() {
                 />
               </div>
             )}
-            {/* uncomment when gifs are implemented */}
-            {/* <div className="relative w-fit rounded-xl rounded-tl-sm border">
-              <Image
-                className="font-medium0 relative w-fit rounded-xl rounded-tl-sm border"
-                src={gifSample.url}
-                alt=""
-              />
-              <Image className="absolute right-2.5 top-2.5" src="/push/giticon.svg" alt="" />
-            </div> */}
           </div>
         )}
       </div>
 
       {/* typebar  design */}
       <div className="relative mt-2">
-        <MessageField getChatCall={getChatCall} />
+        <MessageField />
       </div>
     </section>
   );

@@ -10,7 +10,7 @@ import { Image } from 'ui';
 
 export const PreviewMessage = ({ messageType, content }: { messageType: string; content: string }) => {
   if (messageType === 'GIF') {
-    return <Image className="right-2.5 top-2.5" src="/push/giticon.svg" alt="" />;
+    return <Image className="right-2.5 top-2.5" src="/push/gitIcon.svg" alt="" />;
   }
 
   return <p className="text-sm text-gray-500">{content}</p>;
