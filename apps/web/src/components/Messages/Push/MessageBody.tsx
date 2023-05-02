@@ -170,18 +170,12 @@ export default function MessageBody() {
         {!loading ? (
           requestFeedids.includes(selectedChatId) &&
           Object.keys(requestsFeed).map((id: string) => {
-            const feed = requestsFeed[id];
-            const timeDisplay = parseDate(feed.msg.timestamp ?? 0);
             return (
               <div className="relative" key={id}>
-                <div className="absolute left-1/2 -translate-x-1/2 transform text-sm text-gray-500">
-                  <div>{timeDisplay}</div>
-                </div>
                 <div className="absolute top-8 flex w-96 rounded-e rounded-r-2xl rounded-bl-2xl border border-solid border-gray-300 p-2">
                   <div className="text-sm font-normal">
                     This is your first conversation with the sender. Please accept to continue.
                   </div>
-                  {/* <div>{moment(feed.msg.timestamp).format('h:mm A')}</div> */}
                   <Image
                     className="h-12 cursor-pointer"
                     onClick={handleApprovechatRequest}
