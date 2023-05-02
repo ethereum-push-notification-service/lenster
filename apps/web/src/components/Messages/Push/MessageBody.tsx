@@ -222,29 +222,30 @@ export default function MessageBody() {
         ref={listInnerRef}
         onScroll={onScroll}
       >
-       { loading && 
+        {loading && (
           <div className="flex justify-center py-2">
             <Spinner size="sm" />
-          </div>}
-          <div className="flex flex-col gap-2.5">
-            {chats.get(selectedChatId)?.messages.map((chat: IMessageIPFS, index: number) => (
-              <Messages chat={chat} key={index} />
-            ))}
-            {requestFeedids.includes(selectedChatId) && (
-              <div className="flex w-96 rounded-e rounded-r-2xl rounded-bl-2xl border border-solid border-gray-300 p-2">
-                <div className="text-sm font-normal">
-                  This is your first conversation with the sender. Please accept to continue.
-                </div>
-                <Image
-                  className="h-12 cursor-pointer"
-                  onClick={handleApprovechatRequest}
-                  src="/push/CheckCircle.svg"
-                  alt="check"
-                />
+          </div>
+        )}
+        <div className="flex flex-col gap-2.5">
+          {chats.get(selectedChatId)?.messages.map((chat: IMessageIPFS, index: number) => (
+            <Messages chat={chat} key={index} />
+          ))}
+          {requestFeedids.includes(selectedChatId) && (
+            <div className="flex w-96 rounded-e rounded-r-2xl rounded-bl-2xl border border-solid border-gray-300 p-2">
+              <div className="text-sm font-normal">
+                This is your first conversation with the sender. Please accept to continue.
               </div>
-            )}
-            {/* uncomment when gifs are implemented */}
-            {/* <div className="relative w-fit rounded-xl rounded-tl-sm border">
+              <Image
+                className="h-12 cursor-pointer"
+                onClick={handleApprovechatRequest}
+                src="/push/CheckCircle.svg"
+                alt="check"
+              />
+            </div>
+          )}
+          {/* uncomment when gifs are implemented */}
+          {/* <div className="relative w-fit rounded-xl rounded-tl-sm border">
               <Image
                 className="font-medium0 relative w-fit rounded-xl rounded-tl-sm border"
                 src={gifSample.url}
@@ -252,7 +253,7 @@ export default function MessageBody() {
               />
               <Image className="absolute right-2.5 top-2.5" src="/push/giticon.svg" alt="" />
             </div> */}
-          </div>
+        </div>
       </div>
 
       {/* typebar  design */}

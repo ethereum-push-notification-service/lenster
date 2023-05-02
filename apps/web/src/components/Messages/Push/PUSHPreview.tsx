@@ -112,15 +112,15 @@ const PUSHPreview = () => {
     //set selected chat preview
     //find in inbox or reuqests  or new chat and switch tab as per that and set css for selected chat
     if (chatsFeed.hasOwnProperty(selectedChatId)) {
-      setActiveTab(PUSH_TABS.CHATS)
+      setActiveTab(PUSH_TABS.CHATS);
     }
-    console.log(requestsFeed)
-    console.log(selectedChatId)
+    console.log(requestsFeed);
+    console.log(selectedChatId);
     if (requestsFeed.hasOwnProperty(selectedChatId)) {
-      console.log(activeTab)
-      setActiveTab(PUSH_TABS.REQUESTS)
+      console.log(activeTab);
+      setActiveTab(PUSH_TABS.REQUESTS);
     }
-  }, [selectedChatId, selectedChatType, requestsFeed,chatsFeed]);
+  }, [selectedChatId, selectedChatType, requestsFeed, chatsFeed]);
 
   const onProfileSelected = (profile: Profile) => {
     router.push(`/messages/push/chat/${profile.id}`);
