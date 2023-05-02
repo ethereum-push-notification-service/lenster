@@ -8,7 +8,7 @@ import React, { useEffect } from 'react';
 import { usePushChatStore } from 'src/store/push-chat';
 import { Image } from 'ui';
 
-const PreviewMessage = ({ messageType, content }: { messageType: string; content: string }) => {
+export const PreviewMessage = ({ messageType, content }: { messageType: string; content: string }) => {
   if (messageType === 'GIF') {
     return <Image className="right-2.5 top-2.5" src="/push/giticon.svg" alt="" />;
   }
