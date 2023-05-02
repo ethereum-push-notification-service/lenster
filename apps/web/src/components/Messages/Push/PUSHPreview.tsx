@@ -20,6 +20,7 @@ const PUSHPreview = () => {
   const { data: signer } = wagmi.useSigner();
   const { fetchChatProfile } = useGetChatProfile();
   const activeTab = usePushChatStore((state) => state.activeTab);
+  const chatsFeed = usePushChatStore((state) => state.chatsFeed);
   const setActiveTab = usePushChatStore((state) => state.setActiveTab);
   const setPgpPrivateKey = usePushChatStore((state) => state.setPgpPrivateKey);
   const showCreateChatProfileModal = usePushChatStore((state) => state.showCreateChatProfileModal);
@@ -110,7 +111,16 @@ const PUSHPreview = () => {
   useEffect(() => {
     //set selected chat preview
     //find in inbox or reuqests  or new chat and switch tab as per that and set css for selected chat
-  }, [selectedChatId, selectedChatType]);
+    if (chatsFeed.hasOwnProperty(selectedChatId)) {
+      setActiveTab(PUSH_TABS.CHATS)
+    }
+    console.log(requestsFeed)
+    console.log(selectedChatId)
+    if (requestsFeed.hasOwnProperty(selectedChatId)) {
+      console.log(activeTab)
+      setActiveTab(PUSH_TABS.REQUESTS)
+    }
+  }, [selectedChatId, selectedChatType, requestsFeed,chatsFeed]);
 
   const onProfileSelected = (profile: Profile) => {
     router.push(`/messages/push/chat/${profile.id}`);
