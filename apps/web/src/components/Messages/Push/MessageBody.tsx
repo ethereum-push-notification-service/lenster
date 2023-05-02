@@ -77,7 +77,6 @@ export default function MessageBody() {
     } else if (chats.size && chats.get(selectedChatId)?.lastThreadHash) {
       threadHash = chats.get(selectedChatId)?.lastThreadHash;
     }
-
     if (threadHash) {
       await historyMessages({
         threadHash: threadHash,
@@ -111,7 +110,7 @@ export default function MessageBody() {
       }
       await getChatCall();
     })();
-  }, [decryptedPgpPvtKey, selectedChatId]);
+  }, [decryptedPgpPvtKey,selectedChat ,selectedChatId]);
 
   const appendEmoji = ({ emoji }: { emoji: string }) => setInputText(`${inputText}${emoji}`);
   const appendGIF = (emojiObject: GIFType) => {
