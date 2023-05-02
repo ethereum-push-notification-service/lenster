@@ -110,7 +110,7 @@ export default function MessageBody() {
       }
       await getChatCall();
     })();
-  }, [decryptedPgpPvtKey,selectedChat ,selectedChatId]);
+  }, [decryptedPgpPvtKey, selectedChat, selectedChatId]);
 
   const appendEmoji = ({ emoji }: { emoji: string }) => setInputText(`${inputText}${emoji}`);
   const appendGIF = (emojiObject: GIFType) => {
