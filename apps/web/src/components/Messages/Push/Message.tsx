@@ -50,7 +50,7 @@ const Message = () => {
     <GridLayout classNameChild="md:gap-8">
       <MetaTags title={APP_NAME} />
       <PreviewList className="xs:hidden sm:hidden md:hidden lg:block" />
-      <GridItemEight className="xs:h-[85vh] xs:mx-2 sm:h-[76vh] md:h-[80vh] xl:h-[84vh] mb-0 sm:mx-2 md:col-span-8">
+      <GridItemEight className="xs:h-[85vh] xs:mx-2 mb-0 sm:mx-2 sm:h-[76vh] md:col-span-8 md:h-[80vh] xl:h-[84vh]">
         <Card className="flex h-full flex-col justify-between">
           {showLoading ? (
             <div className="flex h-full flex-grow items-center justify-center">
