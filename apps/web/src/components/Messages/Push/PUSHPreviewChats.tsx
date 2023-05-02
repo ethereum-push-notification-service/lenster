@@ -13,7 +13,7 @@ export const PreviewMessage = ({ messageType, content }: { messageType: string; 
     return <Image className="right-2.5 top-2.5" src="/push/gitIcon.svg" alt="" />;
   }
 
-  return <p className="text-sm text-gray-500">{content}</p>;
+  return <p className="max-w-[150px] truncate text-sm text-gray-500">{content}</p>;
 };
 
 export default function PUSHPreviewChats() {

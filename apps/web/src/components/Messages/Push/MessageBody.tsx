@@ -40,7 +40,9 @@ const MessageCard = ({ chat, position }: { chat: IMessageIPFS; position: number 
         'relative w-fit max-w-[80%] border py-3 pl-4 pr-[50px] font-medium'
       )}
     >
-      <p className={clsx(position ? 'text-white' : '', 'text-sm')}>{chat.messageContent}</p>
+      <p className={clsx(position ? 'text-white' : '', 'max-w-[100%] break-words text-sm')}>
+        {chat.messageContent}
+      </p>
       <span
         className={clsx(position ? 'text-white' : 'text-gray-500', 'absolute bottom-1.5	right-1.5 text-xs')}
       >
@@ -168,7 +170,7 @@ const MessageField = () => {
       <Input
         onChange={(e) => setInputText(e.target.value)}
         value={inputText}
-        className="pl-11"
+        className="pl-11 pr-[115px]"
         type="text"
         disabled={msgSendLoading}
         placeholder="Type your message..."
