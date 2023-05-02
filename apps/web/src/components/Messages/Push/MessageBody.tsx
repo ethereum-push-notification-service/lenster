@@ -26,7 +26,7 @@ type ChatType = {
   timestamp: string;
   time: string;
 };
-
+const CHATS_FETCH_LIMIT = 15;
 const MessageCard = ({ chat, position }: { chat: IMessageIPFS; position: number }) => {
   const time = moment(chat.timestamp).format('hh:mm');
   return (
@@ -56,7 +56,11 @@ const Messages = ({ chat }: { chat: IMessageIPFS }) => {
   );
 };
 
-const MessageField = () => {
+type MessageFieldPropType = {
+  scrollToBottom: () => void;
+};
+
+const MessageField = ({ scrollToBottom }: MessageFieldPropType) => {
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [gifOpen, setGifOpen] = useState(false);
   const [inputText, setInputText] = useState('');
@@ -80,6 +84,7 @@ const MessageField = () => {
       receiver: getCAIPFromLensID(selectedChatId),
       messageType: 'Text'
     });
+    scrollToBottom();
     setInputText('');
   };
 
@@ -133,7 +138,7 @@ const MessageField = () => {
 export default function MessageBody() {
   const pgpPrivateKey = usePushChatStore((state) => state.pgpPrivateKey);
   const listInnerRef = useRef<HTMLDivElement>(null);
-
+  const bottomRef = useRef<HTMLDivElement>(null);
   const setActiveTab = usePushChatStore((state) => state.setActiveTab);
   const selectedChatId = usePushChatStore((state) => state.selectedChatId);
   const requestsFeed = usePushChatStore((state) => state.requestsFeed);
@@ -144,6 +149,7 @@ export default function MessageBody() {
   const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
 
   const selectedChat = chatsFeed[selectedChatId] || requestsFeed[selectedChatId];
+  const selectedMessages = chats.get(selectedChatId);
 
   //add loading in jsx
   const { historyMessages, loading } = useGetHistoryMessages();
@@ -175,19 +181,34 @@ export default function MessageBody() {
 
   const getChatCall = async () => {
     let threadHash = null;
-    if (!chats.get(selectedChatId) && selectedChat?.threadhash) {
+    if (!selectedMessages && selectedChat?.threadhash) {
       threadHash = selectedChat?.threadhash;
-    } else if (chats.size && chats.get(selectedChatId)?.lastThreadHash) {
-      threadHash = chats.get(selectedChatId)?.lastThreadHash;
+    } else if (chats.size && selectedMessages?.lastThreadHash) {
+      threadHash = selectedMessages?.lastThreadHash;
     }
     if (threadHash) {
       await historyMessages({
         threadHash: threadHash,
         chatId: selectedChatId,
-        limit: 10
+        limit: CHATS_FETCH_LIMIT
       });
     }
   };
+
+  const scrollToBottom = () => {
+    bottomRef?.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    if (
+      selectedChatId &&
+      selectedMessages &&
+      selectedMessages?.messages.length &&
+      selectedMessages?.messages.length <= CHATS_FETCH_LIMIT
+    ) {
+      scrollToBottom();
+    }
+  }, [chats.get(selectedChatId)]);
 
   const onScroll = async () => {
     if (listInnerRef.current) {
@@ -219,7 +240,7 @@ export default function MessageBody() {
     <section className="h-full	p-5 pb-3">
       <div className="h-[85%] max-h-[85%] overflow-scroll " ref={listInnerRef} onScroll={onScroll}>
         <div className="flex flex-col gap-2.5">
-          {chats.get(selectedChatId)?.messages.map((chat: IMessageIPFS, index: number) => (
+          {selectedMessages?.messages.map((chat: IMessageIPFS, index: number) => (
             <Messages chat={chat} key={index} />
           ))}
           {requestFeedids.includes(selectedChatId) && (
@@ -235,6 +256,7 @@ export default function MessageBody() {
               />
             </div>
           )}
+          <div ref={bottomRef} />
           {/* uncomment when gifs are implemented */}
           {/* <div className="relative w-fit rounded-xl rounded-tl-sm border">
                 <Image
@@ -249,7 +271,7 @@ export default function MessageBody() {
 
       {/* typebar  design */}
       <div className="relative mt-2">
-        <MessageField />
+        <MessageField scrollToBottom={scrollToBottom} />
       </div>
     </section>
   );
