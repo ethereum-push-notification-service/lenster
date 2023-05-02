@@ -1,3 +1,4 @@
+import useApproveChatRequest from '@components/utils/hooks/push/useApproveChatRequest';
 import useGetHistoryMessages from '@components/utils/hooks/push/useFetchHistoryMessages';
 import type { IMessageIPFS } from '@pushprotocol/restapi';
 import clsx from 'clsx';
@@ -5,11 +6,11 @@ import EmojiPicker from 'emoji-picker-react';
 import GifPicker from 'gif-picker-react';
 import moment from 'moment';
 import React, { useEffect, useRef, useState } from 'react';
-import { usePushChatStore } from 'src/store/push-chat';
+import { PUSH_TABS, usePushChatStore } from 'src/store/push-chat';
 import { Image, Input } from 'ui';
 
-// nft:eip155:80001:0x60Ae865ee4C725cd04353b5AAb364553f56ceF82:0x3e64
-// nft:eip155:80001:0x60Ae865ee4C725cd04353b5AAb364553f56ceF82:0x7d22
+import { getCAIPFromLensID } from './helper';
+
 type GIFType = {
   url: String;
   height: Number;
@@ -59,17 +60,46 @@ export default function MessageBody() {
   const [inputText, setInputText] = useState('');
   const chats = usePushChatStore((state) => state.chats);
   const chatsFeed = usePushChatStore((state) => state.chatsFeed);
-  const requestsFeed = usePushChatStore((state) => state.requestsFeed);
   const pgpPrivateKey = usePushChatStore((state) => state.pgpPrivateKey);
-  const selectedChatId = usePushChatStore((state) => state.selectedChatId);
   const listInnerRef = useRef<HTMLDivElement>(null);
 
+  const setActiveTab = usePushChatStore((state) => state.setActiveTab);
+  const selectedChatId = usePushChatStore((state) => state.selectedChatId);
+  const requestsFeed = usePushChatStore((state) => state.requestsFeed);
+  const setRequestsFeed = usePushChatStore((state) => state.setRequestsFeed);
+  const chatFeed = usePushChatStore((state) => state.chatsFeed);
+  const setChatfeed = usePushChatStore((state) => state.setChatsFeed);
   const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
 
   const selectedChat = chatsFeed[selectedChatId] || requestsFeed[selectedChatId];
 
   //add loading in jsx
   const { historyMessages, loading } = useGetHistoryMessages();
+  const { approveChatRequest, error } = useApproveChatRequest();
+  const requestFeedids = Object.keys(requestsFeed);
+  const handleApprovechatRequest = async () => {
+    console.log(getCAIPFromLensID(selectedChatId));
+    if (selectedChatId) {
+      try {
+        const response = await approveChatRequest({ senderAddress: getCAIPFromLensID(selectedChatId) });
+        if (response) {
+          const updatedRequestsfeed = { ...requestsFeed };
+          const selectedRequest = updatedRequestsfeed[selectedChatId];
+          delete updatedRequestsfeed[selectedChatId];
+          setRequestsFeed(updatedRequestsfeed);
+
+          const chatLe = { ...chatFeed };
+          chatLe[selectedChatId] = selectedRequest;
+          setChatfeed(chatLe);
+          setActiveTab(PUSH_TABS.CHATS);
+        }
+      } catch (error_: Error | any) {
+        console.log(error_.message);
+      }
+    } else {
+      return;
+    }
+  };
 
   const getChatCall = async () => {
     let threadHash = null;
@@ -132,6 +162,21 @@ export default function MessageBody() {
           {chats.get(selectedChatId)?.messages.map((chat: IMessageIPFS, index: number) => (
             <Messages chat={chat} key={index} />
           ))}
+          {requestFeedids.includes(selectedChatId) && (
+            <div className="relative">
+              <div className="absolute top-8 flex w-96 rounded-e rounded-r-2xl rounded-bl-2xl border border-solid border-gray-300 p-2">
+                <div className="text-sm font-normal">
+                  This is your first conversation with the sender. Please accept to continue.
+                </div>
+                <Image
+                  className="h-12 cursor-pointer"
+                  onClick={handleApprovechatRequest}
+                  src="/push/CheckCircle.svg"
+                  alt="check"
+                />
+              </div>
+            </div>
+          )}
           {/* uncomment when gifs are implemented */}
           {/* <div className="relative w-fit rounded-xl rounded-tl-sm border">
                 <Image
@@ -143,6 +188,7 @@ export default function MessageBody() {
               </div> */}
         </div>
       </div>
+
       {/* typebar  design */}
       <div className="relative mt-2">
         <Image
