@@ -15,6 +15,7 @@ import * as wagmi from 'wagmi';
 
 import PUSHPreviewChats from './PUSHPreviewChats';
 import PUSHPreviewRequests from './PUSHPreviewRequest';
+import { toast } from 'react-hot-toast';
 
 const PUSHPreview = () => {
   const { data: signer } = wagmi.useSigner();
@@ -65,10 +66,16 @@ const PUSHPreview = () => {
         // eslint-disable-next-line no-use-before-define
         // connectProfile();
       } else {
-        console.log(error);
+        // console.log(error);
+        // is this okay or printing it in console is fine ?
+        toast.error(error ? error : 'Something went wrong')
         const time = 3000;
         setTimeout(() => {
-          decryptAndUpgrade(encryptedPvtKey);
+          try {
+            decryptAndUpgrade(encryptedPvtKey);
+          } catch (error: Error | any) {
+            toast.error(error.message);
+          }
         }, time);
       }
     },
@@ -77,11 +84,19 @@ const PUSHPreview = () => {
   );
 
   const connectProfile = useCallback(async () => {
-    const connectedProfile = await fetchChatProfile();
-    if (connectedProfile && connectedProfile.encryptedPrivateKey) {
-      setPgpPrivateKey({ encrypted: connectedProfile.encryptedPrivateKey });
-      const encryptedPvtKey = connectedProfile.encryptedPrivateKey;
-      decryptAndUpgrade(encryptedPvtKey);
+    try {
+      const connectedProfile = await fetchChatProfile();
+      if (connectedProfile && connectedProfile.encryptedPrivateKey) {
+        try {
+          setPgpPrivateKey({ encrypted: connectedProfile.encryptedPrivateKey });
+          const encryptedPvtKey = connectedProfile.encryptedPrivateKey;
+          decryptAndUpgrade(encryptedPvtKey);
+        } catch (error: Error | any) {
+          toast.error(error.message);
+        }
+      }
+    } catch (error: Error | any) {
+      toast.error(error.message);
     }
   }, [decryptAndUpgrade, fetchChatProfile, setPgpPrivateKey]);
   const { fetchRequests } = useFetchRequests();
@@ -103,7 +118,11 @@ const PUSHPreview = () => {
       if (!decryptedPgpPvtKey) {
         return;
       }
-      await fetchRequests();
+      try {
+        await fetchRequests();
+      } catch (error: Error | any) {
+        toast.error(error.message);
+      }
     })();
   }, [decryptedPgpPvtKey, fetchRequests]);
 
@@ -124,17 +143,15 @@ const PUSHPreview = () => {
           <div className="mb-6 flex gap-x-5 border-b border-b-gray-300">
             <div
               onClick={() => setActiveTab(PUSH_TABS.CHATS)}
-              className={`w-6/12 cursor-pointer border-b-4 pb-3.5 text-center  font-bold ${
-                activeTab === PUSH_TABS.CHATS ? 'border-b-brand-500' : 'border-b-transparent text-gray-500'
-              }`}
+              className={`w-6/12 cursor-pointer border-b-4 pb-3.5 text-center  font-bold ${activeTab === PUSH_TABS.CHATS ? 'border-b-brand-500' : 'border-b-transparent text-gray-500'
+                }`}
             >
               <Trans>Chats</Trans>
             </div>
             <div
               onClick={() => setActiveTab(PUSH_TABS.REQUESTS)}
-              className={`align-items-center flex w-6/12 cursor-pointer justify-center gap-x-1.5 border-b-4 pb-3.5 font-bold ${
-                activeTab === PUSH_TABS.REQUESTS ? 'border-b-brand-500' : 'border-b-transparent text-gray-500'
-              }`}
+              className={`align-items-center flex w-6/12 cursor-pointer justify-center gap-x-1.5 border-b-4 pb-3.5 font-bold ${activeTab === PUSH_TABS.REQUESTS ? 'border-b-brand-500' : 'border-b-transparent text-gray-500'
+                }`}
             >
               <Trans>Requests</Trans>
               <div className=" bg-brand-500 flex h-5 w-7 justify-center rounded-full text-sm text-white">
@@ -167,21 +184,21 @@ const PUSHPreview = () => {
       <Modal
         size="xs"
         show={showCreateChatProfileModal}
-        onClose={isCreateChatProfileModalClosable ? () => setShowCreateChatProfileModal(false) : () => {}}
+        onClose={isCreateChatProfileModalClosable ? () => setShowCreateChatProfileModal(false) : () => { }}
       >
         {createChatProfileModalContent}
       </Modal>
       <Modal
         size="xs"
         show={showUpgradeChatProfileModal}
-        onClose={isUpgradeChatProfileModalClosable ? () => setShowUpgradeChatProfileModal(false) : () => {}}
+        onClose={isUpgradeChatProfileModalClosable ? () => setShowUpgradeChatProfileModal(false) : () => { }}
       >
         {upgradeChatProfileModalContent}
       </Modal>
       <Modal
         size="xs"
         show={showDecryptionModal}
-        onClose={isDecryptionModalClosable ? () => setShowDecryptionModal(false) : () => {}}
+        onClose={isDecryptionModalClosable ? () => setShowDecryptionModal(false) : () => { }}
       >
         {decryptionModalContent}
       </Modal>

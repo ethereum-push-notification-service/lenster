@@ -10,6 +10,7 @@ import moment from 'moment';
 import React, { useEffect, useRef, useState } from 'react';
 import { PUSH_TABS, usePushChatStore } from 'src/store/push-chat';
 import { Image, Input } from 'ui';
+import { toast } from 'react-hot-toast';
 
 import { getCAIPFromLensID, isProfileExist } from './helper';
 
@@ -65,6 +66,7 @@ const MessageField = () => {
   const connectedProfile = usePushChatStore((state) => state.connectedProfile);
   const { createChatProfile } = useCreateChatProfile();
 
+  // toast.error('Message sent successfully')
   const appendEmoji = ({ emoji }: { emoji: string }) => setInputText(`${inputText}${emoji}`);
   const appendGIF = (emojiObject: GIFType) => {
     console.log({ emojiObject });
@@ -73,14 +75,22 @@ const MessageField = () => {
   const sendMsg = async () => {
     console.log({ inputText });
     if (!isProfileExist(connectedProfile)) {
-      await createChatProfile();
+      try {
+        await createChatProfile();
+      } catch (error: Error | any) {
+        toast.error(error.message);
+      }
     }
-    await sendMessage({
-      message: inputText,
-      receiver: getCAIPFromLensID(selectedChatId),
-      messageType: 'Text'
-    });
-    setInputText('');
+    try {
+      await sendMessage({
+        message: inputText,
+        receiver: getCAIPFromLensID(selectedChatId),
+        messageType: 'Text'
+      });
+      setInputText('');
+    } catch (error: Error | any) {
+      toast.error(error.message);
+    }
   };
 
   const gifSample = {
@@ -181,11 +191,15 @@ export default function MessageBody() {
       threadHash = chats.get(selectedChatId)?.lastThreadHash;
     }
     if (threadHash) {
-      await historyMessages({
-        threadHash: threadHash,
-        chatId: selectedChatId,
-        limit: 10
-      });
+      try {
+        await historyMessages({
+          threadHash: threadHash,
+          chatId: selectedChatId,
+          limit: 10
+        });
+      } catch (error: Error | any) {
+        toast.error(error.message)
+      }
     }
   };
 
@@ -196,9 +210,11 @@ export default function MessageBody() {
         let content = listInnerRef.current;
         let curScrollPos = content.scrollTop;
         let oldScroll = content.scrollHeight - content.clientHeight;
-
-        await getChatCall();
-
+        try {
+          await getChatCall();
+        } catch (error: Error | any) {
+          toast.error(error.message)
+        }
         let newScroll = content.scrollHeight - content.clientHeight;
         content.scrollTop = curScrollPos + (newScroll - oldScroll);
       }
@@ -211,7 +227,11 @@ export default function MessageBody() {
       if (!decryptedPgpPvtKey) {
         return;
       }
-      await getChatCall();
+      try {
+        await getChatCall();
+      } catch (error: Error | any) {
+        toast.error(error.message)
+      }
     })();
   }, [decryptedPgpPvtKey, selectedChat, selectedChatId]);
 

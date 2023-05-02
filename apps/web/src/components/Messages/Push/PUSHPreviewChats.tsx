@@ -5,6 +5,7 @@ import getAvatar from 'lib/getAvatar';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import { usePushChatStore } from 'src/store/push-chat';
 import { Image } from 'ui';
 
@@ -31,7 +32,11 @@ export default function PUSHPreviewChats() {
       if (!decryptedPgpPvtKey) {
         return;
       }
-      await fetchChats();
+      try {
+        await fetchChats();
+      } catch (error: Error | any) {
+        toast.error(error.message);
+      }
     })();
   }, [decryptedPgpPvtKey, fetchChats]);
 
@@ -50,9 +55,8 @@ export default function PUSHPreviewChats() {
             <div
               onClick={() => onChatFeedClick(id)}
               key={id}
-              className={`flex h-16 cursor-pointer gap-2.5 rounded-lg  p-2.5 pr-3 transition-all hover:bg-gray-100 ${
-                selectedChatId === id && 'bg-brand-100'
-              }`}
+              className={`flex h-16 cursor-pointer gap-2.5 rounded-lg  p-2.5 pr-3 transition-all hover:bg-gray-100 ${selectedChatId === id && 'bg-brand-100'
+                }`}
             >
               <Image
                 onError={({ currentTarget }) => {
