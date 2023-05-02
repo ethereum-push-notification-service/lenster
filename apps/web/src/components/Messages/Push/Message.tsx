@@ -30,7 +30,6 @@ const Message = () => {
       const result = await loadProfiles({ variables: { request: { profileIds: [selectedChatId] } } });
       if (result.data) {
         setProfile(result.data.profiles.items[0] as Profile);
-        console.log(result.data.profiles.items[0]);
       } else {
         setProfile(null);
       }
@@ -79,7 +78,7 @@ const MessagePage: NextPage = () => {
   const {
     query: { conversationKey }
   } = useRouter();
-  console.log(conversationKey);
+
 
   if (!conversationKey || !currentProfileId || !Array.isArray(conversationKey)) {
     return <Custom404 />;
@@ -87,7 +86,6 @@ const MessagePage: NextPage = () => {
 
   //case where type is not given
   const [type, conversationId] = conversationKey;
-  console.log(type, conversationId);
 
   if (type !== CHAT_TYPES.CHAT && type !== CHAT_TYPES.GROUP) {
     return <Custom404 />;
