@@ -59,13 +59,14 @@ export default function MessageBody() {
   const [inputText, setInputText] = useState('');
   const chats = usePushChatStore((state) => state.chats);
   const chatsFeed = usePushChatStore((state) => state.chatsFeed);
+  const requestsFeed = usePushChatStore((state) => state.requestsFeed);
   const pgpPrivateKey = usePushChatStore((state) => state.pgpPrivateKey);
   const selectedChatId = usePushChatStore((state) => state.selectedChatId);
   const listInnerRef = useRef<HTMLDivElement>(null);
 
   const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
 
-  const selectedChat = chatsFeed[selectedChatId];
+  const selectedChat = chatsFeed[selectedChatId] || requestsFeed[selectedChatId];
 
   //add loading in jsx
   const { historyMessages, loading } = useGetHistoryMessages();
