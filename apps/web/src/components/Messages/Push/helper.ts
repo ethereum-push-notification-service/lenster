@@ -1,6 +1,6 @@
 import type { IUser } from '@pushprotocol/restapi';
 import { ENV } from '@pushprotocol/restapi/src/lib/constants';
-import { LENSHUB_PROXY, LENSPROTOCOL_HANDLE } from 'data';
+import { LENSHUB_PROXY } from 'data';
 import { CHAIN_ID } from 'src/constants';
 import { PUSH_ENV } from 'src/store/push-chat';
 
