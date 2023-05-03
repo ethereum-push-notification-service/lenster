@@ -114,8 +114,6 @@ const PUSHPreview = () => {
     if (chatsFeed.hasOwnProperty(selectedChatId)) {
       setActiveTab(PUSH_TABS.CHATS);
     }
-    console.log(requestsFeed);
-    console.log(selectedChatId);
     if (requestsFeed.hasOwnProperty(selectedChatId)) {
       console.log(activeTab);
       setActiveTab(PUSH_TABS.REQUESTS);

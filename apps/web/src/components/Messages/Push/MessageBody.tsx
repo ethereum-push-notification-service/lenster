@@ -65,6 +65,7 @@ const MessageField = () => {
   const connectedProfile = usePushChatStore((state) => state.connectedProfile);
   const { createChatProfile } = useCreateChatProfile();
 
+  console.log(selectedChatId);
   const appendEmoji = ({ emoji }: { emoji: string }) => setInputText(`${inputText}${emoji}`);
   const appendGIF = (emojiObject: GIFType) => {
     console.log({ emojiObject });
