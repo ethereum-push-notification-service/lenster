@@ -32,6 +32,6 @@ export const getIsHandle = (handle: string) => {
     return handle === LENSPROTOCOL_HANDLE ? true : handle.includes(HANDLE_SUFFIX.TEST);
   }
   if (PUSH_ENV === ENV.PROD) {
-    return handle === LENSPROTOCOL_HANDLE ? true : handle.includes(HANDLE_SUFFIX.LENS);
+    return handle.includes(HANDLE_SUFFIX.LENS);
   }
 };
