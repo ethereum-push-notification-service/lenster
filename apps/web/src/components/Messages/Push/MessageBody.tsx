@@ -200,7 +200,7 @@ export default function MessageBody() {
 
   const selectedChat = chatsFeed[selectedChatId] || requestsFeed[selectedChatId];
   const selectedMessages = chats.get(selectedChatId);
-  const prevSelectedId = useRef<string>("");
+  const prevSelectedId = useRef<string>('');
 
   //add loading in jsx
   const { historyMessages, loading } = useGetHistoryMessages();
@@ -247,7 +247,7 @@ export default function MessageBody() {
   };
 
   const scrollToBottom = (behavior?: string | null) => {
-    bottomRef?.current?.scrollIntoView( !behavior ? true : {behavior: "smooth"} );
+    bottomRef?.current?.scrollIntoView(!behavior ? true : { behavior: 'smooth' });
   };
 
   useEffect(() => {
@@ -294,29 +294,28 @@ export default function MessageBody() {
       await getChatCall();
     })();
   }, [decryptedPgpPvtKey, selectedChat, selectedChatId]);
+
   return (
-    <section className="h-full	p-5 pb-3">
-      <div className="h-[85%] max-h-[85%] overflow-scroll " ref={listInnerRef} onScroll={onScroll}>
-        <div className="flex flex-col gap-2.5">
-          {selectedMessages?.messages.map((chat: IMessageIPFS, index: number) => (
-            <Messages chat={chat} key={index} />
-          ))}
-          {requestFeedids.includes(selectedChatId) && (
-            <div className="flex w-96 rounded-e rounded-r-2xl rounded-bl-2xl border border-solid border-gray-300 p-2">
-              <div className="text-sm font-normal">
-                This is your first conversation with the sender. Please accept to continue.
-              </div>
-              <Image
-                className="h-12 cursor-pointer"
-                onClick={handleApprovechatRequest}
-                src="/push/CheckCircle.svg"
-                alt="check"
-              />
-            </div>
-          )}
-          <div ref={bottomRef} />
-          {/* uncomment when gifs are implemented */}
-          {/* /* <div className="relative w-fit rounded-xl rounded-tl-sm border">
+    <section className="flex h-[90%] flex-col p-5 pb-3">
+      <div
+        className="flex-grow overflow-x-hidden overflow-y-scroll px-2.5"
+        ref={listInnerRef}
+        onScroll={onScroll}
+      >
+        {loading ? (
+          <div className="flex justify-center">
+            <Spinner size="sm" />
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2.5">
+            {selectedMessages?.messages.map((chat: IMessageIPFS, index: number) => (
+              <Messages chat={chat} key={index} />
+            ))}
+            {requestFeedids.includes(selectedChatId) && (
+              <div className="flex w-96 rounded-e rounded-r-2xl rounded-bl-2xl border border-solid border-gray-300 p-2">
+                <div className="text-sm font-normal">
+                  This is your first conversation with the sender. Please accept to continue.
+                </div>
                 <Image
                   className="h-12 cursor-pointer"
                   onClick={handleApprovechatRequest}
@@ -325,9 +324,9 @@ export default function MessageBody() {
                 />
               </div>
             )}
+            <div ref={bottomRef} />
           </div>
-        )} */}
-        </div>
+        )}
       </div>
 
       <div className="relative mt-2">
