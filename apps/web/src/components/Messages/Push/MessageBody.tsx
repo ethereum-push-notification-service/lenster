@@ -200,6 +200,7 @@ export default function MessageBody() {
 
   const selectedChat = chatsFeed[selectedChatId] || requestsFeed[selectedChatId];
   const selectedMessages = chats.get(selectedChatId);
+  const prevSelectedId = useRef<string>("");
 
   //add loading in jsx
   const { historyMessages, loading } = useGetHistoryMessages();
@@ -245,9 +246,16 @@ export default function MessageBody() {
     }
   };
 
-  const scrollToBottom = () => {
-    bottomRef?.current?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToBottom = (behavior?: string | null) => {
+    bottomRef?.current?.scrollIntoView( !behavior ? true : {behavior: "smooth"} );
   };
+
+  useEffect(() => {
+    if (prevSelectedId.current !== selectedChatId) {
+      scrollToBottom(null);
+    }
+    prevSelectedId.current = selectedChatId;
+  }, [selectedChatId]);
 
   useEffect(() => {
     if (
@@ -256,7 +264,7 @@ export default function MessageBody() {
       selectedMessages?.messages.length &&
       selectedMessages?.messages.length <= CHATS_FETCH_LIMIT
     ) {
-      scrollToBottom();
+      scrollToBottom(null);
     }
   }, [chats.get(selectedChatId)]);
 
