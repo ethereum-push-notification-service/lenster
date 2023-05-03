@@ -29,7 +29,7 @@ export const isProfileExist = (connectedProfile: IUser | undefined) => {
 export const getIsHandle = (handle: string) => {
   console.log(HANDLE_SUFFIX.LENS);
   if (PUSH_ENV === ENV.STAGING) {
-    return handle === LENSPROTOCOL_HANDLE ? true : handle.includes(HANDLE_SUFFIX.TEST);
+    return handle.includes(HANDLE_SUFFIX.TEST);
   }
   if (PUSH_ENV === ENV.PROD) {
     return handle.includes(HANDLE_SUFFIX.LENS);
