@@ -96,6 +96,7 @@ const MessageField = ({ scrollToBottom }: MessageFieldPropType) => {
 
   const requestFeedids = Object.keys(requestsFeed);
 
+  console.log(selectedChatId);
   const appendEmoji = ({ emoji }: { emoji: string }) => setInputText(`${inputText}${emoji}`);
 
   const sendPushMessage = async (content: string, type: string) => {
@@ -178,6 +179,11 @@ const MessageField = ({ scrollToBottom }: MessageFieldPropType) => {
       )}
       <Input
         onChange={(e) => setInputText(e.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') {
+            sendTextMsg();
+          }
+        }}
         value={inputText}
         className="pl-11 pr-[115px]"
         type="text"
@@ -315,7 +321,7 @@ export default function MessageBody() {
     <section className="flex h-[90%] flex-col p-5 pb-3">
       <div className="flex-grow overflow-auto px-2.5" ref={listInnerRef} onScroll={onScroll}>
         {loading ? (
-          <div className="flex justify-center">
+          <div className="flex justify-center py-2">
             <Spinner size="sm" />
           </div>
         ) : (
