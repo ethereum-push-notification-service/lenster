@@ -1,13 +1,17 @@
 import useApproveChatRequest from '@components/utils/hooks/push/useApproveChatRequest';
 import useCreateChatProfile from '@components/utils/hooks/push/useCreateChatProfile';
+import useFetchChats from '@components/utils/hooks/push/useFetchChats';
 import useGetHistoryMessages from '@components/utils/hooks/push/useFetchHistoryMessages';
+import useFetchRequests from '@components/utils/hooks/push/useFetchRequests';
 import usePushSendMessage from '@components/utils/hooks/push/usePushSendMessage';
+import onError from '@lib/onError';
 import type { IMessageIPFS } from '@pushprotocol/restapi';
 import clsx from 'clsx';
 import EmojiPicker from 'emoji-picker-react';
 import GifPicker from 'gif-picker-react';
 import moment from 'moment';
 import React, { useEffect, useRef, useState } from 'react';
+import { useClickAway } from 'react-use';
 import { PUSH_TABS, usePushChatStore } from 'src/store/push-chat';
 import { Image, Input, Spinner } from 'ui';
 
@@ -26,7 +30,7 @@ type ChatType = {
   timestamp: string;
   time: string;
 };
-
+const CHATS_FETCH_LIMIT = 15;
 const MessageCard = ({ chat, position }: { chat: IMessageIPFS; position: number }) => {
   const time = moment(chat.timestamp).format('hh:mm');
   return (
@@ -36,7 +40,9 @@ const MessageCard = ({ chat, position }: { chat: IMessageIPFS; position: number 
         'relative w-fit max-w-[80%] border py-3 pl-4 pr-[50px] font-medium'
       )}
     >
-      <p className={clsx(position ? 'text-white' : '', 'text-sm')}>{chat.messageContent}</p>
+      <p className={clsx(position ? 'text-white' : '', 'max-w-[100%] break-words text-sm')}>
+        {chat.messageContent}
+      </p>
       <span
         className={clsx(position ? 'text-white' : 'text-gray-500', 'absolute bottom-1.5	right-1.5 text-xs')}
       >
@@ -46,17 +52,37 @@ const MessageCard = ({ chat, position }: { chat: IMessageIPFS; position: number 
   );
 };
 
-const Messages = ({ chat }: { chat: IMessageIPFS }) => {
-  const connectedProfile = usePushChatStore((state) => state.connectedProfile);
-
-  return chat.fromDID !== connectedProfile?.did ? (
-    <MessageCard chat={chat} position={0} />
-  ) : (
-    <MessageCard chat={chat} position={1} />
+const GIFCard = ({ chat, position }: { chat: IMessageIPFS; position: number }) => {
+  return (
+    <div className={clsx(position ? 'self-end' : '', 'relative w-fit')}>
+      <Image
+        className={clsx(
+          position ? 'right-0 rounded-xl rounded-tr-sm' : 'rounded-xl rounded-tl-sm',
+          'font-medium0 relative w-fit border'
+        )}
+        src={chat.messageContent}
+        alt=""
+      />
+      <Image className="absolute right-2.5 top-2.5" src="/push/giticon.svg" alt="" />
+    </div>
   );
 };
 
-const MessageField = () => {
+const Messages = ({ chat }: { chat: IMessageIPFS }) => {
+  const connectedProfile = usePushChatStore((state) => state.connectedProfile);
+  const position = chat.fromDID !== connectedProfile?.did ? 0 : 1;
+  if (chat.messageType === 'GIF') {
+    return <GIFCard chat={chat} position={position} />;
+  }
+  return <MessageCard chat={chat} position={position} />;
+};
+
+type MessageFieldPropType = {
+  scrollToBottom: () => void;
+};
+
+const MessageField = ({ scrollToBottom }: MessageFieldPropType) => {
+  const modalRef = useRef(null);
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [gifOpen, setGifOpen] = useState(false);
   const [inputText, setInputText] = useState('');
@@ -64,29 +90,48 @@ const MessageField = () => {
   const selectedChatId = usePushChatStore((state) => state.selectedChatId);
   const connectedProfile = usePushChatStore((state) => state.connectedProfile);
   const { createChatProfile } = useCreateChatProfile();
+  const { fetchChats } = useFetchChats();
+  const { fetchRequests } = useFetchRequests();
+  const requestsFeed = usePushChatStore((state) => state.requestsFeed);
+
+  const requestFeedids = Object.keys(requestsFeed);
 
   console.log(selectedChatId);
   const appendEmoji = ({ emoji }: { emoji: string }) => setInputText(`${inputText}${emoji}`);
-  const appendGIF = (emojiObject: GIFType) => {
-    console.log({ emojiObject });
+
+  const sendPushMessage = async (content: string, type: string) => {
+    try {
+      if (!isProfileExist(connectedProfile)) {
+        await createChatProfile();
+      }
+      await sendMessage({
+        message: content,
+        receiver: getCAIPFromLensID(selectedChatId),
+        messageType: type as any
+      });
+      scrollToBottom();
+
+      // after a message has been sent, we can refetch all messages and chats
+      await fetchChats();
+      await fetchRequests();
+    } catch (error) {
+      onError(error);
+    }
   };
 
-  const sendMsg = async () => {
-    console.log({ inputText });
-    if (!isProfileExist(connectedProfile)) {
-      await createChatProfile();
-    }
-    await sendMessage({
-      message: inputText,
-      receiver: getCAIPFromLensID(selectedChatId),
-      messageType: 'Text'
-    });
+  const sendGIF = async (emojiObject: GIFType) => {
+    sendPushMessage(emojiObject.url as string, 'GIF');
+  };
+
+  const sendTextMsg = async () => {
+    await sendPushMessage(inputText, 'Text');
     setInputText('');
   };
 
-  const gifSample = {
-    url: 'https://media.tenor.com/YGNEnwUYCf4AAAAC/annoyed-irritated.gif'
-  };
+  useClickAway(modalRef, () => {
+    setGifOpen(false);
+    setEmojiOpen(false);
+  });
 
   return (
     <>
@@ -97,24 +142,37 @@ const MessageField = () => {
         alt=""
       />
       <div className="absolute right-4 top-2 flex items-center gap-5">
-        <Image
-          onClick={() => setGifOpen((o) => !o)}
-          className="relative cursor-pointer"
-          src="/push/gif.svg"
-          alt="gif"
-        />
-        <Image onClick={sendMsg} className="relative cursor-pointer" src="/push/send.svg" alt="send" />
+        {!msgSendLoading ? (
+          <>
+            <Image
+              onClick={() => setGifOpen((o) => !o)}
+              className="relative cursor-pointer"
+              src="/push/gif.svg"
+              alt="gif"
+            />
+            <Image
+              onClick={sendTextMsg}
+              className="relative cursor-pointer"
+              src="/push/send.svg"
+              alt="send"
+            />
+          </>
+        ) : (
+          <div className="relative pt-[3px]">
+            <Spinner size="sm" className="mx-auto" />
+          </div>
+        )}
       </div>
       {emojiOpen ? (
-        <div className="absolute bottom-[50px]">
+        <div ref={modalRef} className="absolute bottom-[50px]">
           <EmojiPicker onEmojiClick={appendEmoji} />
         </div>
       ) : (
         ''
       )}
       {gifOpen ? (
-        <div className="absolute bottom-[50px] right-0">
-          <GifPicker onGifClick={appendGIF} tenorApiKey={String(process.env.NEXT_PUBLIC_GOOGLE_TOKEN)} />
+        <div ref={modalRef} className="absolute bottom-[50px] right-0">
+          <GifPicker onGifClick={sendGIF} tenorApiKey={String(process.env.NEXT_PUBLIC_GOOGLE_TOKEN)} />
         </div>
       ) : (
         ''
@@ -122,9 +180,9 @@ const MessageField = () => {
       <Input
         onChange={(e) => setInputText(e.target.value)}
         value={inputText}
-        className="pl-11"
+        className="pl-11 pr-[115px]"
         type="text"
-        disabled={msgSendLoading}
+        disabled={msgSendLoading || requestFeedids.includes(selectedChatId)}
         placeholder="Type your message..."
       />
     </>
@@ -134,7 +192,7 @@ const MessageField = () => {
 export default function MessageBody() {
   const pgpPrivateKey = usePushChatStore((state) => state.pgpPrivateKey);
   const listInnerRef = useRef<HTMLDivElement>(null);
-
+  const bottomRef = useRef<HTMLDivElement>(null);
   const setActiveTab = usePushChatStore((state) => state.setActiveTab);
   const selectedChatId = usePushChatStore((state) => state.selectedChatId);
   const requestsFeed = usePushChatStore((state) => state.requestsFeed);
@@ -145,6 +203,8 @@ export default function MessageBody() {
   const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
 
   const selectedChat = chatsFeed[selectedChatId] || requestsFeed[selectedChatId];
+  const selectedMessages = chats.get(selectedChatId);
+  const prevSelectedId = useRef<string>('');
 
   //add loading in jsx
   const { historyMessages, loading } = useGetHistoryMessages();
@@ -176,19 +236,41 @@ export default function MessageBody() {
 
   const getChatCall = async () => {
     let threadHash = null;
-    if (!chats.get(selectedChatId) && selectedChat?.threadhash) {
+    if (!selectedMessages && selectedChat?.threadhash) {
       threadHash = selectedChat?.threadhash;
-    } else if (chats.size && chats.get(selectedChatId)?.lastThreadHash) {
-      threadHash = chats.get(selectedChatId)?.lastThreadHash;
+    } else if (chats.size && selectedMessages?.lastThreadHash) {
+      threadHash = selectedMessages?.lastThreadHash;
     }
     if (threadHash) {
       await historyMessages({
         threadHash: threadHash,
         chatId: selectedChatId,
-        limit: 15
+        limit: CHATS_FETCH_LIMIT
       });
     }
   };
+
+  const scrollToBottom = (behavior?: string | null) => {
+    bottomRef?.current?.scrollIntoView(!behavior ? true : { behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    if (prevSelectedId.current !== selectedChatId) {
+      scrollToBottom(null);
+    }
+    prevSelectedId.current = selectedChatId;
+  }, [selectedChatId]);
+
+  useEffect(() => {
+    if (
+      selectedChatId &&
+      selectedMessages &&
+      selectedMessages?.messages.length &&
+      selectedMessages?.messages.length <= CHATS_FETCH_LIMIT
+    ) {
+      scrollToBottom(null);
+    }
+  }, [chats.get(selectedChatId)]);
 
   const onScroll = async () => {
     if (listInnerRef.current) {
@@ -216,20 +298,18 @@ export default function MessageBody() {
       await getChatCall();
     })();
   }, [decryptedPgpPvtKey, selectedChat, selectedChatId]);
+
   return (
-    <section className="h-full	p-5 pb-3">
-      <div
-        className="h-[85%] max-h-[85%] overflow-x-hidden overflow-y-scroll px-2.5"
-        ref={listInnerRef}
-        onScroll={onScroll}
-      >
+    <section className="flex h-[90%] flex-col p-5 pb-3">
+      <div className="flex-grow overflow-auto px-2.5" ref={listInnerRef} onScroll={onScroll}>
         {loading && (
           <div className="flex justify-center py-2">
             <Spinner size="sm" />
           </div>
         )}
+
         <div className="flex flex-col gap-2.5">
-          {chats.get(selectedChatId)?.messages.map((chat: IMessageIPFS, index: number) => (
+          {selectedMessages?.messages.map((chat: IMessageIPFS, index: number) => (
             <Messages chat={chat} key={index} />
           ))}
           {requestFeedids.includes(selectedChatId) && (
@@ -245,21 +325,12 @@ export default function MessageBody() {
               />
             </div>
           )}
-          {/* uncomment when gifs are implemented */}
-          {/* <div className="relative w-fit rounded-xl rounded-tl-sm border">
-              <Image
-                className="font-medium0 relative w-fit rounded-xl rounded-tl-sm border"
-                src={gifSample.url}
-                alt=""
-              />
-              <Image className="absolute right-2.5 top-2.5" src="/push/giticon.svg" alt="" />
-            </div> */}
+          <div ref={bottomRef} />
         </div>
       </div>
 
-      {/* typebar  design */}
       <div className="relative mt-2">
-        <MessageField />
+        <MessageField scrollToBottom={scrollToBottom} />
       </div>
     </section>
   );

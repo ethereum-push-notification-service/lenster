@@ -12,7 +12,7 @@ export const HANDLE_SUFFIX = {
 // type ChatTypes = (typeof H)[keyof typeof CHAT_TYPES];
 
 export const getProfileFromDID = (did: string) => {
-  return did.split(':').slice(-2, -1)[0];
+  return did?.split(':')?.slice(-2, -1)[0];
 };
 
 export const getCAIPFromLensID = (id: string) => {

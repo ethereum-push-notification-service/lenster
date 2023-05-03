@@ -89,10 +89,10 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
             </div>
           ) : (
             profile && (
-              <div className="h-full">
+              <>
                 <MessageHeader profile={profile as Profile} />
                 <MessageBody />
-              </div>
+              </>
             )
           )}
         </Card>
@@ -107,9 +107,6 @@ const MessagePage: NextPage = () => {
   const {
     query: { conversationKey }
   } = useRouter();
-  // useEffect(() => {
-  //   Mixpanel.track(PAGEVIEW, { page: 'conversation' });
-  // }, []);
 
   if (!conversationKey || !currentProfileId || !Array.isArray(conversationKey)) {
     return <Custom404 />;
