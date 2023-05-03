@@ -19,7 +19,7 @@ import PUSHPreviewRequests from './PUSHPreviewRequest';
 
 const PUSHPreview = () => {
   const { fetchChatProfile } = useGetChatProfile();
-  const reset = usePushChatStore((state) => state.reset);
+  const resetPushChatStore = usePushChatStore((state) => state.resetPushChatStore);
   const currentProfile = useAppStore((state) => state.currentProfile);
   const activeTab = usePushChatStore((state) => state.activeTab);
   const chatsFeed = usePushChatStore((state) => state.chatsFeed);
@@ -116,7 +116,7 @@ const PUSHPreview = () => {
     if (connectedProfile && connectedProfile.did && currentProfile?.id) {
       const selectedProfilePushId = getProfileFromDID(connectedProfile?.did);
       if (selectedProfilePushId && currentProfile?.id !== selectedProfilePushId) {
-        reset();
+        resetPushChatStore();
         router.push('/messages/push');
       }
     }

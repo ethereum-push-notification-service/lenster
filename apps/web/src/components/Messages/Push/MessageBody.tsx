@@ -179,6 +179,11 @@ const MessageField = ({ scrollToBottom }: MessageFieldPropType) => {
       )}
       <Input
         onChange={(e) => setInputText(e.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') {
+            sendTextMsg();
+          }
+        }}
         value={inputText}
         className="pl-11 pr-[115px]"
         type="text"
@@ -302,10 +307,12 @@ export default function MessageBody() {
   return (
     <section className="flex h-[90%] flex-col p-5 pb-3">
       <div className="flex-grow overflow-auto px-2.5" ref={listInnerRef} onScroll={onScroll}>
-        {loading && (
+        {loading ? (
           <div className="flex justify-center py-2">
             <Spinner size="sm" />
           </div>
+        ) : (
+          ''
         )}
 
         <div className="flex flex-col gap-2.5">
