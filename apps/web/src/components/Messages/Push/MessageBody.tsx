@@ -296,7 +296,7 @@ export default function MessageBody() {
   }, [decryptedPgpPvtKey, selectedChat, selectedChatId]);
   return (
     <section className="h-full	p-5 pb-3">
-      <div className="h-[85%] max-h-[85%] overflow-scroll " ref={listInnerRef} onScroll={onScroll}>
+      <div className="h-[85%] max-h-[85%] overflow-auto " ref={listInnerRef} onScroll={onScroll}>
         <div className="flex flex-col gap-2.5">
           {selectedMessages?.messages.map((chat: IMessageIPFS, index: number) => (
             <Messages chat={chat} key={index} />
