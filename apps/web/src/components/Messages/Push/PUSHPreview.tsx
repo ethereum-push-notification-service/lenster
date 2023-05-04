@@ -20,6 +20,8 @@ import PUSHPreviewRequests from './PUSHPreviewRequest';
 const PUSHPreview = () => {
   const { fetchChatProfile } = useGetChatProfile();
   const resetPushChatStore = usePushChatStore((state) => state.resetPushChatStore);
+  const inputRef = usePushChatStore((state) => state.inputRef);
+  const setInputRef = usePushChatStore((state) => state.setInputRef);
   const currentProfile = useAppStore((state) => state.currentProfile);
   const activeTab = usePushChatStore((state) => state.activeTab);
   const chatsFeed = usePushChatStore((state) => state.chatsFeed);
@@ -37,6 +39,12 @@ const PUSHPreview = () => {
   const pgpPrivateKey = usePushChatStore((state) => state.pgpPrivateKey);
 
   const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
+
+  const handleImgClick = () => {
+    if (inputRef) {
+      inputRef.current ? inputRef.current.focus() : null;
+    }
+  };
 
   const {
     createChatProfile,
@@ -135,17 +143,15 @@ const PUSHPreview = () => {
           <div className="mb-6 flex gap-x-5 border-b border-b-gray-300">
             <div
               onClick={() => setActiveTab(PUSH_TABS.CHATS)}
-              className={`w-6/12 cursor-pointer border-b-4 pb-3.5 text-center  font-bold ${
-                activeTab === PUSH_TABS.CHATS ? 'border-b-brand-500' : 'border-b-transparent text-gray-500'
-              }`}
+              className={`w-6/12 cursor-pointer border-b-4 pb-3.5 text-center  font-bold ${activeTab === PUSH_TABS.CHATS ? 'border-b-brand-500' : 'border-b-transparent text-gray-500'
+                }`}
             >
               <Trans>Chats</Trans>
             </div>
             <div
               onClick={() => setActiveTab(PUSH_TABS.REQUESTS)}
-              className={`align-items-center flex w-6/12 cursor-pointer justify-center gap-x-1.5 border-b-4 pb-3.5 font-bold ${
-                activeTab === PUSH_TABS.REQUESTS ? 'border-b-brand-500' : 'border-b-transparent text-gray-500'
-              }`}
+              className={`align-items-center flex w-6/12 cursor-pointer justify-center gap-x-1.5 border-b-4 pb-3.5 font-bold ${activeTab === PUSH_TABS.REQUESTS ? 'border-b-brand-500' : 'border-b-transparent text-gray-500'
+                }`}
             >
               <Trans>Requests</Trans>
               <div className=" bg-brand-500 flex h-5 w-7 justify-center rounded-full text-sm text-white">
@@ -160,7 +166,7 @@ const PUSHPreview = () => {
               modalWidthClassName="w-80"
               onProfileSelected={onProfileSelected}
             />
-            <div className="">
+            <div onClick={handleImgClick} className="">
               <img className="h-10 w-11" src="/push/requestchat.svg" alt="plus icon" />
             </div>
           </div>
@@ -176,21 +182,21 @@ const PUSHPreview = () => {
       <Modal
         size="xs"
         show={showCreateChatProfileModal}
-        onClose={isCreateChatProfileModalClosable ? () => setShowCreateChatProfileModal(false) : () => {}}
+        onClose={isCreateChatProfileModalClosable ? () => setShowCreateChatProfileModal(false) : () => { }}
       >
         {createChatProfileModalContent}
       </Modal>
       <Modal
         size="xs"
         show={showUpgradeChatProfileModal}
-        onClose={isUpgradeChatProfileModalClosable ? () => setShowUpgradeChatProfileModal(false) : () => {}}
+        onClose={isUpgradeChatProfileModalClosable ? () => setShowUpgradeChatProfileModal(false) : () => { }}
       >
         {upgradeChatProfileModalContent}
       </Modal>
       <Modal
         size="xs"
         show={showDecryptionModal}
-        onClose={isDecryptionModalClosable ? () => setShowDecryptionModal(false) : () => {}}
+        onClose={isDecryptionModalClosable ? () => setShowDecryptionModal(false) : () => { }}
       >
         {decryptionModalContent}
       </Modal>

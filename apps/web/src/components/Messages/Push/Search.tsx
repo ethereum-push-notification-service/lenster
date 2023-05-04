@@ -8,8 +8,9 @@ import type { Profile, ProfileSearchResult } from 'lens';
 import { CustomFiltersTypes, SearchRequestTypes, useSearchProfilesLazyQuery } from 'lens';
 import formatHandle from 'lib/formatHandle';
 import { useRouter } from 'next/router';
-import type { ChangeEvent, FC } from 'react';
+import { ChangeEvent, FC, useEffect } from 'react';
 import { useRef, useState } from 'react';
+import { usePushChatStore } from 'src/store/push-chat';
 import { Card, Input, Spinner } from 'ui';
 // import { GroupDTO } from '@pushprotocol/restapi';
 
@@ -35,6 +36,16 @@ const Search: FC<SearchProps> = ({
 
   const [searchUsers, { data: searchUsersData, loading: searchUsersLoading }] = useSearchProfilesLazyQuery();
   // const [searchGroups, { data: searchGroupsData, loading: searchGroupsLoading }] = useSearchProfilesLazyQuery();
+
+  const inputRef = usePushChatStore((state) => state.inputRef);
+  const setInputRef = usePushChatStore((state) => state.setInputRef);
+
+  useEffect(() => {
+    if (setInputRef) {
+      setInputRef(inputRef);
+    }
+  }, [setInputRef]);
+
 
   const handleSearch = (evt: ChangeEvent<HTMLInputElement>) => {
     const keyword = evt.target.value;
@@ -79,6 +90,7 @@ const Search: FC<SearchProps> = ({
     <div aria-hidden="true" className="w-full" data-testid="global-search">
       <form onSubmit={handleKeyDown}>
         <Input
+          ref={inputRef}
           type="text"
           className="px-3 py-2 text-sm"
           placeholder={placeholder}
