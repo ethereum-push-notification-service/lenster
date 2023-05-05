@@ -8,7 +8,7 @@ import useUpgradeChatProfile from '@components/utils/hooks/push/useUpgradeChatPr
 import { Trans } from '@lingui/macro';
 import type { Profile } from 'lens';
 import router from 'next/router';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useAppStore } from 'src/store/app';
 import { PUSH_TABS, usePushChatStore } from 'src/store/push-chat';
 import { Card, Modal } from 'ui';
@@ -35,15 +35,8 @@ const PUSHPreview = () => {
   const setShowDecryptionModal = usePushChatStore((state) => state.setShowDecryptionModal);
   const requestsFeed = usePushChatStore((state) => state.requestsFeed);
   const pgpPrivateKey = usePushChatStore((state) => state.pgpPrivateKey);
-  const setInputRef = useRef<HTMLInputElement>(null);
 
   const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
-
-  const handleImgClick = () => {
-    if (setInputRef) {
-      setInputRef.current ? setInputRef.current.focus() : null;
-    }
-  };
 
   const {
     createChatProfile,
@@ -161,14 +154,10 @@ const PUSHPreview = () => {
 
           <div className="flex gap-x-2">
             <Search
-              inputRef={setInputRef}
               placeholder="Search lens handle"
               modalWidthClassName="w-80"
               onProfileSelected={onProfileSelected}
             />
-            <div onClick={handleImgClick} className="cursor-pointer">
-              <img className="h-10 w-11" src="/push/requestchat.svg" alt="plus icon" />
-            </div>
           </div>
         </section>
         {/* section for header */}

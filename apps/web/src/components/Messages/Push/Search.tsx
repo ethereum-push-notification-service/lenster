@@ -8,9 +8,8 @@ import type { Profile, ProfileSearchResult } from 'lens';
 import { CustomFiltersTypes, SearchRequestTypes, useSearchProfilesLazyQuery } from 'lens';
 import formatHandle from 'lib/formatHandle';
 import { useRouter } from 'next/router';
-import { ChangeEvent, FC, useEffect } from 'react';
+import type { ChangeEvent, FC } from 'react';
 import { useRef, useState } from 'react';
-import { usePushChatStore } from 'src/store/push-chat';
 import { Card, Input, Spinner } from 'ui';
 // import { GroupDTO } from '@pushprotocol/restapi';
 
@@ -19,14 +18,13 @@ interface SearchProps {
   onProfileSelected?: (profile: Profile) => void;
   placeholder?: string;
   modalWidthClassName?: string;
-  inputRef?: React.MutableRefObject<HTMLInputElement | null>;
 }
 
 const Search: FC<SearchProps> = ({
   hideDropdown = false,
   onProfileSelected,
   placeholder = t`Search…`,
-  modalWidthClassName = 'max-w-md', inputRef
+  modalWidthClassName = 'max-w-md'
 }) => {
   const { push, pathname, query } = useRouter();
   const [searchText, setSearchText] = useState('');
@@ -37,15 +35,13 @@ const Search: FC<SearchProps> = ({
 
   const [searchUsers, { data: searchUsersData, loading: searchUsersLoading }] = useSearchProfilesLazyQuery();
   // const [searchGroups, { data: searchGroupsData, loading: searchGroupsLoading }] = useSearchProfilesLazyQuery();
-
   const setInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (inputRef) {
-      inputRef.current = setInputRef.current;
+  const handleImgClick = () => {
+    if (setInputRef) {
+      setInputRef.current ? setInputRef.current.focus() : null;
     }
-  }, [setInputRef]);
-
+  };
 
   const handleSearch = (evt: ChangeEvent<HTMLInputElement>) => {
     const keyword = evt.target.value;
@@ -88,7 +84,7 @@ const Search: FC<SearchProps> = ({
 
   return (
     <div aria-hidden="true" className="w-full" data-testid="global-search">
-      <form onSubmit={handleKeyDown}>
+      <form onSubmit={handleKeyDown} className="flex gap-x-2" ref={dropdownRef}>
         <Input
           ref={setInputRef}
           type="text"
@@ -104,11 +100,13 @@ const Search: FC<SearchProps> = ({
           }
           onChange={handleSearch}
         />
+        <div className="cursor-pointer" onClick={handleImgClick}>
+          <img className="h-10 w-11" src="/push/requestchat.svg" alt="plus icon" />
+        </div>
       </form>
       {pathname !== '/search' && !hideDropdown && searchText.length > 0 && (
         <div
           className={clsx('absolute mt-2 flex w-[20%] flex-col', modalWidthClassName)}
-          ref={dropdownRef}
           data-testid="search-profiles-dropdown"
         >
           <Card className="z-10 max-h-[70vh] max-w-[295px] overflow-y-auto py-2	">
