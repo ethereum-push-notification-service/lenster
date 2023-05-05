@@ -8,6 +8,7 @@ import { useAppStore } from 'src/store/app';
 import { PUSH_ENV, usePushChatStore } from 'src/store/push-chat';
 import { Button, Image, Input, Spinner } from 'ui';
 import { useSigner } from 'wagmi';
+import generator from "generate-password"
 
 type handleSetPassFunc = () => void;
 const totalSteps: number = 6;
@@ -27,7 +28,7 @@ type modalInfoType = {
 const initModalInfo: modalInfoType = {
   title: 'Create Password',
   info: 'Please set a password to recover your chats if you transfer your Lens NFT to another wallet.',
-  type: ProgressType.INITIATE
+  type: ProgressType.INITIATE,
 };
 
 const useCreateChatProfile = () => {
@@ -37,8 +38,9 @@ const useCreateChatProfile = () => {
   const setShowCreateChatProfileModal = usePushChatStore((state) => state.setShowCreateChatProfileModal);
   const [step, setStep] = useState<number>(1);
   const [modalClosable, setModalClosable] = useState<boolean>(true);
-  const [password, setPassword] = useState<string>('');
   const [modalInfo, setModalInfo] = useState<modalInfoType>(initModalInfo);
+  const [defaultPassword, setDefaultPassword] = useState<string>(generator.generate({ length: 10, numbers: true }));
+  const [password, setPassword] = useState<string>(defaultPassword);
 
   const handleProgress = useCallback(
     (progress: ProgressHookType) => {
@@ -66,7 +68,8 @@ const useCreateChatProfile = () => {
   const reset = useCallback(() => {
     setStep(1);
     setModalInfo(initModalInfo);
-    setPassword('');
+    const newDefaultPassword = generator.generate({ length: 10, numbers: true });
+    setDefaultPassword(newDefaultPassword);
     setModalClosable(true);
   }, []);
 
@@ -127,6 +130,7 @@ const useCreateChatProfile = () => {
             className="px-4 py-4 text-sm"
             value={password}
             autoComplete="off"
+            defaultValue={defaultPassword}
             onChange={(e) => setPassword(e.target.value)}
           />
           <Button
