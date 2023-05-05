@@ -19,13 +19,14 @@ interface SearchProps {
   onProfileSelected?: (profile: Profile) => void;
   placeholder?: string;
   modalWidthClassName?: string;
+  inputRef?: React.MutableRefObject<HTMLInputElement | null>;
 }
 
 const Search: FC<SearchProps> = ({
   hideDropdown = false,
   onProfileSelected,
   placeholder = t`Search…`,
-  modalWidthClassName = 'max-w-md'
+  modalWidthClassName = 'max-w-md', inputRef
 }) => {
   const { push, pathname, query } = useRouter();
   const [searchText, setSearchText] = useState('');
@@ -37,12 +38,11 @@ const Search: FC<SearchProps> = ({
   const [searchUsers, { data: searchUsersData, loading: searchUsersLoading }] = useSearchProfilesLazyQuery();
   // const [searchGroups, { data: searchGroupsData, loading: searchGroupsLoading }] = useSearchProfilesLazyQuery();
 
-  const inputRef = usePushChatStore((state) => state.inputRef);
-  const setInputRef = usePushChatStore((state) => state.setInputRef);
+  const setInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (setInputRef) {
-      setInputRef(inputRef);
+    if (inputRef) {
+      inputRef.current = setInputRef.current;
     }
   }, [setInputRef]);
 
@@ -90,7 +90,7 @@ const Search: FC<SearchProps> = ({
     <div aria-hidden="true" className="w-full" data-testid="global-search">
       <form onSubmit={handleKeyDown}>
         <Input
-          ref={inputRef}
+          ref={setInputRef}
           type="text"
           className="px-3 py-2 text-sm"
           placeholder={placeholder}

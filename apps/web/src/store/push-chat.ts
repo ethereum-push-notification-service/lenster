@@ -2,7 +2,6 @@ import type { IFeeds, IMessageIPFS, IUser } from '@pushprotocol/restapi';
 import { ENV } from '@pushprotocol/restapi/src/lib/constants';
 import { IS_MAINNET } from 'data';
 import type { Profile } from 'lens';
-import React from 'react';
 import { create } from 'zustand';
 
 export const PUSH_TABS = {
@@ -32,8 +31,6 @@ type ChatMessagetype = { messages: IMessageIPFS[]; lastThreadHash: string | null
 export const PUSH_ENV = IS_MAINNET ? ENV.PROD : ENV.STAGING;
 
 interface IPushChatStore {
-  inputRef: React.RefObject<HTMLInputElement>;
-  setInputRef: (inputRef: React.RefObject<HTMLInputElement>) => void;
   connectedProfile: IUser | undefined;
   setConnectedProfile: (connectedProfile: IUser) => void;
   activeTab: PushTabs;
@@ -75,8 +72,6 @@ interface IPushChatStore {
 }
 
 export const usePushChatStore = create<IPushChatStore>((set) => ({
-  inputRef: React.createRef<HTMLInputElement>(),
-  setInputRef: (inputRef) => set(() => ({ inputRef })),
   connectedProfile: undefined,
   setConnectedProfile: (connectedProfile) => set(() => ({ connectedProfile })),
   activeTab: PUSH_TABS.CHATS,

@@ -8,7 +8,7 @@ import useUpgradeChatProfile from '@components/utils/hooks/push/useUpgradeChatPr
 import { Trans } from '@lingui/macro';
 import type { Profile } from 'lens';
 import router from 'next/router';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAppStore } from 'src/store/app';
 import { PUSH_TABS, usePushChatStore } from 'src/store/push-chat';
 import { Card, Modal } from 'ui';
@@ -20,8 +20,6 @@ import PUSHPreviewRequests from './PUSHPreviewRequest';
 const PUSHPreview = () => {
   const { fetchChatProfile } = useGetChatProfile();
   const resetPushChatStore = usePushChatStore((state) => state.resetPushChatStore);
-  const inputRef = usePushChatStore((state) => state.inputRef);
-  const setInputRef = usePushChatStore((state) => state.setInputRef);
   const currentProfile = useAppStore((state) => state.currentProfile);
   const activeTab = usePushChatStore((state) => state.activeTab);
   const chatsFeed = usePushChatStore((state) => state.chatsFeed);
@@ -37,12 +35,13 @@ const PUSHPreview = () => {
   const setShowDecryptionModal = usePushChatStore((state) => state.setShowDecryptionModal);
   const requestsFeed = usePushChatStore((state) => state.requestsFeed);
   const pgpPrivateKey = usePushChatStore((state) => state.pgpPrivateKey);
+  const setInputRef = useRef<HTMLInputElement>(null);
 
   const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
 
   const handleImgClick = () => {
-    if (inputRef) {
-      inputRef.current ? inputRef.current.focus() : null;
+    if (setInputRef) {
+      setInputRef.current ? setInputRef.current.focus() : null;
     }
   };
 
@@ -162,6 +161,7 @@ const PUSHPreview = () => {
 
           <div className="flex gap-x-2">
             <Search
+              inputRef={setInputRef}
               placeholder="Search lens handle"
               modalWidthClassName="w-80"
               onProfileSelected={onProfileSelected}
