@@ -38,11 +38,8 @@ const PUSHPreview = () => {
 
   const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
 
-  const {
-    createChatProfile,
-    modalContent: createChatProfileModalContent,
-    isModalClosable: isCreateChatProfileModalClosable
-  } = useCreateChatProfile();
+  const { modalContent: createChatProfileModalContent, isModalClosable: isCreateChatProfileModalClosable } =
+    useCreateChatProfile();
   const {
     upgradeChatProfile,
     modalContent: upgradeChatProfileModalContent,
@@ -170,7 +167,6 @@ const PUSHPreview = () => {
         {activeTab === PUSH_TABS.REQUESTS && <PUSHPreviewRequests />}
         {/* sections for requests */}
       </Card>
-      <button onClick={createChatProfile}>Create</button>
       <Modal
         size="xs"
         show={showCreateChatProfileModal}
