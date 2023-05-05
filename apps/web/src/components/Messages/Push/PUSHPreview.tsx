@@ -166,7 +166,7 @@ const PUSHPreview = () => {
               modalWidthClassName="w-80"
               onProfileSelected={onProfileSelected}
             />
-            <div onClick={handleImgClick} className="">
+            <div onClick={handleImgClick} className="cursor-pointer">
               <img className="h-10 w-11" src="/push/requestchat.svg" alt="plus icon" />
             </div>
           </div>
