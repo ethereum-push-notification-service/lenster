@@ -68,8 +68,7 @@ const useCreateChatProfile = () => {
   const reset = useCallback(() => {
     setStep(1);
     setModalInfo(initModalInfo);
-    const newDefaultPassword = generator.generate({ length: 10, numbers: true });
-    setDefaultPassword(newDefaultPassword);
+    setPassword(defaultPassword);
     setModalClosable(true);
   }, []);
 
