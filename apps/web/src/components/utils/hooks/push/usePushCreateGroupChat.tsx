@@ -51,13 +51,22 @@ type memberProfileListType = {
   memberList: Profile[];
   isAddedMembersList?: boolean;
   onAddMembers?: (profile: Profile) => void;
+  onRemoveMembers?: (profile: Profile) => void;
 };
 
 const MemberProfileList = ({
   memberList,
   isAddedMembersList = false,
-  onAddMembers
+  onAddMembers,
+  onRemoveMembers
 }: memberProfileListType) => {
+  const [showModal, setShowModal] = useState<boolean>(false);
+
+  const handleRemoveClick = (profile: Profile) => {
+    if(onRemoveMembers) {
+      onRemoveMembers(profile);
+    }
+  }
   return (
     <div className="flex flex-col gap-2 py-2">
       {memberList.map((member, i) => (
@@ -85,8 +94,21 @@ const MemberProfileList = ({
           </div>
 
           {!onAddMembers && (
-            <div className="w-fit cursor-pointer">
-              <img className="h-10 w-9" src="/push/more.svg" alt="plus icon" />
+            <div>
+              <div className="w-fit cursor-pointer" onClick={() => !showModal ? setShowModal(true) : null}>
+                <img className="h-10 w-9" src="/push/more.svg" alt="more icon" />
+              </div>
+              {showModal && (
+                <div>
+                  <div>
+                    Make admin
+                  </div>
+                  <div 
+                  onClick={() => handleRemoveClick(member)}>
+                    Remove User
+                  </div>
+                </div>
+              )}
             </div>
           )}
           {/* change to icon for Add + */}
@@ -103,6 +125,7 @@ const MemberProfileList = ({
     </div>
   );
 };
+
 
 const useCreateGroup = () => {
   const { data: signer } = useSigner();
@@ -172,7 +195,7 @@ const useCreateGroup = () => {
       const memberAddressList = members.map((member) => member.ownedBy);
       //add dummy group image if image not uploaded
 
-      console.log({groupName, groupDescription, groupImage, memberAddressList, signer})
+      console.log({ groupName, groupDescription, groupImage, memberAddressList, signer })
 
       //sdk call for create group
 
@@ -185,7 +208,7 @@ const useCreateGroup = () => {
         isPublic: groupType?.value as boolean,
         account: `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${currentProfile.id}`,
         pgpPrivateKey: decryptedPgpPvtKey as string, //decrypted private key
-        env:PUSH_ENV
+        env: PUSH_ENV
       });
       console.log(response, 'response');
       setShowCreateGroupModal(false);
@@ -270,6 +293,11 @@ const useCreateGroup = () => {
     }
   };
 
+  const onRemoveMembers = (profile: Profile) => {
+    console.log("onRemoveMembers called");
+    setMembers(members.filter((item) => item !== profile));
+  };  
+
   const handleUpload = () => {
     if (fileUploadInputRef.current) {
       fileUploadInputRef.current.click();
@@ -345,7 +373,7 @@ const useCreateGroup = () => {
                   'justigy-center flex w-1/2 cursor-pointer flex-col items-center border  border-gray-300 px-2 py-2 hover:bg-gray-100'
                 )}
                 key={option.id}
-                onClick={() => {setGroupType(option), console.log(option)}}
+                onClick={() => { setGroupType(option), console.log(option) }}
               >
                 <p className="text-base font-medium">{option?.title}</p>
                 <p className="text-center text-xs font-thin text-gray-400">{option?.subTitle}</p>
@@ -383,9 +411,8 @@ const useCreateGroup = () => {
           <div className="mb-4 mt-1  text-center text-xl font-medium">{modalInfo.title}</div>
           <div className="flex flex-row justify-between pt-4 text-base">
             <span className="font-medium">Add users</span>
-            <span className="text-sm text-slate-500">{`0${
-              members?.length ? members?.length : ''
-            } / 09 Members`}</span>
+            <span className="text-sm text-slate-500">{`0${members?.length ? members?.length : ''
+              } / 09 Members`}</span>
           </div>
           <div className="w-full pt-4">
             <Search
@@ -399,7 +426,7 @@ const useCreateGroup = () => {
             <MemberProfileList memberList={searchedMembers} onAddMembers={onAddMembers} />
           )}
           <div className="mt-5">
-            {!!members && !!members.length && <MemberProfileList memberList={members} />}
+            {!!members && !!members.length && <MemberProfileList memberList={members} onRemoveMembers={onRemoveMembers}/>}
           </div>
           <Button
             className="mb-2 mt-4 self-center border-2 text-center"
