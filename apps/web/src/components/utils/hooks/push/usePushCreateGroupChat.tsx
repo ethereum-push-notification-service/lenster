@@ -7,9 +7,12 @@ import formatHandle from 'lib/formatHandle';
 import getAvatar from 'lib/getAvatar';
 import { useRef, useState } from 'react';
 import { useAppStore } from 'src/store/app';
-import { usePushChatStore } from 'src/store/push-chat';
+import { PUSH_ENV, usePushChatStore } from 'src/store/push-chat';
 import { Button, Image, Input } from 'ui';
 import { useSigner } from 'wagmi';
+import * as PushAPI from '@pushprotocol/restapi';
+import { CHAIN_ID } from 'src/constants';
+import { LENSHUB_PROXY } from 'data/constants';
 
 type handleSetPassFunc = () => void;
 enum ProgressType {
@@ -169,19 +172,22 @@ const useCreateGroup = () => {
       const memberAddressList = members.map((member) => member.ownedBy);
       //add dummy group image if image not uploaded
 
+      console.log({groupName, groupDescription, groupImage, memberAddressList, signer})
+
       //sdk call for create group
 
-      // await PushAPI.chat.createGroup({
-      //   groupName,
-      //   groupDescription: groupDescription as string,
-      //   members: memberAddressList,
-      //   groupImage: groupImage as string,
-      //   admins: [],
-      //   isPublic: true,
-      //   signer: signer,
-      //   pgpPrivateKey: decryptedPgpPvtKey as string //decrypted private key
-      //   env:PUSH_ENV
-      // });
+      const response = await PushAPI.chat.createGroup({
+        groupName,
+        groupDescription: groupDescription as string,
+        members: memberAddressList,
+        groupImage: groupImage as string,
+        admins: [],
+        isPublic: groupType?.value as boolean,
+        account: `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${currentProfile.id}`,
+        pgpPrivateKey: decryptedPgpPvtKey as string, //decrypted private key
+        env:PUSH_ENV
+      });
+      console.log(response, 'response');
       setShowCreateGroupModal(false);
     } catch (error) {
       console.log(error);
@@ -216,8 +222,12 @@ const useCreateGroup = () => {
       handleProgress({ level: ProgressType.ADDMEMBERS });
     }
     if (step === 2 && !isModalInputsEmpty()) {
-      handleCreateGroupCall();
-      setModalClosable(false);
+      try {
+        handleCreateGroupCall();
+        setModalClosable(false);
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 
@@ -335,7 +345,7 @@ const useCreateGroup = () => {
                   'justigy-center flex w-1/2 cursor-pointer flex-col items-center border  border-gray-300 px-2 py-2 hover:bg-gray-100'
                 )}
                 key={option.id}
-                onClick={() => setGroupType(option)}
+                onClick={() => {setGroupType(option), console.log(option)}}
               >
                 <p className="text-base font-medium">{option?.title}</p>
                 <p className="text-center text-xs font-thin text-gray-400">{option?.subTitle}</p>
