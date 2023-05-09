@@ -52,21 +52,30 @@ type memberProfileListType = {
   isAddedMembersList?: boolean;
   onAddMembers?: (profile: Profile) => void;
   onRemoveMembers?: (profile: Profile) => void;
+  onMakeAdmin?: (profile: Profile) => void;
 };
 
 const MemberProfileList = ({
   memberList,
   isAddedMembersList = false,
   onAddMembers,
-  onRemoveMembers
+  onRemoveMembers,
+  onMakeAdmin
 }: memberProfileListType) => {
   const [showModal, setShowModal] = useState<boolean>(false);
 
   const handleRemoveClick = (profile: Profile) => {
-    if(onRemoveMembers) {
+    if (onRemoveMembers) {
       onRemoveMembers(profile);
     }
   }
+
+  const handleMakeAdmin = (profile: Profile) => {
+    if (onMakeAdmin) {
+      onMakeAdmin(profile);
+    }
+  }
+
   return (
     <div className="flex flex-col gap-2 py-2">
       {memberList.map((member, i) => (
@@ -100,11 +109,11 @@ const MemberProfileList = ({
               </div>
               {showModal && (
                 <div>
-                  <div>
+                  <div onClick={() => handleMakeAdmin(member)}>
                     Make admin
                   </div>
-                  <div 
-                  onClick={() => handleRemoveClick(member)}>
+                  <div
+                    onClick={() => handleRemoveClick(member)}>
                     Remove User
                   </div>
                 </div>
@@ -199,19 +208,24 @@ const useCreateGroup = () => {
 
       //sdk call for create group
 
-      const response = await PushAPI.chat.createGroup({
-        groupName,
-        groupDescription: groupDescription as string,
-        members: memberAddressList,
-        groupImage: groupImage as string,
-        admins: [],
-        isPublic: groupType?.value as boolean,
-        account: `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${currentProfile.id}`,
-        pgpPrivateKey: decryptedPgpPvtKey as string, //decrypted private key
-        env: PUSH_ENV
-      });
-      console.log(response, 'response');
-      setShowCreateGroupModal(false);
+      try {
+
+        const response = await PushAPI.chat.createGroup({
+          groupName,
+          groupDescription: groupDescription as string,
+          members: memberAddressList,
+          groupImage: groupImage as string,
+          admins: [],
+          isPublic: groupType?.value as boolean,
+          account: `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${currentProfile.id}`,
+          pgpPrivateKey: decryptedPgpPvtKey as string, //decrypted private key
+          env: PUSH_ENV
+        });
+        console.log(response, 'response');
+        setShowCreateGroupModal(false);
+      } catch(err: Error | any) {
+        console.log(err.message)
+      }
     } catch (error) {
       console.log(error);
       setModalClosable(true);
@@ -296,7 +310,22 @@ const useCreateGroup = () => {
   const onRemoveMembers = (profile: Profile) => {
     console.log("onRemoveMembers called");
     setMembers(members.filter((item) => item !== profile));
-  };  
+  };
+
+  const onMakeadmin = (profile: Profile) => {
+    setMembers(
+      members.map((member) => {
+        if (member.ownedBy === profile.ownedBy) {
+          return {
+            ...member,
+            isAdmin: true
+          };
+        }
+        return member;
+      }
+      )
+    );
+  }
 
   const handleUpload = () => {
     if (fileUploadInputRef.current) {
@@ -426,7 +455,7 @@ const useCreateGroup = () => {
             <MemberProfileList memberList={searchedMembers} onAddMembers={onAddMembers} />
           )}
           <div className="mt-5">
-            {!!members && !!members.length && <MemberProfileList memberList={members} onRemoveMembers={onRemoveMembers}/>}
+            {!!members && !!members.length && <MemberProfileList memberList={members} onMakeAdmin={onMakeadmin} onRemoveMembers={onRemoveMembers} />}
           </div>
           <Button
             className="mb-2 mt-4 self-center border-2 text-center"
