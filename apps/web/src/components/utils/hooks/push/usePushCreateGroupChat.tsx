@@ -102,7 +102,7 @@ const MemberProfileList = ({
 
   return (
     <div className="flex flex-col gap-2 py-2 ">
-      {adminAddress.map((member, i) => (
+      {!onAddMembers && adminAddress.map((member, i) => (
         <div key={`${member.ownedBy}${i}`} className="flex flex-row items-center justify-between bg-gray-100 flex flex-row items-center justify-between rounded-xl  px-4 py-2">
           <div className='flex flex-row items-center justify-between'>
             <div className='flex flex-row items-center'>
