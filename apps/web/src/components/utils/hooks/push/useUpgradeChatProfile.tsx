@@ -1,6 +1,8 @@
+import usePushDecryption from '@components/utils/hooks/push/usePushDecryption';
 import { XIcon } from '@heroicons/react/outline';
 import type { ProgressHookType } from '@pushprotocol/restapi';
 import * as PushAPI from '@pushprotocol/restapi';
+import { ENCRYPTION_TYPE } from '@pushprotocol/restapi/src/lib/constants';
 // import { LENSHUB_PROXY } from 'data';
 import { useCallback, useState } from 'react';
 // import { CHAIN_ID } from 'src/constants';
@@ -39,10 +41,14 @@ const useUpgradeChatProfile = () => {
   const connectedProfile = usePushChatStore((state) => state.connectedProfile);
   const setConnectedProfile = usePushChatStore((state) => state.setConnectedProfile);
   const setShowUpgradeChatProfileModal = usePushChatStore((state) => state.setShowUpgradeChatProfileModal);
+  const pgpPrivateKey = usePushChatStore((state) => state.pgpPrivateKey);
+
   const [step, setStep] = useState<number>(1);
   const [modalClosable, setModalClosable] = useState<boolean>(false);
   const [password, setPassword] = useState<string>('');
   const [modalInfo, setModalInfo] = useState<modalInfoType>(initModalInfo);
+
+  const { decryptKey } = usePushDecryption();
 
   const reset = useCallback(() => {
     setStep(1);
@@ -82,14 +88,25 @@ const useUpgradeChatProfile = () => {
     if (!signer || !currentProfile || !connectedProfile) {
       return;
     }
+    const decryptResponse = await decryptKey({
+      encryptedText: pgpPrivateKey.encrypted!,
+      additionalMeta: { NFTPGP_V1: { password } }
+    });
 
     try {
-      const response = await PushAPI.user.upgrade({
+      const response = await PushAPI.user.auth.update({
+        pgpPrivateKey: decryptResponse.decryptedKey!,
+        pgpEncryptionVersion: ENCRYPTION_TYPE.NFTPGP_V1,
         signer: signer,
-        additionalMeta: { password: password },
+        pgpPublicKey: connectedProfile?.publicKey,
         account: connectedProfile?.did,
-        progressHook: handleProgress,
-        env: PUSH_ENV
+        env: PUSH_ENV,
+        additionalMeta: {
+          NFTPGP_V1: {
+            password: password
+          }
+        },
+        progressHook: handleProgress
       });
 
       if (response) {
@@ -103,15 +120,7 @@ const useUpgradeChatProfile = () => {
         initiateProcess();
       }, timeout);
     }
-  }, [
-    signer,
-    currentProfile,
-    connectedProfile,
-    password,
-    handleProgress,
-    setConnectedProfile,
-    initiateProcess
-  ]);
+  }, [signer, currentProfile, connectedProfile, password, setConnectedProfile, initiateProcess]);
 
   const upgradeChatProfile = useCallback(async () => {
     initiateProcess();
