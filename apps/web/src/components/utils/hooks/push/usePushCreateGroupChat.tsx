@@ -24,12 +24,14 @@ enum ProgressType {
   ERROR = 'ERROR',
   WARN = 'WARN'
 }
+
 type groupOptionsType = {
   id: number;
   title: string;
   subTitle: string;
   value: boolean;
 };
+
 const groupOptions: Array<groupOptionsType> = [
   {
     id: 1,
@@ -44,6 +46,9 @@ const groupOptions: Array<groupOptionsType> = [
     value: false
   }
 ];
+
+const randomGroupImage = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAvklEQVR4AcXBsW2FMBiF0Y8r3GQb6jeBxRauYRpo4yGQkMd4A7kg7Z/GUfSKe8703fKDkTATZsJsrr0RlZSJ9r4RLayMvLmJjnQS1d6IhJkwE2bT13U/DBzp5BN73xgRZsJMmM1HOolqb/yWiWpvjJSUiRZWopIykTATZsJs5g+1N6KSMiO1N/5DmAkzYTa9Lh6MhJkwE2ZzSZlo7xvRwson3txERzqJhJkwE2bT6+JhoKTMJ2pvjAgzYSbMfgDlXixqjH6gRgAAAABJRU5ErkJggg==`;
+
 type ProgressHookType = {
   level: ProgressType;
 };
@@ -99,11 +104,11 @@ const MemberProfileList = ({
   const handleRemoveUseradmin = (profile: Profile) => {
     if (removeUserAdmin) {
       try {
-        console.log("Yoo")
+        console.log('Yoo');
         removeUserAdmin(profile);
         setShowModalAdmingroupOptions(-2);
-      } catch (err) {
-        console.log(err);
+      } catch (error) {
+        console.log(error);
       }
     }
   };
@@ -163,7 +168,11 @@ const MemberProfileList = ({
                     className="flex cursor-pointer p-[8px] text-lg font-medium"
                     onClick={() => onProfileSelected(member)}
                   >
-                    <Image src="/push/createmessage.svg" className="h-[21px] mt-[4px] pr-[10px]" alt="remove icon" />
+                    <Image
+                      src="/push/createmessage.svg"
+                      className="mt-[4px] h-[21px] pr-[10px]"
+                      alt="remove icon"
+                    />
                     <div className="text-lg font-[450]">Message user</div>
                   </div>
                   <div
@@ -209,17 +218,27 @@ const MemberProfileList = ({
             </div>
           </div>
           {!onAddMembers && (
-            <div className='flex relative'>
-              <div className="w-fit cursor-pointer" onClick={() => setShowModalgroupOptions(showModalgroupOptions === i ? -1 : i)}>
+            <div className="relative flex">
+              <div
+                className="w-fit cursor-pointer"
+                onClick={() => setShowModalgroupOptions(showModalgroupOptions === i ? -1 : i)}
+              >
                 <img className="h-10 w-9" src="/push/more.svg" alt="more icon" />
               </div>
               {showModalgroupOptions === i && (
-                <div key={`${member.ownedBy}${i}`} className="absolute z-50 right-[-16px] mt-[-17px] w-[250px] rounded-lg border border-gray-300 bg-white p-4 p-4">
+                <div
+                  key={`${member.ownedBy}${i}`}
+                  className="absolute right-[-16px] z-50 mt-[-17px] w-[250px] rounded-lg border border-gray-300 bg-white p-4 p-4"
+                >
                   <div
                     className="flex cursor-pointer p-[8px] text-lg font-medium"
                     onClick={() => onProfileSelected(member)}
                   >
-                    <Image src="/push/createmessage.svg" className="h-[21px] mt-[4px] pr-[10px]" alt="remove icon" />
+                    <Image
+                      src="/push/createmessage.svg"
+                      className="mt-[4px] h-[21px] pr-[10px]"
+                      alt="remove icon"
+                    />
                     <div className="text-lg font-[450]">Message user</div>
                   </div>
                   <div
@@ -313,35 +332,38 @@ const useCreateGroup = () => {
       title: 'Create Group',
       type: ProgressType.INITIATE
     });
-    setModalClosable(true);
-    setAdminAddresses([]);
   };
 
   const handleCreateGroupCall = async () => {
-    if (!signer || !currentProfile) {
+    if (!signer || !currentProfile || !decryptedPgpPvtKey) {
       return;
     }
-    try {
-      const memberAddressList = members.map((member) => member.ownedBy);
-      //add dummy group image if image not uploaded
 
-      console.log(adminAddresses, 'adminAddresses');
+    try {
+      const memberAddressList = members.map(
+        (member) => `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${member.id}`
+      );
+      const adminAddressList = adminAddresses.map(
+        (member) => `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${member.id}`
+      );
+
+      console.log(adminAddressList, 'adminAddresses');
       console.log(memberAddressList, 'memberAddressList');
+
       //sdk call for create group
       try {
         const response = await PushAPI.chat.createGroup({
           groupName,
-          groupDescription: groupDescription as string,
+          groupDescription: groupDescription,
           members: memberAddressList,
-          groupImage: groupImage as string,
-          admins: adminAddresses.map((member) => member.ownedBy), // pass the adminAddresses array here
-          isPublic: groupType?.value as boolean,
+          groupImage: groupImage ?? randomGroupImage,
+          admins: adminAddressList, // pass the adminAddresses array here
+          isPublic: groupType?.value ?? true,
           account: `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${currentProfile.id}`,
-          pgpPrivateKey: decryptedPgpPvtKey as string, //decrypted private key
+          pgpPrivateKey: decryptedPgpPvtKey, //decrypted private key
           env: PUSH_ENV
         });
         console.log(response, 'response');
-        setAdminAddresses([]);
         setShowCreateGroupModal(false);
       } catch (error: Error | any) {
         console.log(error.message);
@@ -349,7 +371,6 @@ const useCreateGroup = () => {
     } catch (error) {
       console.log(error);
       setModalClosable(true);
-      setAdminAddresses([]);
       // // handle error here
       // const timeout = 3000; // after this time, show modal state to 1st step
       // setTimeout(() => {
@@ -404,6 +425,8 @@ const useCreateGroup = () => {
     setGroupType(null);
     setMembers([]);
     setSearchedMembers([]);
+    setAdminAddresses([]);
+    setModalClosable(true);
   };
   const createGroup = async () => {
     setShowCreateGroupModal(true);
@@ -421,7 +444,8 @@ const useCreateGroup = () => {
     //add error message for these conditons
     if (
       !members.some((member) => member.ownedBy === profile.ownedBy) &&
-      members.length < 9 && !adminAddresses.some((member) => member.ownedBy === profile.ownedBy) &&
+      members.length < 9 &&
+      !adminAddresses.some((member) => member.ownedBy === profile.ownedBy) &&
       profile.ownedBy !== currentProfile?.ownedBy
     ) {
       setMembers((prevMembers) => [...prevMembers, profile]);
@@ -572,8 +596,9 @@ const useCreateGroup = () => {
           <div className="mb-4 mt-1  text-center text-xl font-medium">{modalInfo.title}</div>
           <div className="flex flex-row justify-between pt-4 text-base">
             <span className="font-medium">Add users</span>
-            <span className="text-sm text-slate-500">{`0${members?.length ? members?.length : ''
-              } / 09 Members`}</span>
+            <span className="text-sm text-slate-500">{`0${
+              members?.length ? members?.length : ''
+            } / 09 Members`}</span>
           </div>
           <div className="w-full pt-4">
             <Search
