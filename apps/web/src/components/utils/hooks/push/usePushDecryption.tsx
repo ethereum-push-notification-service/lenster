@@ -78,7 +78,9 @@ const usePushDecryption = () => {
       error?: string | undefined;
     }> => {
       reset();
-      setShowDecryptionModal(true);
+      if (!additionalMeta.NFTPGP_V1?.password) {
+        setShowDecryptionModal(true);
+      }
       if (!currentProfile || !signer) {
         return { decryptedKey: undefined, error: undefined };
       }

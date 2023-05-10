@@ -41,12 +41,12 @@ const useUpgradeChatProfile = () => {
   const connectedProfile = usePushChatStore((state) => state.connectedProfile);
   const setConnectedProfile = usePushChatStore((state) => state.setConnectedProfile);
   const setShowUpgradeChatProfileModal = usePushChatStore((state) => state.setShowUpgradeChatProfileModal);
-  const pgpPrivateKey = usePushChatStore((state) => state.pgpPrivateKey);
 
   const [step, setStep] = useState<number>(1);
   const [modalClosable, setModalClosable] = useState<boolean>(false);
   const [password, setPassword] = useState<string>('');
   const [modalInfo, setModalInfo] = useState<modalInfoType>(initModalInfo);
+  const [error, setError] = useState<string | null>(null);
 
   const { decryptKey } = usePushDecryption();
 
@@ -55,6 +55,7 @@ const useUpgradeChatProfile = () => {
     setModalClosable(true);
     setPassword('');
     setModalInfo(initModalInfo);
+    setError(null);
   }, []);
 
   const handleProgress = useCallback(
@@ -88,14 +89,19 @@ const useUpgradeChatProfile = () => {
     if (!signer || !currentProfile || !connectedProfile) {
       return;
     }
-    const decryptResponse = await decryptKey({
-      encryptedText: pgpPrivateKey.encrypted!,
-      additionalMeta: { NFTPGP_V1: { password } }
-    });
 
     try {
+      const { decryptedKey, error } = await decryptKey({
+        encryptedText: connectedProfile?.encryptedPrivateKey,
+        additionalMeta: { NFTPGP_V1: { password } }
+      });
+
+      if (!decryptedKey) {
+        throw new Error(error);
+      }
+
       const response = await PushAPI.user.auth.update({
-        pgpPrivateKey: decryptResponse.decryptedKey!,
+        pgpPrivateKey: decryptedKey,
         pgpEncryptionVersion: ENCRYPTION_TYPE.NFTPGP_V1,
         signer: signer,
         pgpPublicKey: connectedProfile?.publicKey,
@@ -112,10 +118,13 @@ const useUpgradeChatProfile = () => {
       if (response) {
         setConnectedProfile(response);
       }
-    } catch (error) {
+    } catch (error: Error | any) {
       console.log(error);
+      if (error.message && error.message.includes('OperationError')) {
+        setError('Incorrect Password! Please try again!');
+      }
       // handle error here
-      const timeout = 2000; // after this time, show modal state to 1st step
+      const timeout = 3000; // after this time, show modal state to 1st step
       setTimeout(() => {
         initiateProcess();
       }, timeout);
@@ -149,7 +158,7 @@ const useUpgradeChatProfile = () => {
             Start fresh by creating a new profile
           </div>
           <div
-            className="text-brand cursor-pointer self-center text-center text-sm font-[500]"
+            className="text-brand mb-4 cursor-pointer self-center text-center text-sm font-[500]"
             onClick={() => {
               createChatProfile();
               reset();
@@ -158,8 +167,19 @@ const useUpgradeChatProfile = () => {
           >
             Create new profile
           </div>
+          {error && (
+            <div className="flex items-center justify-center pb-2 text-center text-sm font-medium text-[#EF4444]">
+              <Image
+                src="/xcircle.png"
+                loading="lazy"
+                className="mr-2 h-4 w-4 rounded-full"
+                alt="Check circle"
+              />{' '}
+              {error}
+            </div>
+          )}
           <Button
-            className="mt-6 self-center text-center"
+            className="self-center text-center"
             variant="primary"
             disabled={password === '' ? true : false}
             onClick={handleContinue}
