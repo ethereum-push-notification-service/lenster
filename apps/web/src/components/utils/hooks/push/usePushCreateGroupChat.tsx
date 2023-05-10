@@ -102,7 +102,7 @@ const MemberProfileList = ({
 
   return (
     <div className="flex flex-col gap-2 py-2 ">
-      {!onAddMembers && adminAddress.map((member, i) => (
+      {onAddMembers && adminAddress.map((member, i) => (
         <div key={`${member.ownedBy}${i}`} className="flex flex-row items-center justify-between bg-gray-100 flex flex-row items-center justify-between rounded-xl  px-4 py-2">
           <div className='flex flex-row items-center justify-between'>
             <div className='flex flex-row items-center'>
@@ -259,6 +259,7 @@ const useCreateGroup = () => {
       type: ProgressType.INITIATE
     });
     setModalClosable(true);
+    setAdminAddresses([]);
   };
 
   const handleCreateGroupCall = async () => {
@@ -293,6 +294,7 @@ const useCreateGroup = () => {
     } catch (error) {
       console.log(error);
       setModalClosable(true);
+      setAdminAddresses([]);
       // // handle error here
       // const timeout = 3000; // after this time, show modal state to 1st step
       // setTimeout(() => {
@@ -527,7 +529,7 @@ const useCreateGroup = () => {
               zIndex="z-10"
             />
           </div>
-          {!!searchedMembers && !!searchedMembers.length && (
+          {searchedMembers && (
             <MemberProfileList memberList={searchedMembers} adminAddress={adminAddresses} onAddMembers={onAddMembers} />
           )}
           <div className="mt-5">
