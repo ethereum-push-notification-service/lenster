@@ -7,6 +7,7 @@ import { LENSHUB_PROXY } from 'data/constants';
 import type { Profile } from 'lens';
 import formatHandle from 'lib/formatHandle';
 import getAvatar from 'lib/getAvatar';
+import router from 'next/router';
 import { useRef, useState } from 'react';
 import { CHAIN_ID } from 'src/constants';
 import { useAppStore } from 'src/store/app';
@@ -68,21 +69,22 @@ const MemberProfileList = ({
   removeAdmin,
   removeUserAdmin
 }: memberProfileListType) => {
-  const [showModal, setShowModal] = useState(-1);
-  const [showModalAdmin, setShowModalAdmin] = useState(-2);
+  // have used this state instead of boolean since if I used boolean than I still had to check if the user id is equal to the id selected to make it unique and open only that modal which is suppose to open and not open every modal
+  const [showModalgroupOptions, setShowModalgroupOptions] = useState(-1);
+  const [showModalAdmingroupOptions, setShowModalAdmingroupOptions] = useState(-2);
 
   const handleRemoveClick = (profile: Profile) => {
     if (onRemoveMembers) {
       onRemoveMembers(profile);
-      setShowModal(-1);
+      setShowModalgroupOptions(-1);
     }
   };
 
   const handleMakeAdmin = (profile: Profile) => {
     if (onMakeAdmin) {
       onMakeAdmin(profile);
-      setShowModalAdmin(-2);
-      setShowModal(-1);
+      setShowModalAdmingroupOptions(-2);
+      setShowModalgroupOptions(-1);
     }
   };
 
@@ -90,7 +92,7 @@ const MemberProfileList = ({
     if (removeAdmin) {
       console.log('Yoo');
       removeAdmin(profile);
-      setShowModalAdmin(-2);
+      setShowModalAdmingroupOptions(-2);
     }
   };
 
@@ -99,19 +101,26 @@ const MemberProfileList = ({
       try {
         console.log("Yoo")
         removeUserAdmin(profile);
-        setShowModalAdmin(-2);
-      } catch(err) {
+        setShowModalAdmingroupOptions(-2);
+      } catch (err) {
         console.log(err);
       }
     }
   };
 
   const handleRemoveModal = () => {
-    if (showModalAdmin !== -2) {
-      setShowModalAdmin(-2);
-    } else if (showModal !== -1) {
-      setShowModal(-1);
+    if (showModalAdmingroupOptions !== -2) {
+      setShowModalAdmingroupOptions(-2);
+    } else if (showModalgroupOptions !== -1) {
+      setShowModalgroupOptions(-1);
     }
+  };
+
+  const setShowCreateGroupModal = usePushChatStore((s) => s.setShowCreateGroupModal);
+
+  const onProfileSelected = (profile: Profile) => {
+    setShowCreateGroupModal(false);
+    router.push(`/messages/push/chat/${profile.id}`);
   };
 
   return (
@@ -140,16 +149,23 @@ const MemberProfileList = ({
             </div>
             <div
               className="w-fit cursor-pointer"
-              onClick={() => setShowModalAdmin(showModalAdmin === i ? -2 : i)}
+              onClick={() => setShowModalAdmingroupOptions(showModalAdmingroupOptions === i ? -2 : i)}
             >
               <img className="ml-auto h-10 w-9" src="/push/more.svg" alt="more icon" />
             </div>
-            {showModalAdmin === i && (
+            {showModalAdmingroupOptions === i && (
               <div
                 key={i + 1}
-                className="absolute z-50 ml-[100px] mt-[50px] w-[210px] rounded-lg border border-gray-300 bg-white p-4 p-4"
+                className="absolute z-50 ml-[100px] mt-[90px] w-[210px] rounded-lg border border-gray-300 bg-white p-4 p-4"
               >
                 <div className="relative">
+                  <div
+                    className="flex cursor-pointer p-[8px] text-lg font-medium"
+                    onClick={() => onProfileSelected(member)}
+                  >
+                    <Image src="/push/createmessage.svg" className="h-[21px] mt-[4px] pr-[10px]" alt="remove icon" />
+                    <div className="text-lg font-[450]">Message user</div>
+                  </div>
                   <div
                     className="flex cursor-pointer p-[8px] text-lg font-medium"
                     onClick={() => handleRemoveAdmin(member)}
@@ -194,27 +210,34 @@ const MemberProfileList = ({
           </div>
           {!onAddMembers && (
             <div className='flex relative'>
-              <div className="w-fit cursor-pointer" onClick={() => setShowModal(showModal === i ? -1 : i)}>
+              <div className="w-fit cursor-pointer" onClick={() => setShowModalgroupOptions(showModalgroupOptions === i ? -1 : i)}>
                 <img className="h-10 w-9" src="/push/more.svg" alt="more icon" />
               </div>
-                {showModal === i && (
-                  <div key={`${member.ownedBy}${i}`} className="absolute z-50 right-[-16px] mt-[-17px] w-[250px] rounded-lg border border-gray-300 bg-white p-4 p-4">
-                    <div
-                      className="flex cursor-pointer p-[8px] text-lg font-medium"
-                      onClick={() => handleMakeAdmin(member)}
-                    >
-                      <Image src="/push/Shield.svg" className="h-[25px] pr-[10px]" alt="admin icon" />
-                      <div className="text-lg font-[450]">Make group admin</div>
-                    </div>
-                    <div
-                      className="flex cursor-pointer p-[8px] text-lg font-medium"
-                      onClick={() => handleRemoveClick(member)}
-                    >
-                      <Image src="/push/MinusCircle.svg" className="h-[25px] pr-[10px]" alt="remove icon" />
-                      <div className="text-lg font-[450] text-red-600">Remove</div>
-                    </div>
+              {showModalgroupOptions === i && (
+                <div key={`${member.ownedBy}${i}`} className="absolute z-50 right-[-16px] mt-[-17px] w-[250px] rounded-lg border border-gray-300 bg-white p-4 p-4">
+                  <div
+                    className="flex cursor-pointer p-[8px] text-lg font-medium"
+                    onClick={() => onProfileSelected(member)}
+                  >
+                    <Image src="/push/createmessage.svg" className="h-[21px] mt-[4px] pr-[10px]" alt="remove icon" />
+                    <div className="text-lg font-[450]">Message user</div>
                   </div>
-                )}
+                  <div
+                    className="flex cursor-pointer p-[8px] text-lg font-medium"
+                    onClick={() => handleMakeAdmin(member)}
+                  >
+                    <Image src="/push/Shield.svg" className="h-[25px] pr-[10px]" alt="admin icon" />
+                    <div className="text-lg font-[450]">Make group admin</div>
+                  </div>
+                  <div
+                    className="flex cursor-pointer p-[8px] text-lg font-medium"
+                    onClick={() => handleRemoveClick(member)}
+                  >
+                    <Image src="/push/MinusCircle.svg" className="h-[25px] pr-[10px]" alt="remove icon" />
+                    <div className="text-lg font-[450] text-red-600">Remove</div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
           {/* change to icon for Add + */}
@@ -398,7 +421,7 @@ const useCreateGroup = () => {
     //add error message for these conditons
     if (
       !members.some((member) => member.ownedBy === profile.ownedBy) &&
-      members.length < 9 &&
+      members.length < 9 && !adminAddresses.some((member) => member.ownedBy === profile.ownedBy) &&
       profile.ownedBy !== currentProfile?.ownedBy
     ) {
       setMembers((prevMembers) => [...prevMembers, profile]);
