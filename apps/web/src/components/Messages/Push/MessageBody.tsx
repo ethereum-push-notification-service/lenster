@@ -79,6 +79,9 @@ type MessageFieldPropType = {
   scrollToBottom: () => void;
 };
 
+const requestLimit: number = 30;
+const page: number = 1;
+
 const MessageField = ({ scrollToBottom }: MessageFieldPropType) => {
   const modalRef = useRef(null);
   const [emojiOpen, setEmojiOpen] = useState(false);
@@ -110,7 +113,7 @@ const MessageField = ({ scrollToBottom }: MessageFieldPropType) => {
 
       // after a message has been sent, we can refetch all messages and chats
       // await fetchChats();
-      await fetchRequests();
+      await fetchRequests({ page, requestLimit });
     } catch (error) {
       onError(error);
     }

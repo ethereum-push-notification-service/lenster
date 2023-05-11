@@ -18,6 +18,9 @@ import { getProfileFromDID } from './helper';
 import PUSHPreviewChats from './PUSHPreviewChats';
 import PUSHPreviewRequests from './PUSHPreviewRequest';
 
+const requestLimit: number = 30;
+const page: number = 1;
+
 const PUSHPreview = () => {
   const { fetchChatProfile } = useGetChatProfile();
   const resetPushChatStore = usePushChatStore((state) => state.resetPushChatStore);
@@ -101,7 +104,7 @@ const PUSHPreview = () => {
 
     (async function () {
       if (connectedProfile && !connectedProfile?.encryptedPrivateKey) {
-        await fetchRequests();
+        await fetchRequests({ page, requestLimit });
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -117,21 +120,21 @@ const PUSHPreview = () => {
       if (!decryptedPgpPvtKey) {
         return;
       }
-      await fetchRequests();
+      await fetchRequests({ page, requestLimit });
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [decryptedPgpPvtKey]);
 
-  useEffect(() => {
-    //set selected chat preview
-    //find in inbox or reuqests  or new chat and switch tab as per that and set css for selected chat
-    if (selectedChatId in chatsFeed) {
-      setActiveTab(PUSH_TABS.CHATS);
-    }
-    if (selectedChatId in requestsFeed) {
-      setActiveTab(PUSH_TABS.REQUESTS);
-    }
-  }, [selectedChatId, selectedChatType, requestsFeed, chatsFeed]);
+  // useEffect(() => {
+  //   //set selected chat preview
+  //   //find in inbox or reuqests  or new chat and switch tab as per that and set css for selected chat
+  //   if (selectedChatId in chatsFeed) {
+  //     setActiveTab(PUSH_TABS.CHATS);
+  //   }
+  //   if (selectedChatId in requestsFeed) {
+  //     setActiveTab(PUSH_TABS.REQUESTS);
+  //   }
+  // }, [selectedChatId, selectedChatType, requestsFeed, chatsFeed]);
 
   useEffect(() => {
     if (connectedProfile && connectedProfile.did && currentProfile?.id) {

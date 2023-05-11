@@ -20,7 +20,8 @@ export const PreviewMessage = ({ messageType, content }: { messageType: string; 
   return <p className="max-w-[150px] truncate text-sm text-gray-500">{content}</p>;
 };
 
-const chatLimit = 8;
+const chatLimit = 10;
+
 export default function PUSHPreviewChats() {
   const router = useRouter();
   const testRef = useRef<HTMLDivElement>(null);
@@ -196,6 +197,10 @@ export default function PUSHPreviewChats() {
         <div className="flex h-full flex-grow items-center justify-center">
           <Loader message="Loading Chats" />
         </div>
+      )}
+
+      {!loading && Object.keys(chatsFeed).length === 0 && (
+        <div className="mt-12 flex h-full flex-grow items-center justify-center">No requests yet</div>
       )}
 
       <div ref={testRef} className="invisible" />
