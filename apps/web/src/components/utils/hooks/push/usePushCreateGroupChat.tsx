@@ -97,13 +97,11 @@ const MemberProfileList = ({
     if (removeAdmin) {
       removeAdmin(profile);
       setShowModalAdmingroupOptions(-2);
-      console.log('Yoo');
     }
   };
 
   const handleRemoveUseradmin = (profile: Profile) => {
     if (removeUserAdmin) {
-      console.log('Yoo');
       removeUserAdmin(profile);
       setShowModalAdmingroupOptions(-2);
     }
@@ -124,7 +122,7 @@ const MemberProfileList = ({
     router.push(`/messages/push/chat/${profile.id}`);
   };
   const isAdmin = (member: Profile) => {
-    const isAdmin = adminAddress.some((admin) => admin.ownedBy === member.ownedBy);
+    const isAdmin = adminAddress.some((admin) => admin.id === member.id);
     return isAdmin;
   };
 
@@ -137,7 +135,7 @@ const MemberProfileList = ({
             isAddedMembersList ? 'border border-gray-300 ' : 'bg-gray-100',
             'flex flex-row items-center justify-between rounded-xl  px-2 py-2'
           )}
-          key={`${member.ownedBy}${i}`}
+          key={`${member.id}${i}`}
         >
           <div className="flex flex-row items-center">
             <Image
@@ -154,7 +152,7 @@ const MemberProfileList = ({
               <Slug className="text-sm" slug={formatHandle(member?.handle)} prefix="@" />
             </div>
           </div>
-          {isAdmin(member) ? (
+          {isAdmin(member) && !onAddMembers ? (
             <div className="absolute left-[250px] rounded-lg bg-[#E5DAFF] pb-1 pl-2.5 pr-2.5 pt-1 text-xs text-[#8B5CF6]">
               Admin
             </div>
@@ -171,7 +169,7 @@ const MemberProfileList = ({
               </div>
               {showModalgroupOptions === i && (
                 <div
-                  key={`${member.ownedBy}${i}`}
+                  key={`${member.id}${i}`}
                   className="absolute right-[-16px] z-50 mt-[-17px] w-[260px] rounded-lg border border-gray-300 bg-white p-4 p-4"
                 >
                   <div
@@ -300,12 +298,8 @@ const useCreateGroup = () => {
         (member) => `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${member.id}`
       );
 
-      console.log(adminAddressList, 'adminAddresses');
-      console.log(memberAddressList, 'memberAddressList');
-
       //sdk call for create group
       try {
-        console.log(memberAddressList, 'memberAddressList');
         const response = await PushAPI.chat.createGroup({
           groupName,
           groupDescription: groupDescription,
@@ -317,7 +311,6 @@ const useCreateGroup = () => {
           pgpPrivateKey: decryptedPgpPvtKey, //decrypted private key
           env: PUSH_ENV
         });
-        console.log(response, 'response');
         setShowCreateGroupModal(false);
       } catch (error: Error | any) {
         console.log(error.message);
@@ -397,29 +390,28 @@ const useCreateGroup = () => {
 
     //add error message for these conditons
     if (
-      !members.some((member) => member.ownedBy === profile.ownedBy) &&
+      !members.some((member) => member.id === profile.id) &&
       memberAddressList.length + adminAddresses.length < 9 &&
-      !adminAddresses.some((member) => member.ownedBy === profile.ownedBy) &&
-      profile.ownedBy !== currentProfile?.ownedBy
+      !adminAddresses.some((member) => member.id === profile.id) &&
+      profile.id !== currentProfile?.id
     ) {
       setMembers((prevMembers) => [...prevMembers, profile]);
     }
   };
 
   const onRemoveMembers = (profile: Profile) => {
-    console.log('onRemoveMembers called');
     setMembers(members.filter((item) => item !== profile));
   };
 
   const onMakeadmin = (profile: Profile) => {
     // Check if the user is already an admin
-    if (adminAddresses.some((admin) => admin.ownedBy === profile.ownedBy)) {
+    if (adminAddresses.some((admin) => admin.id === profile.id)) {
       return;
     }
 
     // Update the member's `isAdmin` property to true
     const updatedMembers = members.map((member) => {
-      if (member.ownedBy === profile.ownedBy) {
+      if (member.id === profile.id) {
         return {
           ...member,
           isAdmin: true
@@ -436,7 +428,7 @@ const useCreateGroup = () => {
   const removeAdmin = (profile: Profile) => {
     // Update the member's `isAdmin` property to false
     const updatedMembers = members.map((member) => {
-      if (member.ownedBy === profile.ownedBy) {
+      if (member.id === profile.id) {
         return {
           ...member,
           isAdmin: false
@@ -447,17 +439,17 @@ const useCreateGroup = () => {
     // Update the state with the updated members list
     setMembers(updatedMembers);
     // Remove the user from the `adminAddresses` array
-    setAdminAddresses(adminAddresses.filter((admin) => admin.ownedBy !== profile.ownedBy));
+    setAdminAddresses(adminAddresses.filter((admin) => admin.id !== profile.id));
   };
 
   const removeUserAdmin = (profile: Profile) => {
     // Remove the user from the `adminAddresses` array
-    const updatedAdminAddresses = adminAddresses.filter((admin) => admin.ownedBy !== profile.ownedBy);
+    const updatedAdminAddresses = adminAddresses.filter((admin) => admin.id !== profile.id);
     setAdminAddresses(updatedAdminAddresses);
 
     // Update the member's `isAdmin` property to false and remove from the `members` array
     const updatedMembers = members.filter((member) => {
-      if (member.ownedBy === profile.ownedBy) {
+      if (member.id === profile.id) {
         return false;
       }
       return true;
@@ -540,9 +532,7 @@ const useCreateGroup = () => {
                   'justigy-center flex w-1/2 cursor-pointer flex-col items-center border  border-gray-300 px-2 py-2 hover:bg-gray-100'
                 )}
                 key={option.id}
-                onClick={() => {
-                  setGroupType(option), console.log(option);
-                }}
+                onClick={() => setGroupType(option)}
               >
                 <p className="text-base font-medium">{option?.title}</p>
                 <p className="text-center text-xs font-thin text-gray-400">{option?.subTitle}</p>
