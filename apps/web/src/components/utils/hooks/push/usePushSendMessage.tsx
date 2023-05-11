@@ -65,8 +65,9 @@ const usePushSendMessage = () => {
           newOne['msg'] = modifiedResponse;
           setChatFeed(selectedChatId, newOne);
 
+          // still working on this
           let fetchChatss = await fetchChat({ recipientAddress: receiver });
-          console.log(fetchChatss, receiver);
+          // console.log(fetchChatss, receiver);
         } else {
           let fetchChatss = await fetchChat({ recipientAddress: receiver });
           console.log(fetchChatss, receiver);

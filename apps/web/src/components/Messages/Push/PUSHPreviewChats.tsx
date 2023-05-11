@@ -2,10 +2,15 @@ import Loader from '@components/Shared/Loader';
 import useFetchChats from '@components/utils/hooks/push/useFetchChats';
 import { useIsInViewport } from '@components/utils/hooks/push/useIsInViewport';
 import type { IFeeds } from '@pushprotocol/restapi/src/lib/types';
+import formatHandle from 'lib/formatHandle';
+import getAvatar from 'lib/getAvatar';
+import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react';
 import { usePushChatStore } from 'src/store/push-chat';
 import { Image } from 'ui';
+
+import { checkIfGroup, getGroupImage, getGroupPreviewMessage, getProfileFromDID, isCAIP } from './helper';
 
 export const PreviewMessage = ({ messageType, content }: { messageType: string; content: string }) => {
   if (messageType === 'GIF') {
@@ -23,14 +28,16 @@ export default function PUSHPreviewChats() {
   // const [parsedChats, setParsedChats] = useState<any>([]);
   const { fetchChats, loading } = useFetchChats();
   const selectedChatId = usePushChatStore((state) => state.selectedChatId);
+  const connectedProfile = usePushChatStore((state) => state.connectedProfile);
   const chatsFeed = usePushChatStore((state) => state.chatsFeed);
   const setChatsFeed = usePushChatStore((state) => state.setChatsFeed);
   const pgpPrivateKey = usePushChatStore((state) => state.pgpPrivateKey);
   const lensProfiles = usePushChatStore((state) => state.lensProfiles);
   const [page, setPage] = useState<number>(1);
-  const [allFeeds, setAllFeeds] = useState<object[]>();
+  const [allFeeds, setAllFeeds] = useState<Array<any>>();
   const [paginateLoading, setPaginateLoading] = useState<boolean>(false);
   const isInViewport1 = useIsInViewport(testRef, '0px');
+  const setSelectedChatId = usePushChatStore((state) => state.setSelectedChatId);
 
   const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
 
@@ -64,7 +71,13 @@ export default function PUSHPreviewChats() {
 
   // action for when you click on a chat
   const onChatFeedClick = (chatId: string) => {
-    router.push(`/messages/push/chat/${chatId}`);
+    setSelectedChatId(chatId);
+    const profileId: string = getProfileFromDID(chatId);
+    if (isCAIP(chatId)) {
+      router.push(`/messages/push/chat/${profileId}`);
+    } else {
+      router.push(`/messages/push/group/${profileId}`);
+    }
   };
 
   const callFeeds = async (page: number) => {
@@ -85,18 +98,20 @@ export default function PUSHPreviewChats() {
   };
 
   const withNestedKeys = (data?: any) => {
-    // let newArray = [];
+    let newArray = [];
     let newList = Object.entries(data).map((entry) => {
       return { [entry[0]]: entry[1] };
     });
-    // if (newList) {
-    //   for (const element of newList) {
-    //     const [resultOf] = Object.entries(element).map(([id, val]) => ({ id, ...val }));
-    //     newArray.push(resultOf);
-    //   }
-    // }
-    // return newArray;
-    return newList;
+    if (newList) {
+      for (const element of newList) {
+        const [resultOf] = Object.entries(element).map(([id, val]) => ({
+          id,
+          ...(val as Record<string, unknown>)
+        }));
+        newArray.push(resultOf);
+      }
+    }
+    return newArray;
   };
 
   useEffect(() => {
@@ -108,45 +123,75 @@ export default function PUSHPreviewChats() {
   return (
     <section className="flex flex-col gap-2.5	overflow-auto">
       {!loading ? (
-        // allFeeds
-        //   ?.sort((a, b) => b?.msg?.timestamp - a?.msg?.timestamp)
-        allFeeds?.map((item, i) => {
-          // let id = item.id;
-          // let feed = chatsFeed[id];
-          // let lensProfile = lensProfiles.get(id);
-          return (
-            <div key={i}>koko</div>
-            // <div
-            //   onClick={() => onChatFeedClick(id)}
-            //   key={id}
-            //   className={`flex h-16 cursor-pointer gap-2.5 rounded-lg  p-2.5 pr-3 transition-all hover:bg-gray-100 ${
-            //     selectedChatId === id && 'bg-brand-100'
-            //   }`}
-            // >
-            //   <Image
-            //     onError={({ currentTarget }) => {
-            //       currentTarget.src = getAvatar(lensProfile, false);
-            //     }}
-            //     src={getAvatar(lensProfile)}
-            //     loading="lazy"
-            //     className="h-12 w-12 rounded-full border bg-gray-200 dark:border-gray-700"
-            //     height={40}
-            //     width={40}
-            //     alt={formatHandle(lensProfile?.handle)}
-            //   />
-            //   <div className="flex w-full	justify-between	">
-            //     <div>
-            //       <p className="bold max-w-[180px] truncate text-base">{formatHandle(lensProfile?.handle)}</p>
-            //       {/* <p className="text-sm text-gray-500	">{feed.msg.messageContent}</p> */}
-            //       <PreviewMessage content={feed?.msg.messageContent} messageType={feed?.msg.messageType} />
-            //     </div>
-            //     <div>
-            //       <span className="text-xs text-gray-500">{moment(feed.msg.timestamp).fromNow()}</span>
-            //     </div>
-            //   </div>
-            // </div>
-          );
-        })
+        allFeeds
+          ?.sort((a, b) => b?.msg?.timestamp - a?.msg?.timestamp)
+          .map((item) => {
+            let id = item?.id;
+            const feed = chatsFeed[id];
+            const profileId: string = getProfileFromDID(feed?.did ?? feed?.chatId);
+            const lensProfile = lensProfiles.get(profileId);
+            const isGroup = checkIfGroup(feed);
+            return (
+              <div
+                onClick={() => onChatFeedClick(id)}
+                key={id}
+                className={`flex h-16 cursor-pointer gap-2.5 rounded-lg  p-2.5 pr-3 transition-all hover:bg-gray-100 ${
+                  selectedChatId === id && 'bg-brand-100'
+                }`}
+              >
+                {isGroup ? (
+                  <Image
+                    src={getGroupImage(feed)}
+                    loading="lazy"
+                    className="h-12 w-12 rounded-full border bg-gray-200 dark:border-gray-700"
+                    height={40}
+                    width={40}
+                    alt={feed.groupInformation?.groupName!}
+                  />
+                ) : (
+                  <Image
+                    onError={({ currentTarget }) => {
+                      currentTarget.src = getAvatar(lensProfile, false);
+                    }}
+                    src={getAvatar(lensProfile)}
+                    loading="lazy"
+                    className="h-12 w-12 rounded-full border bg-gray-200 dark:border-gray-700"
+                    height={40}
+                    width={40}
+                    alt={formatHandle(lensProfile?.handle)}
+                  />
+                )}
+                <div className="flex w-full	justify-between	">
+                  <div>
+                    {isGroup ? (
+                      <>
+                        <p className="bold max-w-[180px] truncate text-base">
+                          {feed.groupInformation?.groupName}
+                        </p>
+                        <PreviewMessage
+                          content={getGroupPreviewMessage(feed, connectedProfile?.did!, false).message}
+                          messageType={getGroupPreviewMessage(feed, connectedProfile?.did!, false).type}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <p className="bold max-w-[180px] truncate text-base">
+                          {formatHandle(lensProfile?.handle)}
+                        </p>
+                        <PreviewMessage
+                          content={feed?.msg.messageContent}
+                          messageType={feed?.msg.messageType}
+                        />
+                      </>
+                    )}
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-500">{moment(feed?.msg.timestamp).fromNow()}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })
       ) : (
         <div className="flex h-full flex-grow items-center justify-center">
           <Loader message="Loading Chats" />

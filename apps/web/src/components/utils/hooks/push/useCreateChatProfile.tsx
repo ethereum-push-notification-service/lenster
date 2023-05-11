@@ -39,7 +39,7 @@ const useCreateChatProfile = () => {
   const [step, setStep] = useState<number>(1);
   const [modalClosable, setModalClosable] = useState<boolean>(true);
   const [modalInfo, setModalInfo] = useState<modalInfoType>(initModalInfo);
-  const [password, setPassword] = useState<string>('');
+  const [password, setPassword] = useState<string>(generator.generate({ length: 10, numbers: true }));
 
   const handleProgress = useCallback(
     (progress: ProgressHookType) => {
@@ -84,7 +84,7 @@ const useCreateChatProfile = () => {
     try {
       const response = await PushAPI.user.create({
         signer: signer,
-        // additionalMeta: { password: password },
+        additionalMeta: { NFTPGP_V1: { password: password } },
         account: `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${currentProfile.id}`,
         progressHook: handleProgress,
         env: PUSH_ENV
@@ -129,7 +129,9 @@ const useCreateChatProfile = () => {
             className="px-4 py-4 text-sm"
             value={password}
             autoComplete="off"
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value), console.log(e.target.value);
+            }}
           />
           <Button
             className="mt-7 self-center text-center"

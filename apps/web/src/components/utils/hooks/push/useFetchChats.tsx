@@ -48,20 +48,14 @@ const useFetchChats = () => {
         const modifiedChatsObj: { [key: string]: IFeeds } = {};
 
         for (const chat of chats) {
-          const profileId: string = getProfileFromDID(chat.did);
-          lensIds.push(profileId);
-          modifiedChatsObj[profileId] = chat;
+          const profileId: string = getProfileFromDID(chat.did ?? chat.chatId);
+          if (chat.did) {
+            lensIds.push(profileId);
+          }
+          modifiedChatsObj[chat.did ?? chat.chatId] = chat;
         }
 
         await loadLensProfiles(lensIds);
-        // if (page <= 1) {
-        //   setChatsFeed(modifiedChatsObj);
-        // } else {
-        //   let newFeed: { [key: string]: IFeeds } = { ...chatsFeed, ...modifiedChatsObj };
-        //   setChatsFeed(newFeed);
-        //   console.log(chatsFeed, newFeed, 'alltogether');
-        // }
-        // console.log(modifiedChatsObj, 'modified');
         return modifiedChatsObj;
       } catch (error: Error | any) {
         setLoading(false);
