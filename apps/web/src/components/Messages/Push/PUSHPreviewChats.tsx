@@ -200,7 +200,7 @@ export default function PUSHPreviewChats() {
       )}
 
       {!loading && Object.keys(chatsFeed).length === 0 && (
-        <div className="mt-12 flex h-full flex-grow items-center justify-center">No requests yet</div>
+        <div className="mt-12 flex h-full flex-grow items-center justify-center">No chats yet</div>
       )}
 
       <div ref={testRef} className="invisible" />
