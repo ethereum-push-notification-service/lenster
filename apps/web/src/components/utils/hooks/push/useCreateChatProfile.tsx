@@ -84,7 +84,7 @@ const useCreateChatProfile = () => {
     try {
       const response = await PushAPI.user.create({
         signer: signer,
-        additionalMeta: { password: password },
+        // additionalMeta: { password: password },
         account: `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${currentProfile.id}`,
         progressHook: handleProgress,
         env: PUSH_ENV

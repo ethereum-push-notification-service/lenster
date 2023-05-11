@@ -1,9 +1,12 @@
 import { getCAIPFromLensID } from '@components/Messages/Push/helper';
+import type { IFeeds } from '@pushprotocol/restapi';
 import * as PushAPI from '@pushprotocol/restapi';
 import { useCallback, useState } from 'react';
 import { useAppStore } from 'src/store/app';
 import { PUSH_ENV, usePushChatStore } from 'src/store/push-chat';
 import { useSigner } from 'wagmi';
+
+import useFetchChat from './useFetchChat';
 
 interface SendMessageParams {
   message: string;
@@ -19,8 +22,11 @@ const usePushSendMessage = () => {
   const selectedChatId = usePushChatStore((state) => state.selectedChatId);
   const chats = usePushChatStore((state) => state.chats);
   const setChat = usePushChatStore((state) => state.setChat);
+  const chatsFeed = usePushChatStore((state) => state.chatsFeed);
+  const setChatFeed = usePushChatStore((state) => state.setChatFeed);
   const currentProfile = useAppStore((state) => state.currentProfile);
   const { data: signer } = useSigner();
+  const { fetchChat } = useFetchChat();
 
   const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
 
@@ -50,11 +56,21 @@ const usePushSendMessage = () => {
 
         const modifiedResponse = { ...response, messageContent: message };
         if (chats.get(selectedChatId)) {
+          let newOne: IFeeds = chatsFeed[selectedChatId];
           setChat(selectedChatId, {
             messages: [...chats.get(selectedChatId)!.messages, modifiedResponse],
             lastThreadHash: chats.get(selectedChatId)!.lastThreadHash
           });
+
+          newOne['msg'] = modifiedResponse;
+          setChatFeed(selectedChatId, newOne);
+
+          let fetchChatss = await fetchChat({ recipientAddress: receiver });
+          console.log(fetchChatss, receiver);
         } else {
+          let fetchChatss = await fetchChat({ recipientAddress: receiver });
+          console.log(fetchChatss, receiver);
+
           setChat(selectedChatId, {
             messages: [modifiedResponse],
             lastThreadHash: chats.get(selectedChatId)!.lastThreadHash

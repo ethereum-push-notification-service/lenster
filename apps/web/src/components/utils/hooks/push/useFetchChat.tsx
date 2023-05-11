@@ -16,13 +16,14 @@ const useFetchChat = () => {
 
   const fetchChat = useCallback(
     async ({ recipientAddress }: fetchChat) => {
+      console.log(recipientAddress, 'receipient');
       setLoading(true);
       // try {
       //   const chat = await PushAPI.chat.chat({
       //     account: `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${(currentProfile as Profile)?.id}`,
       //     toDecrypt: true,
       //     pgpPrivateKey: String(decryptedPgpPvtKey),
-      //     recipient:recipientAddress,
+      //     recipient: recipientAddress,
       //     env: PUSH_ENV
       //   });
       //   return chat;

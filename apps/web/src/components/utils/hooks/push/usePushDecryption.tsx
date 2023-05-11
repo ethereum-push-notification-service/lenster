@@ -89,7 +89,7 @@ const usePushDecryption = () => {
           encryptedPGPPrivateKey: encryptedText,
           signer: signer,
           account: ownedBy,
-          additionalMeta: additionalMeta,
+          // additionalMeta: additionalMeta,
           progressHook: handleProgress,
           env: PUSH_ENV
         });

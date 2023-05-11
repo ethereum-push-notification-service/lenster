@@ -86,7 +86,7 @@ const useUpgradeChatProfile = () => {
     try {
       const response = await PushAPI.user.upgrade({
         signer: signer,
-        additionalMeta: { password: password },
+        // additionalMeta: { password: password },
         account: connectedProfile?.did,
         progressHook: handleProgress,
         env: PUSH_ENV

@@ -43,7 +43,7 @@ const useFetchRequests = () => {
       }
 
       await loadLensProfiles(lensIds);
-      setRequestsFeed(modifiedChatsObj);
+      // setRequestsFeed(modifiedChatsObj);
       return modifiedChatsObj;
     } catch (error: Error | any) {
       setLoading(false);

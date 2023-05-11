@@ -84,6 +84,7 @@ export const usePushChatStore = create<IPushChatStore>((set) => ({
     set((state) => {
       const chats = new Map(state.chats);
       chats.set(key, newChat);
+      console.log({ chats });
       return { chats };
     });
   },

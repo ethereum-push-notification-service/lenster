@@ -104,7 +104,7 @@ const MessageField = ({ scrollToBottom }: MessageFieldPropType) => {
       scrollToBottom();
 
       // after a message has been sent, we can refetch all messages and chats
-      await fetchChats();
+      // await fetchChats();
       await fetchRequests();
     } catch (error) {
       onError(error);
