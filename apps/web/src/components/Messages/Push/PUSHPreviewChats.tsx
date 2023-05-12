@@ -177,17 +177,17 @@ export default function PUSHPreviewChats() {
                     ) : (
                       <>
                         <p className="bold max-w-[180px] truncate text-base">
-                          {formatHandle(lensProfile?.handle)}
+                          {lensProfile?.name ?? formatHandle(lensProfile?.handle)}
                         </p>
                         <PreviewMessage
-                          content={feed?.msg.messageContent}
-                          messageType={feed?.msg.messageType}
+                          content={feed.msg.messageContent}
+                          messageType={feed.msg.messageType}
                         />
                       </>
                     )}
                   </div>
                   <div>
-                    <span className="text-xs text-gray-500">{moment(feed?.msg.timestamp).fromNow()}</span>
+                    <span className="text-xs text-gray-500">{moment(feed.msg.timestamp).fromNow()}</span>
                   </div>
                 </div>
               </div>
