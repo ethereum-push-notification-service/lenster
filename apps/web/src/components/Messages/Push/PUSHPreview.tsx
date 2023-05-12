@@ -7,6 +7,7 @@ import useCreateGroup from '@components/utils/hooks/push/usePushCreateGroupChat'
 import usePushDecryption from '@components/utils/hooks/push/usePushDecryption';
 import useUpgradeChatProfile from '@components/utils/hooks/push/useUpgradeChatProfile';
 import { Trans } from '@lingui/macro';
+import type { IFeeds } from '@pushprotocol/restapi';
 import type { Profile } from 'lens';
 import router from 'next/router';
 import { useEffect } from 'react';
@@ -17,7 +18,6 @@ import { Card, Image, Modal } from 'ui';
 import { getProfileFromDID } from './helper';
 import PUSHPreviewChats from './PUSHPreviewChats';
 import PUSHPreviewRequests from './PUSHPreviewRequest';
-import { IFeeds } from '@pushprotocol/restapi';
 
 const requestLimit: number = 30;
 const page: number = 1;
@@ -126,7 +126,7 @@ const PUSHPreview = () => {
       }
       let feeds = await fetchRequests({ page, requestLimit });
       let firstFeeds: { [key: string]: IFeeds } = { ...feeds };
-      setRequestsFeed(firstFeeds);
+      // setRequestsFeed(firstFeeds);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [decryptedPgpPvtKey]);
