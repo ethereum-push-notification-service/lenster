@@ -17,6 +17,7 @@ import { Card, Image, Modal } from 'ui';
 import { getProfileFromDID } from './helper';
 import PUSHPreviewChats from './PUSHPreviewChats';
 import PUSHPreviewRequests from './PUSHPreviewRequest';
+import { IFeeds } from '@pushprotocol/restapi';
 
 const requestLimit: number = 30;
 const page: number = 1;
@@ -41,6 +42,7 @@ const PUSHPreview = () => {
   const setShowDecryptionModal = usePushChatStore((state) => state.setShowDecryptionModal);
   const requestsFeed = usePushChatStore((state) => state.requestsFeed);
   const pgpPrivateKey = usePushChatStore((state) => state.pgpPrivateKey);
+  const setRequestsFeed = usePushChatStore((state) => state.setRequestsFeed);
 
   const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
 
@@ -104,7 +106,9 @@ const PUSHPreview = () => {
 
     (async function () {
       if (connectedProfile && !connectedProfile?.encryptedPrivateKey) {
-        await fetchRequests({ page, requestLimit });
+        let feeds = await fetchRequests({ page, requestLimit });
+        let firstFeeds: { [key: string]: IFeeds } = { ...feeds };
+        setRequestsFeed(firstFeeds);
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -120,7 +124,9 @@ const PUSHPreview = () => {
       if (!decryptedPgpPvtKey) {
         return;
       }
-      await fetchRequests({ page, requestLimit });
+      let feeds = await fetchRequests({ page, requestLimit });
+      let firstFeeds: { [key: string]: IFeeds } = { ...feeds };
+      setRequestsFeed(firstFeeds);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [decryptedPgpPvtKey]);

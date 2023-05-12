@@ -311,6 +311,7 @@ const useCreateGroup = () => {
           pgpPrivateKey: decryptedPgpPvtKey, //decrypted private key
           env: PUSH_ENV
         });
+        console.log(response);
         setShowCreateGroupModal(false);
       } catch (error: Error | any) {
         console.log(error.message);
