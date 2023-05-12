@@ -14,7 +14,6 @@ interface SendMessageParams {
   messageType?: 'Text' | 'Image' | 'File' | 'GIF' | 'MediaURL';
 }
 
-// ToDo: Need to enable it for gif and image type msg as well
 const usePushSendMessage = () => {
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -55,7 +54,7 @@ const usePushSendMessage = () => {
         }
 
         const modifiedResponse = { ...response, messageContent: message };
-        if (chats.get(selectedChatId)) {
+        if (chatsFeed[selectedChatId]) {
           let newOne: IFeeds = chatsFeed[selectedChatId];
           setChat(selectedChatId, {
             messages: [...chats.get(selectedChatId)!.messages, modifiedResponse],
@@ -69,7 +68,9 @@ const usePushSendMessage = () => {
           setChatFeed(selectedChatId, fetchChatsMessages);
 
           setChat(selectedChatId, {
-            messages: [modifiedResponse],
+            messages: Array.isArray(chats.get(selectedChatId)?.messages)
+              ? [...chats.get(selectedChatId)!.messages, modifiedResponse]
+              : [modifiedResponse],
             lastThreadHash: chats.get(selectedChatId)!.lastThreadHash
           });
         }

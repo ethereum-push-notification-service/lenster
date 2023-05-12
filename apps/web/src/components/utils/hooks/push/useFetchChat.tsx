@@ -24,7 +24,7 @@ const useFetchChat = () => {
       try {
         const chat = await PushAPI.chat.chat({
           account: `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${currentProfile?.id}`,
-          toDecrypt: true,
+          toDecrypt: decryptedPgpPvtKey ? true : false,
           pgpPrivateKey: String(decryptedPgpPvtKey),
           recipient: recipientAddress,
           env: PUSH_ENV

@@ -186,7 +186,7 @@ const PUSHPreview = () => {
             />
           </div>
         </section>
-        <div onClick={createGroup} className="ml-0 flex cursor-pointer pb-2 pl-4 pr-4">
+        <div onClick={createGroup} className="ml-0 flex cursor-pointer px-4 pb-4">
           <Image src="/push/creategroup.svg" alt="create group" className="mr-2 h-5" />
           <button className="text-base font-medium">Create Group</button>
         </div>
