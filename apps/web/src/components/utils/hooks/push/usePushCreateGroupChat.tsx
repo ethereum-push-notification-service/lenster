@@ -328,7 +328,9 @@ const useCreateGroup = () => {
           const msg = fetchChatsMessages?.msg;
           setChatFeed(response.chatId, fetchChatsMessages);
           setChat(response.chatId, {
-            messages: [...chats.get(response.chatId)!.messages, msg],
+            messages: Array.isArray(chats.get(response.chatId)?.messages)
+              ? [...chats.get(response.chatId)!.messages, msg]
+              : [msg],
             lastThreadHash: chats.get(response.chatId)?.lastThreadHash ?? msg.link
           });
         }
@@ -675,18 +677,3 @@ const useCreateGroup = () => {
 };
 
 export default useCreateGroup;
-
-function setSelectedChatId(chatId: string) {
-  throw new Error('Function not implemented.');
-}
-
-function fetchChat(arg0: { recipientAddress: any }): IFeeds | PromiseLike<IFeeds> {
-  throw new Error('Function not implemented.');
-}
-
-function setChat(
-  chatId: any,
-  arg1: { messages: (PushAPI.GroupDTO | PushAPI.IMessageIPFS)[]; lastThreadHash: any }
-) {
-  throw new Error('Function not implemented.');
-}
