@@ -62,9 +62,11 @@ type memberProfileListType = {
   adminAddress: Profile[];
   removeAdmin?: (profile: Profile) => void;
   removeUserAdmin?: (profile: Profile) => void;
+  messageUser?: (profile: Profile) => void;
+  isOwner?: (profile: Profile) => void;
 };
 
-const MemberProfileList = ({
+export const MemberProfileList = ({
   memberList,
   isAddedMembersList = false,
   onAddMembers,
@@ -72,7 +74,9 @@ const MemberProfileList = ({
   onMakeAdmin,
   adminAddress,
   removeAdmin,
-  removeUserAdmin
+  removeUserAdmin,
+  messageUser,
+  isOwner
 }: memberProfileListType) => {
   // have used this state instead of boolean since if I used boolean than I still had to check if the user id is equal to the id selected to make it unique and open only that modal which is suppose to open and not open every modal
   const [showModalgroupOptions, setShowModalgroupOptions] = useState(-1);
@@ -117,16 +121,24 @@ const MemberProfileList = ({
     }
   };
 
+  const handleMessageUser = (profile: Profile) => {
+    if (messageUser) {
+      messageUser(profile);
+      setShowModalgroupOptions(-1);
+    }
+  }
+
   const setShowCreateGroupModal = usePushChatStore((s) => s.setShowCreateGroupModal);
 
-  const onProfileSelected = (profile: Profile) => {
-    setShowCreateGroupModal(false);
-    router.push(`/messages/push/chat/${profile.id}`);
-  };
   const isAdmin = (member: Profile) => {
-    const isAdmin = adminAddress.some((admin) => admin.ownedBy === member.ownedBy);
+    const isAdmin = adminAddress?.some((admin) => admin.ownedBy === member.ownedBy);
     return isAdmin;
   };
+
+  // const isOwner = (member: Profile) => {
+  //   const isOwner = adminAddress?.some((admin) => admin.ownedBy === );
+  //   return isOwner;
+  // }
 
   return (
     <div className="flex flex-col gap-2 py-2" onClick={handleRemoveModal}>
@@ -169,14 +181,14 @@ const MemberProfileList = ({
               >
                 <img className="h-10 w-9" src="/push/more.svg" alt="more icon" />
               </div>
-              {showModalgroupOptions === i && (
+              {showModalgroupOptions  === i && (
                 <div
                   key={`${member.ownedBy}${i}`}
-                  className="absolute right-[-16px] z-50 mt-[-17px] w-[260px] rounded-lg border border-gray-300 bg-white p-4 p-4"
+                  className="absolute right-[-5px] z-50 mt-[-17px] w-[260px] rounded-lg border border-gray-300 bg-white p-4 p-4"
                 >
                   <div
                     className="flex cursor-pointer p-[8px] text-lg font-medium"
-                    onClick={() => onProfileSelected(member)}
+                    onClick={() => handleMessageUser(member)}
                   >
                     <Image
                       src="/push/createmessage.svg"
@@ -252,7 +264,7 @@ const useCreateGroup = () => {
   });
 
   const memberAddressList = members
-    .filter((member) => !adminAddresses.some((admin) => admin.id === member.id))
+    .filter((member) => !adminAddresses?.some((admin) => admin.id === member.id))
     .map((member) => `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${member.id}`);
 
   const isModalInputsEmpty = (): boolean => {
@@ -409,6 +421,11 @@ const useCreateGroup = () => {
   const onRemoveMembers = (profile: Profile) => {
     console.log('onRemoveMembers called');
     setMembers(members.filter((item) => item !== profile));
+  };
+
+  const messageUser = (profile: Profile) => {
+    setShowCreateGroupModal(false);
+    router.push(`/messages/push/chat/${profile.id}`);
   };
 
   const onMakeadmin = (profile: Profile) => {
@@ -600,6 +617,7 @@ const useCreateGroup = () => {
               adminAddress={adminAddresses}
               onAddMembers={onAddMembers}
               onMakeAdmin={onMakeadmin}
+              messageUser={messageUser}
               removeAdmin={removeAdmin}
               removeUserAdmin={removeUserAdmin}
             />
@@ -611,6 +629,7 @@ const useCreateGroup = () => {
                 adminAddress={adminAddresses}
                 removeUserAdmin={removeUserAdmin}
                 removeAdmin={removeAdmin}
+                messageUser = {messageUser}
                 onMakeAdmin={onMakeadmin}
                 onRemoveMembers={onRemoveMembers}
               />

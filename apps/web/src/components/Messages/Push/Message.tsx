@@ -166,7 +166,7 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
             <>
               {profile !== '' && profile && (
                 <>
-                  <MessageHeader profile={profile as Profile} />
+                  <MessageHeader groupInfo={groupInfo as GroupDTO} profile={profile as Profile} />
                   <MessageBody />
                 </>
               )}
