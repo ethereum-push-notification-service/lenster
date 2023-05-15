@@ -131,6 +131,7 @@ export const MemberProfileList = ({
   const setShowCreateGroupModal = usePushChatStore((s) => s.setShowCreateGroupModal);
 
   const isAdmin = (member: Profile) => {
+    console.log(adminAddress, "creategroupchat");
     const isAdmin = adminAddress?.some((admin) => admin.ownedBy === member.ownedBy);
     return isAdmin;
   };

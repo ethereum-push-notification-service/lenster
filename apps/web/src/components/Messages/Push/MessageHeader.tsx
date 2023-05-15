@@ -67,7 +67,7 @@ export default function MessageHeader({ profile, groupInfo }: MessageHeaderProps
           </div>
         )}
         {groupInfo && showModal && (
-          <div ref={downRef} className='absolute mt-16 px-4 w-40 border border-[#BAC4D6] rounded-2xl p-2 cursor-pointer flex bg-white' onClick={() => { setShowGroupinfoModal(true); setShowModal(false) }}>
+          <div ref={downRef} className='absolute top-36 ml-[-80px] px-4 w-40 border border-[#BAC4D6] rounded-2xl p-2 cursor-pointer flex bg-white' onClick={() => { setShowGroupinfoModal(true); setShowModal(false) }}>
             <div>
               <Image className="h-8 w-8 mr-1" src="/push/info.svg" alt="group info settings" />
             </div>
