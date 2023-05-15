@@ -56,11 +56,6 @@ export default function MessageHeader({ profile, groupInfo }: MessageHeaderProps
         )}
       </div>
       <div className="flex items-center gap-4	">
-        {groupInfo && (
-          <div className="w-fit cursor-pointer">
-            <Image className="h-10 w-9" src="/push/more.svg" alt="group info settings" />
-          </div>
-        )}
         <img className="cursor-pointer" src="/push/video.svg" alt="video icon" />
         {profile &&
           (following ? (
@@ -77,14 +72,8 @@ export default function MessageHeader({ profile, groupInfo }: MessageHeaderProps
           </div>
         )}
         {groupInfo && showModal && (
-          <div
-            ref={downRef}
-            className="absolute mt-16 flex w-40 cursor-pointer rounded-2xl border border-[#BAC4D6] bg-white p-2 px-4"
-            onClick={() => {
-              setShowGroupinfoModal(true);
-              setShowModal(false);
-            }}
-          >
+          <div ref={downRef} className='absolute top-36 ml-[-80px] px-4 w-40 border border-[#BAC4D6] rounded-2xl p-2 cursor-pointer flex bg-white' onClick={() => { setShowGroupinfoModal(true); setShowModal(false) }}>
+
             <div>
               <Image className="mr-1 h-8 w-8" src="/push/info.svg" alt="group info settings" />
             </div>

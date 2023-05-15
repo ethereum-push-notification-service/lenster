@@ -132,7 +132,8 @@ export const MemberProfileList = ({
   };
 
   const isAdmin = (member: Profile) => {
-    const isAdmin = adminAddress.some((admin) => admin.id === member.id);
+    console.log(adminAddress, "creategroupchat");
+    const isAdmin = adminAddress?.some((admin) => admin.ownedBy === member.ownedBy);
     return isAdmin;
   };
 

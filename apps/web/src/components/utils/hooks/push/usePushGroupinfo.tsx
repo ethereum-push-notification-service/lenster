@@ -4,7 +4,7 @@ import * as PushAPI from '@pushprotocol/restapi';
 import { LENSHUB_PROXY } from 'data/constants';
 import type { Profile } from 'lens';
 import router from 'next/router';
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { CHAIN_ID } from 'src/constants';
 import { useAppStore } from 'src/store/app';
 import { PUSH_ENV, usePushChatStore } from 'src/store/push-chat';
@@ -22,16 +22,21 @@ type GroupInfoModalProps = {
 };
 
 const useGroupInfoModal = (options: GroupInfoModalProps) => {
+  const { groupInfo, show, setShow } = options;
   const [showSearchmembers, setShowsearchMembers] = useState<boolean>(false);
   const [showSearchedmembertoAdd, setShowSearchedmembertoAdd] = useState<Array<Profile>>([]);
   const currentProfile = useAppStore((state) => state.currentProfile);
   const [updatedMembers, setUpdatedMembers] = useState<Profile[]>([]);
   const [adminAddresses, setAdminAddresses] = useState<Profile[]>([]);
+  const [adminAddressesinPendingmembers, setAdminAddressesinPendingmembers] = useState<Profile[]>([]);
+  // const adminWalletsInPendingMembers = 
+  // setAdminAddressesinPendingmembers(adminWalletsInPendingMembers);
+  const [letssee, setLetssee] = useState<Profile[]>([]);
+
   const [showPendingmembers, setShowpendingMembers] = useState<boolean>(false);
   const { data: signer } = useSigner();
   const pgpPrivateKey = usePushChatStore((state) => state.pgpPrivateKey);
   const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
-  const { groupInfo, show, setShow } = options;
   const downRef = useRef(null);
   const { loadLensProfiles } = useFetchLensProfiles();
   const [chatProfile, setChatprofile] = useState<Profile[]>([]);
@@ -95,7 +100,8 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
     });
     setUpdatedMembers(newMembers);
     setAdminAddresses((prevMembers) => [...prevMembers, profile]);
-  };
+    console.log(adminAddresses, 'adminAddresses');
+  }
 
   const isOwner = (profile: Profile) => {
     const isCreator = groupInfo?.groupCreator.split(':')[4] === profile.id;
@@ -139,44 +145,66 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
       groupInfo.pendingMembers.splice(indexToRemove, 1);
       console.log(`Removed member with wallet ${profile.ownedBy}`);
       console.log(groupInfo.pendingMembers, 'groupInfo.pendingMembers');
+      setChatprofile(chatProfile.filter((member) => member.ownedBy !== profile.ownedBy));
     }
   };
 
   const onMakeAdminUpdateMembers = (profile: Profile) => {
-    console.log(groupInfo?.pendingMembers, 'groupInfo?.pendingMembers');
-    const indexToMakeAdmin = groupInfo.pendingMembers.findIndex(
-      (member) => member.wallet.includes(profile.id) && !member.isAdmin
-    );
+    console.log(groupInfo?.pendingMembers, 'groupInfo?.pendingMembers')
+    const indexToMakeAdmin = groupInfo.pendingMembers.findIndex(member => member.wallet.includes(profile.id) && !member.isAdmin);
     console.log(indexToMakeAdmin, 'indexToMakeAdmin');
-    console.log(profile);
+    console.log(profile)
     if (indexToMakeAdmin !== -1) {
       groupInfo.pendingMembers[indexToMakeAdmin].isAdmin = true;
-      console.log(`Made admin with wallet ${profile.ownedBy}`);
-      console.log(groupInfo.pendingMembers, 'groupInfo.members');
+      setAdminAddressesinPendingmembers((prevMembers) => [...prevMembers, profile]);
     } else {
-      alert('User is already an admin');
+      alert("User is already an admin");
     }
-  };
+  }
+
+
+  const onRemoveAdminUpdateMembers = (profile: Profile) => {
+    const indexToRemoveAdmin = groupInfo.pendingMembers.findIndex(member => member.wallet.includes(profile.id) && member.isAdmin);
+    console.log(indexToRemoveAdmin, 'indexToRemoveAdmin');
+    if (indexToRemoveAdmin !== -1) {
+      groupInfo.pendingMembers[indexToRemoveAdmin].isAdmin = false;
+      setAdminAddressesinPendingmembers(adminAddressesinPendingmembers.filter((member) => member.ownedBy !== profile.ownedBy));
+    } else {
+      alert("User is not an admin");
+    }
+  }
+
+  const pendingMemberisAdmin = async () => {
+    const pendingMembersAdminlist = groupInfo?.pendingMembers.filter((member) => member.isAdmin === true).map((member) => member.wallet.split(":")[4]);
+    console.log(pendingMembersAdminlist, 'pendingMembersAdminlist');
+    for (const member of pendingMembersAdminlist) {
+      const result = await loadLensProfiles([member])
+      const lensProfile: any = result?.get(member);
+      adminAddressesinPendingmembers.push(lensProfile);
+    }
+    console.log(adminAddressesinPendingmembers, 'adminAddressesinPendingmemberssss');
+  }
+
 
   const pendingMembersss = async () => {
-    const pendingMembersList = groupInfo?.pendingMembers.map((member) => member.wallet.split(':')[4]);
-    console.log(pendingMembersList, 'pendingMembersList');
-    // const result = await loadLensProfiles(["0x7156"])
-    // const myepfol = result?.get("0x7156")
-    // console.log(myepfol, 'myepfol');
+    pendingMemberisAdmin();
+    const pendingMembersList = groupInfo?.pendingMembers.map((member) => member.wallet.split(":")[4]);
     for (const member of pendingMembersList) {
       const result = await loadLensProfiles([member]);
       const lensProfile: any = result?.get(member);
-      // console.log(lensProfile?.handle, "Yoo");
       chatProfile.push(lensProfile);
       console.log(chatProfile, 'chatProfile');
     }
-  };
+  }
+
+
   const handleShowallPendingmembers = () => {
     if (showPendingmembers) {
       setShowpendingMembers(false);
       setChatprofile([]);
+      setAdminAddressesinPendingmembers([]);
     } else {
+      console.log(adminAddressesinPendingmembers, "sdsdf")
       setShowpendingMembers(true);
       pendingMembersss();
     }
@@ -186,6 +214,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
     if (!signer || !currentProfile || !decryptedPgpPvtKey) {
       return;
     }
+    showPendingmembers ? setShowpendingMembers(false) : null;
 
     const mapOfaddress = updatedMembers
       ? updatedMembers.map((member) => `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${member.id}`)
@@ -251,161 +280,104 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
 
   return (
     <Modal show={show}>
-      <div
-        ref={downRef}
-        className={` absolute right-[-200px] z-50 w-[100%] rounded-2xl bg-white ${
-          showPendingmembers ? 'bottom-[-450px] h-[100vh]' : 'bottom-[-300px] h-[70vh]'
-        }`}
-      >
-        <div className="flex items-center justify-center pt-6 text-center text-2xl">
-          {showSearchmembers && (
-            <Image
-              onClick={handleGoback}
-              alt="Arrow icon"
-              className="absolute left-9 cursor-pointer"
-              src="/push/ArrowLeft.svg"
-            />
-          )}
-          <Image
-            onClick={handleCloseall}
-            className="absolute right-9 cursor-pointer"
-            src="/push/X.svg"
-            alt="Close icon"
-          />
+      <div ref={downRef}>
+        <div className='pt-4 flex text-2xl items-center justify-center text-center'>
+          {showSearchmembers && <Image onClick={handleGoback} className='absolute left-9 cursor-pointer' src='/push/ArrowLeft.svg' />}
+          <Image onClick={handleCloseall} className='absolute right-9 cursor-pointer' src='/push/X.svg' />
+
           {!showSearchmembers ? `Group info` : `Edit Group`}
         </div>
-        <div>
+        {!showSearchmembers && (
           <div>
-            {!showSearchmembers && (
+            <div className='mt-4 ml-9 flex'>
+              <Image
+                className='h-16 w-16 rounded-2xl'
+                src={groupInfo.groupImage!}
+                alt={"group name"}
+              />
+              <div className='relative left-4 w-[200px] top-1'>
+                <p className='text-[20px] font-medium'>{groupInfo.groupName}</p>
+                <p className='text-[16px] text-[#787E99]'>
+                  {groupInfo.members.length + groupInfo.pendingMembers.length} members
+                </p>
+              </div>
+            </div>
+            <div className='mt-6 ml-9'>
+              <div className='flex text-[18px] font-medium'>Group Description</div>
+              <div className='text-[#787E99] text-[18px] font-normal'>
+                {groupInfo.groupDescription}
+              </div>
+            </div>
+            <div className='mt-6 ml-9 border border-[#D7D7D7] rounded-2xl flex w-[85%] h-[62px] items-center flex-row'>
+              <div className='ml-[20px]'>
+                <Image src='/push/lock.svg' alt='lock' />
+              </div>
+              <div className='ml-4'>
+                <div>
+                  <p className='text-[18px]'>
+                    {groupInfo.isPublic === true ? `Public` : `Private`}
+                  </p>
+                </div>
+                <div className='text-[12px] text-[#657795]'>
+                  {groupInfo.isPublic === true
+                    ? `Chats are not encrypted`
+                    : `Chats are encrypted`}
+                </div>
+              </div>
+            </div>
+            <div className='mt-8 ml-9 border cursor-pointer border-[#D7D7D7] rounded-2xl flex h-[62px] w-[85%]' onClick={() => { setShowsearchMembers(true); setShowpendingMembers(false) }}>
+              <div className='flex items-center justify-center w-full'>
+                <div className='flex items-center justify-center text-center'>
+                  <Image src='/push/Add.svg' className='mr-2' alt='lock' />
+                  Add more wallets
+                </div>
+              </div>
+            </div>
+            <div onClick={handleShowallPendingmembers} className='cursor-pointer mt-[30px] ml-9 text-lg font-normal border border-[#D7D7D7] h-[62px] w-[85%] rounded-2xl flex items-center'>
+              <div className='ml-4 w-28 flex'>
+                <div className='absolute text-[18px] mt-[-10px]'>Pending requests</div>
+                <div className='absolute mt-[-10px] left-48 ml-4 pt-0.25 pr-3 pb-0.25 text-white pl-3 bg-brand-500 rounded-lg'>{groupInfo?.pendingMembers.length}</div>
+              </div>
               <div>
-                <div className="absolute left-9 top-20 flex">
-                  <Image className="h-16 w-16 rounded-2xl" src={groupInfo.groupImage!} alt={'group name'} />
-                  <div className="relative left-4 top-1 w-[200px]">
-                    <p className="text-[20px] font-medium">{groupInfo.groupName}</p>
-                    <p className="text-[16px] text-[#787E99]">
-                      {groupInfo.members.length + groupInfo.pendingMembers.length} members
-                    </p>
-                  </div>
-                </div>
-                <div className="absolute left-9 top-44">
-                  <div className="flex text-[18px] font-medium">Group Description</div>
-                  <div className="text-[18px] font-normal text-[#787E99]">{groupInfo.groupDescription}</div>
-                </div>
-                <div className="absolute left-9 top-60 flex h-[62px] w-[85%] flex-row items-center rounded-2xl border border-[#D7D7D7]">
-                  <div className="absolute left-[20px]">
-                    <Image src="/push/lock.svg" alt="lock" />
-                  </div>
-                  <div className="absolute left-[50px]">
-                    <div>
-                      <p className="text-[18px]">{groupInfo.isPublic === true ? `Public` : `Private`}</p>
-                    </div>
-                    <div className="text-[12px] text-[#657795]">
-                      {groupInfo.isPublic === true ? `Chats are not encrypted` : `Chats are encrypted`}
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="absolute left-9 top-80 flex h-[62px] w-[85%] cursor-pointer rounded-2xl border border-[#D7D7D7]"
-                  onClick={() => {
-                    setShowsearchMembers(true);
-                    setShowpendingMembers(false);
-                  }}
-                >
-                  <div className="flex w-full items-center justify-center">
-                    <div className="flex items-center justify-center text-center">
-                      <Image src="/push/Add.svg" className="mr-2" alt="lock" />
-                      Add more wallets
-                    </div>
-                  </div>
-                </div>
-                <div
-                  onClick={handleShowallPendingmembers}
-                  className="ml-9 mt-[340px] flex h-[62px] w-[85%] cursor-pointer items-center rounded-2xl border border-[#D7D7D7] text-lg font-normal"
-                >
-                  <div className="absolute left-[50px] flex">
-                    <div className="text-[18px]">Pending requests</div>
-                    <div className="pt-0.25 pb-0.25 bg-brand-500 ml-4 rounded-lg pl-3 pr-3 text-white">
-                      {groupInfo?.pendingMembers.length}
-                    </div>
-                  </div>
-                  <div>
-                    <Image
-                      className={`ml-[390px] mt-2 cursor-pointer ${showPendingmembers ? 'rotate-180' : ''}`}
-                      src="/push/CaretRight.svg"
-                      alt="arrow"
-                    />
-                  </div>
-                </div>
-                <div className="relative left-[36px] h-[30vh] w-[85%] items-center justify-center overflow-auto">
-                  {showPendingmembers && (
-                    <MemberProfileList
-                      isOwner={isOwner}
-                      memberList={chatProfile}
-                      adminAddress={adminAddresses}
-                      onMakeAdmin={onMakeAdminUpdateMembers}
-                      onRemoveMembers={onRemoveUpdateMembers}
-                      removeAdmin={removeAdmin}
-                      messageUser={messageUser}
-                    />
-                  )}
-                </div>
-                <div className="flex items-center justify-center">
-                  <Button onClick={handleUpdateGroup} className="absolute bottom-16 h-12 w-64">
-                    Update Members
-                  </Button>
-                </div>
-                {/* <div className='relative left-[85px] w-[350px]'>
-              <MemberProfileList memberList={chatProfilemembers} />
-            </div> */}
+                <Image className={`cursor-pointer mt-0 ${showPendingmembers ? 'rotate-180 ml-[240px]' : 'ml-[260px]'}`} src='/push/CaretRight.svg' alt='arrow' />
               </div>
-            )}
-            {showSearchmembers && (
-              <div className="flex w-full justify-center pt-4">
-                <div className="flex w-[300px] items-center">
-                  <Search
-                    modalWidthClassName="max-w-xs"
-                    placeholder={`Search for someone to message...`}
-                    onProfileSelected={onProfileSelected}
-                    zIndex="z-10"
-                  />
-                </div>
-              </div>
-            )}
-            <div className="">
-              <div className="relative left-[85px] w-[350px]">
-                {showSearchedmembertoAdd && (
-                  <MemberProfileList
-                    memberList={showSearchedmembertoAdd}
-                    onAddMembers={onAddMembers}
-                    adminAddress={adminAddresses}
-                    onMakeAdmin={onMakeAdmin}
-                    onRemoveMembers={onRemoveMembers}
-                    removeAdmin={removeAdmin}
-                  />
-                )}
-              </div>
-              <div className="relative left-[85px] w-[350px]">
-                {updatedMembers && (
-                  <MemberProfileList
-                    removeUserAdmin={removeUserAdmin}
-                    removeAdmin={removeAdmin}
-                    adminAddress={adminAddresses}
-                    messageUser={messageUser}
-                    memberList={updatedMembers}
-                    onMakeAdmin={onMakeAdmin}
-                    onRemoveMembers={onRemoveMembers}
-                  />
-                )}
-              </div>
-              {showSearchmembers && (
-                <div className="flex items-center justify-center">
-                  <Button onClick={handleUpdateGroup} className="absolute bottom-16 h-12 w-64">
-                    Add members
-                  </Button>
-                </div>
-              )}
+            </div>
+            <div className='ml-[36px] w-[85%] items-center justify-center'>
+              {showPendingmembers && <MemberProfileList isOwner={isOwner} memberList={chatProfile} adminAddress={adminAddressesinPendingmembers} onMakeAdmin={onMakeAdminUpdateMembers} onRemoveMembers={onRemoveUpdateMembers} removeAdmin={onRemoveAdminUpdateMembers} messageUser={messageUser} />}
+            </div>
+            <div className='flex mt-4 mb-4 items-center justify-center'>
+              <Button onClick={handleUpdateGroup} className='h-12 w-64'>Update Members</Button>
             </div>
           </div>
+        )}
+        {showSearchmembers && (
+          <div className="pt-4 pb-4 w-full flex justify-center">
+            <div className="w-[300px] flex items-center">
+              <Search
+                modalWidthClassName="max-w-xs"
+                placeholder={`Search for someone to message...`}
+                onProfileSelected={onProfileSelected}
+                zIndex="z-10"
+              />
+            </div>
+          </div>
+        )}
+        <div className=''>
+          <div className='ml-[85px] w-[350px]'>
+            {showSearchedmembertoAdd && (
+              <MemberProfileList memberList={showSearchedmembertoAdd} onAddMembers={onAddMembers} adminAddress={adminAddresses} onMakeAdmin={onMakeAdmin} onRemoveMembers={onRemoveMembers} removeAdmin={removeAdmin} />
+            )}
+          </div>
+          <div className=' ml-[85px] w-[350px]'>
+            {updatedMembers && (
+              <MemberProfileList removeUserAdmin={removeUserAdmin} removeAdmin={removeAdmin} adminAddress={adminAddresses} messageUser={messageUser} memberList={updatedMembers} onMakeAdmin={onMakeAdmin} onRemoveMembers={onRemoveMembers} />
+            )}
+          </div>
+          {showSearchmembers && (
+            <div className='flex items-center justify-center mb-4 mt-2'>
+              <Button onClick={handleUpdateGroup} className='bottom-16 h-12 w-64'>Add members</Button>
+            </div>
+          )}
         </div>
       </div>
     </Modal>
