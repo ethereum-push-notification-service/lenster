@@ -4,7 +4,7 @@ import * as PushAPI from '@pushprotocol/restapi';
 import { LENSHUB_PROXY } from 'data/constants';
 import type { Profile } from 'lens';
 import router from 'next/router';
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { CHAIN_ID } from 'src/constants';
 import { useAppStore } from 'src/store/app';
 import { PUSH_ENV, usePushChatStore } from 'src/store/push-chat';
@@ -145,6 +145,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
       groupInfo.pendingMembers.splice(indexToRemove, 1);
       console.log(`Removed member with wallet ${profile.ownedBy}`);
       console.log(groupInfo.pendingMembers, 'groupInfo.pendingMembers');
+      setChatprofile(chatProfile.filter((member) => member.ownedBy !== profile.ownedBy));
     }
   };
 
@@ -187,22 +188,15 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
 
   const pendingMembersss = async () => {
     pendingMemberisAdmin();
-    // const adminPendings = groupInfo?.pendingMembers.filter((member) => member.isAdmin === true).map((member) => member);
-    // setAdminAddressesinPendingmembers(adminPendings);
     const pendingMembersList = groupInfo?.pendingMembers.map((member) => member.wallet.split(":")[4]);
-    // console.log(pendingMembersList, 'pendingMembersList');
-    // const result = await loadLensProfiles(["0x7156"])
-    // const myepfol = result?.get("0x7156")
-    // console.log(myepfol, 'myepfol');
     for (const member of pendingMembersList) {
       const result = await loadLensProfiles([member]);
       const lensProfile: any = result?.get(member);
-      // console.log(lensProfile?.handle, "Yoo");
       chatProfile.push(lensProfile);
       console.log(chatProfile, 'chatProfile');
     }
-    // console.log(adminAddressesinPendingmembers, 'adminAddressesinPendingmembers');
   }
+
 
   const handleShowallPendingmembers = () => {
     if (showPendingmembers) {
