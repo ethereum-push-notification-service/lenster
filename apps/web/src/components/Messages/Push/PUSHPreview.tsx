@@ -7,23 +7,26 @@ import useCreateGroup from '@components/utils/hooks/push/usePushCreateGroupChat'
 import usePushDecryption from '@components/utils/hooks/push/usePushDecryption';
 import useUpgradeChatProfile from '@components/utils/hooks/push/useUpgradeChatProfile';
 import { Trans } from '@lingui/macro';
-import type { Profile } from 'lens';
+import type { IFeeds } from '@pushprotocol/restapi';
 import router from 'next/router';
 import { useEffect } from 'react';
 import { useAppStore } from 'src/store/app';
+import type { ChatTypes } from 'src/store/push-chat';
 import { PUSH_TABS, usePushChatStore } from 'src/store/push-chat';
 import { Card, Image, Modal } from 'ui';
 
-import { getProfileFromDID } from './helper';
+import { getProfileFromDID, isProfileExist } from './helper';
 import PUSHPreviewChats from './PUSHPreviewChats';
 import PUSHPreviewRequests from './PUSHPreviewRequest';
+
+const requestLimit: number = 30;
+const page: number = 1;
 
 const PUSHPreview = () => {
   const { fetchChatProfile } = useGetChatProfile();
   const resetPushChatStore = usePushChatStore((state) => state.resetPushChatStore);
   const currentProfile = useAppStore((state) => state.currentProfile);
   const activeTab = usePushChatStore((state) => state.activeTab);
-  const chatsFeed = usePushChatStore((state) => state.chatsFeed);
   const connectedProfile = usePushChatStore((state) => state.connectedProfile);
   const setActiveTab = usePushChatStore((state) => state.setActiveTab);
   const setShowCreateGroupModal = usePushChatStore((state) => state.setShowCreateGroupModal);
@@ -32,17 +35,19 @@ const PUSHPreview = () => {
   const setShowCreateChatProfileModal = usePushChatStore((state) => state.setShowCreateChatProfileModal);
   const showUpgradeChatProfileModal = usePushChatStore((state) => state.showUpgradeChatProfileModal);
   const showDecryptionModal = usePushChatStore((state) => state.showDecryptionModal);
-  const selectedChatId = usePushChatStore((state) => state.selectedChatId);
-  const selectedChatType = usePushChatStore((state) => state.selectedChatType);
   const setShowUpgradeChatProfileModal = usePushChatStore((state) => state.setShowUpgradeChatProfileModal);
   const setShowDecryptionModal = usePushChatStore((state) => state.setShowDecryptionModal);
   const requestsFeed = usePushChatStore((state) => state.requestsFeed);
   const pgpPrivateKey = usePushChatStore((state) => state.pgpPrivateKey);
+  const setRequestsFeed = usePushChatStore((state) => state.setRequestsFeed);
 
   const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
 
-  const { modalContent: createChatProfileModalContent, isModalClosable: isCreateChatProfileModalClosable } =
-    useCreateChatProfile();
+  const {
+    createChatProfile,
+    modalContent: createChatProfileModalContent,
+    isModalClosable: isCreateChatProfileModalClosable
+  } = useCreateChatProfile();
   const {
     createGroup,
     modalContent: createGroupModalContent,
@@ -101,7 +106,9 @@ const PUSHPreview = () => {
 
     (async function () {
       if (connectedProfile && !connectedProfile?.encryptedPrivateKey) {
-        await fetchRequests();
+        let feeds = await fetchRequests({ page, requestLimit });
+        let firstFeeds: { [key: string]: IFeeds } = { ...feeds };
+        setRequestsFeed(firstFeeds);
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -117,21 +124,23 @@ const PUSHPreview = () => {
       if (!decryptedPgpPvtKey) {
         return;
       }
-      await fetchRequests();
+      let feeds = await fetchRequests({ page, requestLimit });
+      let firstFeeds: { [key: string]: IFeeds } = { ...feeds };
+      setRequestsFeed(firstFeeds);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [decryptedPgpPvtKey]);
 
-  useEffect(() => {
-    //set selected chat preview
-    //find in inbox or reuqests  or new chat and switch tab as per that and set css for selected chat
-    if (selectedChatId in chatsFeed) {
-      setActiveTab(PUSH_TABS.CHATS);
-    }
-    if (selectedChatId in requestsFeed) {
-      setActiveTab(PUSH_TABS.REQUESTS);
-    }
-  }, [selectedChatId, selectedChatType, requestsFeed, chatsFeed]);
+  // useEffect(() => {
+  //   //set selected chat preview
+  //   //find in inbox or reuqests  or new chat and switch tab as per that and set css for selected chat
+  //   if (selectedChatId in chatsFeed) {
+  //     setActiveTab(PUSH_TABS.CHATS);
+  //   }
+  //   if (selectedChatId in requestsFeed) {
+  //     setActiveTab(PUSH_TABS.REQUESTS);
+  //   }
+  // }, [selectedChatId, selectedChatType, requestsFeed, chatsFeed]);
 
   useEffect(() => {
     if (connectedProfile && connectedProfile.did && currentProfile?.id) {
@@ -144,8 +153,21 @@ const PUSHPreview = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentProfile, connectedProfile]);
 
-  const onProfileSelected = (profile: Profile) => {
-    router.push(`/messages/push/chat/${profile.id}`);
+  const onProfileSelected = (type: ChatTypes, chatId: string) => {
+    router.push(`/messages/push/${type}/${chatId}`);
+  };
+
+  const handleCreateGroup = async () => {
+    try {
+      if (!isProfileExist(connectedProfile)) {
+        await createChatProfile();
+      }
+      if (decryptedPgpPvtKey) {
+        createGroup();
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -183,7 +205,7 @@ const PUSHPreview = () => {
             />
           </div>
         </section>
-        <div onClick={createGroup} className="ml-0 flex cursor-pointer pb-2 pl-4 pr-4">
+        <div onClick={handleCreateGroup} className="ml-0 flex cursor-pointer px-4 pb-4">
           <Image src="/push/creategroup.svg" alt="create group" className="mr-2 h-5" />
           <button className="text-base font-medium">Create Group</button>
         </div>

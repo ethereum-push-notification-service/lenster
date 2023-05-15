@@ -3,17 +3,16 @@ import Unfollow from '@components/Shared/Unfollow';
 import UserProfile from '@components/Shared/UserProfile';
 import useGroupInfoModal from '@components/utils/hooks/push/usePushGroupinfo';
 import useOnClickOutside from '@components/utils/hooks/useOnClickOutside';
-import type { GroupDTO, ProgressHookType } from '@pushprotocol/restapi';
+import type { GroupDTO } from '@pushprotocol/restapi';
 import type { Profile } from 'lens';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { CHAT_TYPES, usePushChatStore } from 'src/store/push-chat';
-import { Image, Modal } from 'ui';
+import { Image } from 'ui';
 
 interface MessageHeaderProps {
   profile?: Profile;
-  groupInfo: GroupDTO
+  groupInfo?: GroupDTO;
 }
-
 
 export default function MessageHeader({ profile, groupInfo }: MessageHeaderProps) {
   // get the connected profile
@@ -24,8 +23,11 @@ export default function MessageHeader({ profile, groupInfo }: MessageHeaderProps
   const [showModal, setShowModal] = useState(false);
   const [showGroupinfoModal, setShowGroupinfoModal] = useState(false);
   console.log(groupInfo);
-  const downRef = useRef(null)
-  useOnClickOutside(downRef, () => {setShowGroupinfoModal(false); setShowModal(false)})
+  const downRef = useRef(null);
+  useOnClickOutside(downRef, () => {
+    setShowGroupinfoModal(false);
+    setShowModal(false);
+  });
 
   useEffect(() => {
     if (selectedChatType === CHAT_TYPES.GROUP) {
@@ -44,7 +46,7 @@ export default function MessageHeader({ profile, groupInfo }: MessageHeaderProps
             <Image
               src={groupInfo.groupImage!}
               loading="lazy"
-              className="h-10 w-10 rounded-full border bg-gray-200 dark:border-gray-700"
+              className="h-12 w-12 rounded-full border bg-gray-200 dark:border-gray-700"
               height={40}
               width={40}
               alt={groupInfo.groupName}
@@ -54,6 +56,11 @@ export default function MessageHeader({ profile, groupInfo }: MessageHeaderProps
         )}
       </div>
       <div className="flex items-center gap-4	">
+        {groupInfo && (
+          <div className="w-fit cursor-pointer">
+            <Image className="h-10 w-9" src="/push/more.svg" alt="group info settings" />
+          </div>
+        )}
         <img className="cursor-pointer" src="/push/video.svg" alt="video icon" />
         {profile &&
           (following ? (
@@ -62,21 +69,33 @@ export default function MessageHeader({ profile, groupInfo }: MessageHeaderProps
             <Follow profile={profile!} setFollowing={setFollowing} showText />
           ))}
         {groupInfo && (
-          <div className="w-fit cursor-pointer" onClick={() => showModal === false ? setShowModal(true) : setShowModal(false)}>
+          <div
+            className="w-fit cursor-pointer"
+            onClick={() => (showModal === false ? setShowModal(true) : setShowModal(false))}
+          >
             <Image className="h-10 w-9" src="/push/more.svg" alt="group info settings" />
           </div>
         )}
         {groupInfo && showModal && (
-          <div ref={downRef} className='absolute mt-16 px-4 w-40 border border-[#BAC4D6] rounded-2xl p-2 cursor-pointer flex bg-white' onClick={() => { setShowGroupinfoModal(true); setShowModal(false) }}>
+          <div
+            ref={downRef}
+            className="absolute mt-16 flex w-40 cursor-pointer rounded-2xl border border-[#BAC4D6] bg-white p-2 px-4"
+            onClick={() => {
+              setShowGroupinfoModal(true);
+              setShowModal(false);
+            }}
+          >
             <div>
-              <Image className="h-8 w-8 mr-1" src="/push/info.svg" alt="group info settings" />
+              <Image className="mr-1 h-8 w-8" src="/push/info.svg" alt="group info settings" />
             </div>
-            <div className='items-center text-[#657795] text-[18px]'>
-              Group Info
-            </div>
+            <div className="items-center text-[18px] text-[#657795]">Group Info</div>
           </div>
         )}
-        {useGroupInfoModal({ groupInfo: groupInfo, show: showGroupinfoModal, setShow: setShowGroupinfoModal })}
+        {useGroupInfoModal({
+          groupInfo: groupInfo,
+          show: showGroupinfoModal,
+          setShow: setShowGroupinfoModal
+        })}
       </div>
     </section>
   );

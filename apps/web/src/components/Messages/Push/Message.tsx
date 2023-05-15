@@ -1,17 +1,19 @@
 import MetaTags from '@components/Common/MetaTags';
 import Loader from '@components/Shared/Loader';
+import useFetchChat from '@components/utils/hooks/push/useFetchChat';
 import useFetchLensProfiles from '@components/utils/hooks/push/useFetchLensProfiles';
 import useGetChatProfile from '@components/utils/hooks/push/useGetChatProfile';
 import useGetGroup from '@components/utils/hooks/push/useGetGroup';
 import useGroupByName from '@components/utils/hooks/push/useGetGroupbyName';
 import { t } from '@lingui/macro';
-import type { GroupDTO } from '@pushprotocol/restapi';
+import type { GroupDTO, IFeeds } from '@pushprotocol/restapi';
 import { APP_NAME } from 'data/constants';
 import type { Profile } from 'lens';
 import { useProfileLazyQuery } from 'lens';
 import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 import Custom404 from 'src/pages/404';
 import { useAppStore } from 'src/store/app';
 import type { ChatTypes } from 'src/store/push-chat';
@@ -22,6 +24,7 @@ import PreviewList from '../PreviewList';
 import { getCAIPFromLensID, getIsHandle, getProfileFromDID } from './helper';
 import MessageBody from './MessageBody';
 import MessageHeader from './MessageHeader';
+import PUSHNoConversationSelected from './PUSHNoConversationSelected';
 
 type MessagePropType = {
   conversationType: ChatTypes;
@@ -39,9 +42,29 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
   const setSelectedChatId = usePushChatStore((state) => state.setSelectedChatId);
   const setSelectedChatType = usePushChatStore((state) => state.setSelectedChatType);
   const [getProfileByHandle, { loading }] = useProfileLazyQuery();
+  const { fetchChat } = useFetchChat();
+  const requestsFeed = usePushChatStore((state) => state.requestsFeed);
+  const chatsFeed = usePushChatStore((state) => state.chatsFeed);
+  const pgpPrivateKey = usePushChatStore((state) => state.pgpPrivateKey);
+  const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
+  const connectedProfile = usePushChatStore((state) => state.connectedProfile);
+  const currentProfile = useAppStore((state) => state.currentProfile);
 
   const [profile, setProfile] = useState<Profile | null | ''>('');
   const [groupInfo, setGroupInfo] = useState<GroupDTO | null | ''>('');
+  const [selectedChat, setSelectedChat] = useState<IFeeds>();
+
+  useEffect(() => {
+    if (!selectedChatId) {
+      return;
+    }
+    const fetchSelectedChat = async () => {
+      const response = await fetchChat({ recipientAddress: selectedChatId });
+      setSelectedChat(response);
+    };
+
+    fetchSelectedChat();
+  }, [selectedChatId, decryptedPgpPvtKey]);
 
   const setChatId = async (lensProfile: Profile | null) => {
     if (lensProfile && getProfileFromDID(selectedChatId) !== lensProfile.id) {
@@ -148,8 +171,36 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId, conversationType]);
 
-  if (profile === null || groupInfo === null) {
-    return <Custom404 />;
+  const ifPrivateGroup = () => {
+    if (selectedChat && selectedChat.groupInformation && selectedChat.groupInformation.isPublic === false) {
+      return true;
+    }
+    return false;
+  };
+
+  const ifGroupMember = () => {
+    let response = false;
+    if (connectedProfile && connectedProfile?.did) {
+      selectedChat?.groupInformation?.members.map((member) => {
+        if (member.wallet === connectedProfile.did) {
+          response = true;
+          return;
+        }
+      });
+      selectedChat?.groupInformation?.pendingMembers.map((member) => {
+        if (member.wallet === connectedProfile.did) {
+          response = true;
+          return;
+        }
+      });
+    }
+    return response;
+  };
+
+  const CHAT_NOT_FOUND = profile === null || groupInfo === null;
+
+  if (CHAT_NOT_FOUND) {
+    toast.error('Chat Not Found!');
   }
 
   return (
@@ -157,28 +208,41 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
       <MetaTags title={APP_NAME} />
       <PreviewList className="xs:hidden sm:hidden md:hidden lg:block" />
       <GridItemEight className="xs:h-[85vh] xs:mx-2 mb-0 sm:mx-2 sm:h-[76vh] md:col-span-8 md:h-[80vh] xl:h-[84vh]">
-        <Card className="flex h-full flex-col justify-between">
-          {showLoading || loading ? (
-            <div className="flex h-full flex-grow items-center justify-center">
-              <Loader message={t`Loading messages`} />
+        {CHAT_NOT_FOUND ? (
+          <Card className="h-full">
+            <div className="flex h-full flex-col text-center">
+              <PUSHNoConversationSelected />
             </div>
-          ) : (
-            <>
-              {profile !== '' && profile && (
-                <>
-                  <MessageHeader groupInfo={groupInfo as GroupDTO} profile={profile as Profile} />
-                  <MessageBody />
-                </>
-              )}
-              {groupInfo !== '' && groupInfo && (
-                <>
-                  <MessageHeader groupInfo={groupInfo as GroupDTO} />
-                  <MessageBody />
-                </>
-              )}
-            </>
-          )}
-        </Card>
+          </Card>
+        ) : (
+          <Card className="flex h-full flex-col justify-between">
+            {showLoading || loading ? (
+              <div className="flex h-full flex-grow items-center justify-center">
+                <Loader message={t`Loading messages`} />
+              </div>
+            ) : (
+              <>
+                {profile !== '' && profile && (
+                  <>
+                    <MessageHeader profile={profile} />
+                    <MessageBody
+                      selectedChat={chatsFeed[selectedChatId] ?? requestsFeed[selectedChatId] ?? selectedChat}
+                    />
+                  </>
+                )}
+                {groupInfo !== '' && groupInfo && (
+                  <>
+                    <MessageHeader groupInfo={groupInfo} />
+                    <MessageBody
+                      groupInfo={groupInfo}
+                      selectedChat={chatsFeed[selectedChatId] ?? requestsFeed[selectedChatId] ?? selectedChat}
+                    />
+                  </>
+                )}
+              </>
+            )}
+          </Card>
+        )}
       </GridItemEight>
     </GridLayout>
   );

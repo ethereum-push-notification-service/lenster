@@ -1,21 +1,27 @@
+import Slug from '@components/Shared/Slug';
+import UserPreview from '@components/Shared/UserPreview';
 import useApproveChatRequest from '@components/utils/hooks/push/useApproveChatRequest';
 import useCreateChatProfile from '@components/utils/hooks/push/useCreateChatProfile';
-import useFetchChats from '@components/utils/hooks/push/useFetchChats';
 import useGetHistoryMessages from '@components/utils/hooks/push/useFetchHistoryMessages';
+import useFetchLensProfiles from '@components/utils/hooks/push/useFetchLensProfiles';
 import useFetchRequests from '@components/utils/hooks/push/useFetchRequests';
 import usePushSendMessage from '@components/utils/hooks/push/usePushSendMessage';
 import onError from '@lib/onError';
-import type { IMessageIPFS } from '@pushprotocol/restapi';
+import type { GroupDTO, IFeeds, IMessageIPFS } from '@pushprotocol/restapi';
 import clsx from 'clsx';
 import EmojiPicker from 'emoji-picker-react';
 import GifPicker from 'gif-picker-react';
+import type { Profile } from 'lens';
+import formatHandle from 'lib/formatHandle';
+import getAvatar from 'lib/getAvatar';
 import moment from 'moment';
 import React, { useEffect, useRef, useState } from 'react';
 import { useClickAway } from 'react-use';
-import { PUSH_TABS, usePushChatStore } from 'src/store/push-chat';
-import { Image, Input, Spinner } from 'ui';
+import { useAppStore } from 'src/store/app';
+import { CHAT_TYPES, PUSH_TABS, usePushChatStore } from 'src/store/push-chat';
+import { Button, Image, Input, Spinner } from 'ui';
 
-import { dateToFromNowDaily, isProfileExist } from './helper';
+import { dateToFromNowDaily, getProfileFromDID, isProfileExist } from './helper';
 
 type GIFType = {
   url: String;
@@ -26,18 +32,26 @@ type GIFType = {
 const CHATS_FETCH_LIMIT = 15;
 const MessageCard = ({ chat, position }: { chat: IMessageIPFS; position: number }) => {
   const time = moment(chat.timestamp).format('hh:mm');
+  // position = 0 -> DM (another person), 1 -> Connected Profile ID, 2 -> Group (another person)
   return (
     <div
       className={clsx(
-        position ? 'self-end rounded-xl rounded-tr-sm  bg-violet-500' : 'rounded-xl rounded-tl-sm',
+        position === 0
+          ? 'rounded-xl rounded-tl-sm'
+          : position === 1
+          ? 'self-end rounded-xl rounded-tr-sm bg-violet-500'
+          : 'absolute top-[-16px] ml-11 rounded-xl rounded-tl-sm',
         'relative w-fit max-w-[80%] border py-3 pl-4 pr-[50px] font-medium'
       )}
     >
-      <p className={clsx(position ? 'text-white' : '', 'max-w-[100%] break-words text-sm')}>
+      <p className={clsx(position === 1 ? 'text-white' : '', 'max-w-[100%] break-words text-sm')}>
         {chat.messageContent}
       </p>
       <span
-        className={clsx(position ? 'text-white' : 'text-gray-500', 'absolute bottom-1.5	right-1.5 text-xs')}
+        className={clsx(
+          position === 1 ? 'text-white' : 'text-gray-500',
+          'absolute bottom-1.5	right-1.5 text-xs'
+        )}
       >
         {time}
       </span>
@@ -46,11 +60,16 @@ const MessageCard = ({ chat, position }: { chat: IMessageIPFS; position: number 
 };
 
 const GIFCard = ({ chat, position }: { chat: IMessageIPFS; position: number }) => {
+  // position = 0 -> DM (another person), 1 -> Connected Profile ID, 2 -> Group (another person)
   return (
     <div className={clsx(position ? 'self-end' : '', 'relative w-fit')}>
       <Image
         className={clsx(
-          position ? 'right-0 rounded-xl rounded-tr-sm' : 'rounded-xl rounded-tl-sm',
+          position === 0
+            ? 'rounded-xl rounded-tl-sm'
+            : position === 1
+            ? 'right-0 rounded-xl rounded-tr-sm'
+            : 'absolute top-[-16px] ml-11 rounded-xl rounded-tl-sm',
           'font-medium0 relative w-fit border'
         )}
         src={chat.messageContent}
@@ -61,9 +80,49 @@ const GIFCard = ({ chat, position }: { chat: IMessageIPFS; position: number }) =
   );
 };
 
+const SenderProfileInMsg = ({ chat }: { chat: IMessageIPFS }) => {
+  const { getLensProfile } = useFetchLensProfiles();
+  const [profile, setProfile] = useState<Profile>();
+
+  useEffect(() => {
+    (async function () {
+      const profileRes = await getLensProfile(getProfileFromDID(chat.fromDID));
+      if (profileRes) {
+        setProfile(profileRes);
+      }
+    })();
+  }, []);
+
+  return profile ? (
+    <div className="flex items-start space-x-2">
+      <Image
+        onError={({ currentTarget }) => {
+          currentTarget.src = getAvatar(profile, false);
+        }}
+        src={getAvatar(profile)}
+        loading="lazy"
+        className="h-9 w-9 rounded-full border bg-gray-200 dark:border-gray-700"
+        height={36}
+        width={36}
+        alt={formatHandle(profile?.handle)}
+      />
+      <UserPreview profile={profile}>
+        <p className="bold text-base leading-6">{profile.name ?? formatHandle(profile?.handle)}</p>
+      </UserPreview>
+    </div>
+  ) : null;
+};
+
 const Messages = ({ chat }: { chat: IMessageIPFS }) => {
   const connectedProfile = usePushChatStore((state) => state.connectedProfile);
-  const position = chat.fromDID !== connectedProfile?.did ? 0 : 1;
+  const selectedChatType = usePushChatStore((state) => state.selectedChatType);
+  let position = chat.fromDID !== connectedProfile?.did ? 0 : 1;
+
+  // making position 2 for groups messages of different people than connected profile
+  if (!position && selectedChatType === CHAT_TYPES.GROUP) {
+    position = 2;
+  }
+
   if (chat.messageType === 'GIF') {
     return <GIFCard chat={chat} position={position} />;
   }
@@ -72,9 +131,13 @@ const Messages = ({ chat }: { chat: IMessageIPFS }) => {
 
 type MessageFieldPropType = {
   scrollToBottom: () => void;
+  selectedChat: IFeeds;
 };
 
-const MessageField = ({ scrollToBottom }: MessageFieldPropType) => {
+const requestLimit: number = 30;
+const page: number = 1;
+
+const MessageField = ({ scrollToBottom, selectedChat }: MessageFieldPropType) => {
   const modalRef = useRef(null);
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [gifOpen, setGifOpen] = useState(false);
@@ -82,19 +145,79 @@ const MessageField = ({ scrollToBottom }: MessageFieldPropType) => {
   const { sendMessage, loading: msgSendLoading } = usePushSendMessage();
   const selectedChatId = usePushChatStore((state) => state.selectedChatId);
   const connectedProfile = usePushChatStore((state) => state.connectedProfile);
+  const currentProfile = useAppStore((state) => state.currentProfile);
   const { createChatProfile } = useCreateChatProfile();
-  const { fetchChats } = useFetchChats();
   const { fetchRequests } = useFetchRequests();
   const requestsFeed = usePushChatStore((state) => state.requestsFeed);
+  const { approveChatRequest } = useApproveChatRequest();
+  const pgpPrivateKey = usePushChatStore((state) => state.pgpPrivateKey);
+
+  const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
 
   const requestFeedids = Object.keys(requestsFeed);
+  const [toShowJoinPublicGroup, setToShowJoinPublicGroup] = useState<boolean>(false);
 
   const appendEmoji = ({ emoji }: { emoji: string }) => setInputText(`${inputText}${emoji}`);
+
+  const ifPublicGroup = () => {
+    if (selectedChat && selectedChat.groupInformation && selectedChat.groupInformation.isPublic) {
+      return true;
+    }
+    return false;
+  };
+
+  const ifGroupMember = () => {
+    let response = false;
+    if (connectedProfile && connectedProfile?.did) {
+      selectedChat?.groupInformation?.members.map((member) => {
+        if (member.wallet === connectedProfile.did) {
+          response = true;
+          return;
+        }
+      });
+      selectedChat?.groupInformation?.pendingMembers.map((member) => {
+        if (member.wallet === connectedProfile.did) {
+          response = true;
+          return;
+        }
+      });
+    } else {
+      selectedChat?.groupInformation?.members.map((member) => {
+        if (getProfileFromDID(member.wallet) === currentProfile?.id) {
+          response = true;
+          return;
+        }
+      });
+      selectedChat?.groupInformation?.pendingMembers.map((member) => {
+        if (getProfileFromDID(member.wallet) === currentProfile?.id) {
+          response = true;
+          return;
+        }
+      });
+    }
+    return response;
+  };
+
+  const ifPublicGroupAndNotMember = (): boolean => {
+    if (ifPublicGroup() && !ifGroupMember()) {
+      return true;
+    }
+
+    return false;
+  };
+
+  useEffect(() => {
+    const response = ifPublicGroupAndNotMember();
+    setToShowJoinPublicGroup(response);
+  }, [selectedChat]);
 
   const sendPushMessage = async (content: string, type: string) => {
     try {
       if (!isProfileExist(connectedProfile)) {
         await createChatProfile();
+      }
+      if (!decryptedPgpPvtKey) {
+        return;
       }
       await sendMessage({
         message: content,
@@ -103,9 +226,7 @@ const MessageField = ({ scrollToBottom }: MessageFieldPropType) => {
       });
       scrollToBottom();
 
-      // after a message has been sent, we can refetch all messages and chats
-      await fetchChats();
-      await fetchRequests();
+      fetchRequests({ page, requestLimit });
     } catch (error) {
       onError(error);
     }
@@ -125,7 +246,30 @@ const MessageField = ({ scrollToBottom }: MessageFieldPropType) => {
     setEmojiOpen(false);
   });
 
-  return (
+  const handleJoinGroup = async () => {
+    try {
+      if (!isProfileExist(connectedProfile)) {
+        await createChatProfile();
+      }
+      if (decryptedPgpPvtKey) {
+        const response = await approveChatRequest({ senderAddress: selectedChatId });
+        setToShowJoinPublicGroup(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  return toShowJoinPublicGroup ? (
+    <div className="flex justify-between rounded-lg border border-solid p-2">
+      <div className="align-center self-center text-sm text-[#9E9EA9]">
+        You need to join the group in order to send a message
+      </div>
+      <Button onClick={handleJoinGroup} className="self-center px-8 py-2 text-center" variant="primary">
+        Join Group
+      </Button>
+    </div>
+  ) : (
     <>
       <Image
         onClick={() => setEmojiOpen((o) => !o)}
@@ -155,19 +299,15 @@ const MessageField = ({ scrollToBottom }: MessageFieldPropType) => {
           </div>
         )}
       </div>
-      {emojiOpen ? (
+      {emojiOpen && (
         <div ref={modalRef} className="absolute bottom-[50px]">
           <EmojiPicker onEmojiClick={appendEmoji} />
         </div>
-      ) : (
-        ''
       )}
-      {gifOpen ? (
+      {gifOpen && (
         <div ref={modalRef} className="absolute bottom-[50px] right-0">
           <GifPicker onGifClick={sendGIF} tenorApiKey={String(process.env.NEXT_PUBLIC_GOOGLE_TOKEN)} />
         </div>
-      ) : (
-        ''
       )}
       <Input
         onChange={(e) => setInputText(e.target.value)}
@@ -186,7 +326,13 @@ const MessageField = ({ scrollToBottom }: MessageFieldPropType) => {
   );
 };
 
-export default function MessageBody() {
+interface MessageBodyProps {
+  groupInfo?: GroupDTO;
+  selectedChat: IFeeds;
+}
+
+export default function MessageBody({ groupInfo, selectedChat }: MessageBodyProps) {
+  const currentProfile = useAppStore((state) => state.currentProfile);
   const connectedProfile = usePushChatStore((state) => state.connectedProfile);
   const pgpPrivateKey = usePushChatStore((state) => state.pgpPrivateKey);
   const listInnerRef = useRef<HTMLDivElement>(null);
@@ -196,12 +342,16 @@ export default function MessageBody() {
   const requestsFeed = usePushChatStore((state) => state.requestsFeed);
   const setRequestsFeed = usePushChatStore((state) => state.setRequestsFeed);
   const setChatfeed = usePushChatStore((state) => state.setChatsFeed);
+  const selectedChatType = usePushChatStore((state) => state.selectedChatType);
   const chats = usePushChatStore((state) => state.chats);
   const chatsFeed = usePushChatStore((state) => state.chatsFeed);
+  const { getLensProfile } = useFetchLensProfiles();
+  const { createChatProfile } = useCreateChatProfile();
   const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
   const dates = new Set();
 
-  const selectedChat = chatsFeed[selectedChatId] || requestsFeed[selectedChatId];
+  const [groupCreatorProfile, setGroupCreatorProfile] = useState<Profile>();
+
   const selectedMessages = chats.get(selectedChatId);
   const prevSelectedId = useRef<string>('');
 
@@ -212,6 +362,12 @@ export default function MessageBody() {
   const handleApprovechatRequest = async () => {
     if (selectedChatId) {
       try {
+        if (!isProfileExist(connectedProfile)) {
+          await createChatProfile();
+        }
+        if (!decryptedPgpPvtKey) {
+          return;
+        }
         const response = await approveChatRequest({ senderAddress: selectedChatId });
         if (response) {
           const updatedRequestsfeed = { ...requestsFeed };
@@ -233,11 +389,15 @@ export default function MessageBody() {
   };
 
   const getChatCall = async () => {
+    if (!selectedChat || selectedChatId !== (selectedChat?.did ?? selectedChat?.chatId)) {
+      return;
+    }
     let threadHash = null;
-    if (!selectedMessages && selectedChat?.threadhash) {
+    const messages = chats.get(selectedChatId);
+    if (!messages && selectedChat?.threadhash) {
       threadHash = selectedChat?.threadhash;
-    } else if (chats.size && selectedMessages?.lastThreadHash) {
-      threadHash = selectedMessages?.lastThreadHash;
+    } else if (chats.size && messages?.lastThreadHash) {
+      threadHash = messages?.lastThreadHash;
     }
     if (threadHash) {
       await historyMessages({
@@ -251,6 +411,20 @@ export default function MessageBody() {
   const scrollToBottom = (behavior?: string | null) => {
     bottomRef?.current?.scrollIntoView(!behavior ? true : { behavior: 'smooth' });
   };
+
+  useEffect(() => {
+    if (!groupInfo) {
+      return;
+    }
+
+    (async function () {
+      const groupCreatorProfileId = getProfileFromDID(groupInfo.groupCreator);
+      const profile = await getLensProfile(groupCreatorProfileId);
+      if (profile) {
+        setGroupCreatorProfile(profile);
+      }
+    })();
+  }, [groupInfo]);
 
   useEffect(() => {
     if (prevSelectedId.current !== selectedChatId) {
@@ -308,7 +482,7 @@ export default function MessageBody() {
       }
       await getChatCall();
     })();
-  }, [decryptedPgpPvtKey, selectedChat, selectedChatId]);
+  }, [decryptedPgpPvtKey, selectedChat]);
 
   type RenderDataType = {
     chat: IMessageIPFS;
@@ -323,8 +497,8 @@ export default function MessageBody() {
   };
 
   return (
-    <section className="flex h-[90%] flex-col p-5 pb-3">
-      <div className="flex-grow overflow-auto px-2.5" ref={listInnerRef} onScroll={onScroll}>
+    <section className="flex h-[90%] flex-col p-3 pb-3">
+      <div className="flex-grow overflow-auto px-2" ref={listInnerRef} onScroll={onScroll}>
         {loading ? (
           <div className="flex justify-center py-2">
             <Spinner size="sm" />
@@ -336,18 +510,51 @@ export default function MessageBody() {
         <div className="flex flex-col gap-2.5">
           {selectedMessages?.messages.map((chat: IMessageIPFS, index: number) => {
             const dateNum = moment(chat.timestamp).format('ddMMyyyy');
+            let previousChat = null;
+            if (index > 0) {
+              previousChat = selectedMessages?.messages[index - 1]; // Get the previous chat
+            }
+
             return (
               <>
                 {dates.has(dateNum) ? null : renderDate({ chat, dateNum })}
+                {chat.fromDID !== connectedProfile?.did &&
+                selectedChatType === CHAT_TYPES.GROUP &&
+                (index === 0 || previousChat?.fromDID !== chat.fromDID) ? (
+                  <SenderProfileInMsg chat={chat} />
+                ) : null}
                 <Messages chat={chat} key={index} />
               </>
             );
           })}
           {requestFeedids.includes(selectedChatId) && (
-            <div className="flex w-96 rounded-e rounded-r-2xl rounded-bl-2xl border border-solid border-gray-300 p-2">
-              <div className="text-sm font-normal">
-                This is your first conversation with the sender. Please accept to continue.
-              </div>
+            <div className="flex w-fit rounded-e rounded-r-2xl rounded-bl-2xl border border-solid border-gray-300 p-2">
+              {selectedChatType === CHAT_TYPES.CHAT ? (
+                <div className="flex flex-col text-sm font-normal">
+                  <span>This is your first conversation with the sender.</span>
+                  <span>Please accept to continue.</span>
+                </div>
+              ) : selectedChatType === CHAT_TYPES.GROUP ? (
+                <div className="flex flex-col text-sm font-normal">
+                  <span>
+                    You were invited to the group by{' '}
+                    {groupCreatorProfile?.name ?? formatHandle(groupCreatorProfile?.handle)} (
+                    <span className="cursor-pointer">
+                      {groupCreatorProfile && (
+                        <UserPreview profile={groupCreatorProfile}>
+                          <Slug
+                            className="text-sm"
+                            slug={formatHandle(groupCreatorProfile.handle)}
+                            prefix="@"
+                          />
+                        </UserPreview>
+                      )}
+                    </span>
+                    ) .
+                  </span>
+                  <span> Please accept to continue messaging in this group.</span>
+                </div>
+              ) : null}
               <Image
                 className="h-12 cursor-pointer"
                 onClick={handleApprovechatRequest}
@@ -361,7 +568,7 @@ export default function MessageBody() {
       </div>
 
       <div className="relative mt-2">
-        <MessageField scrollToBottom={scrollToBottom} />
+        <MessageField scrollToBottom={scrollToBottom} selectedChat={selectedChat} />
       </div>
     </section>
   );
