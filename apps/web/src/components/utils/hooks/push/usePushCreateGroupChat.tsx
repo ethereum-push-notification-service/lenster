@@ -9,7 +9,7 @@ import type { Profile } from 'lens';
 import formatHandle from 'lib/formatHandle';
 import getAvatar from 'lib/getAvatar';
 import router from 'next/router';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { CHAIN_ID } from 'src/constants';
 import { useAppStore } from 'src/store/app';
@@ -188,7 +188,7 @@ export const MemberProfileList = ({
           ) : (
             <div />
           )}
-          {!onAddMembers && (showPendingmembers ? !isOwners(member) : isOwners(member)) && (
+          {!onAddMembers && isOwners(member) && (
             <div className="relative flex">
               <div
                 className="w-fit cursor-pointer"
@@ -239,16 +239,15 @@ export const MemberProfileList = ({
             </div>
           )}
           {/* change to icon for Add + */}
-          {onAddMembers && (
-            (showPendingmembers ? !isOwners(member) : isOwners(member)) && (
-              <div
-                className="cursor-pointer rounded-lg border border-violet-600 px-2 text-violet-600"
-                onClick={() => onAddMembers(member)}
-              >
-                <span className="text-sm">Add</span> <span className="text-base">+</span>
-              </div>
-            )
-          )}
+          {onAddMembers && isOwners(member) && (
+            <div
+              className="cursor-pointer rounded-lg border border-violet-600 px-2 text-violet-600"
+              onClick={() => onAddMembers(member)}
+            >
+              <span className="text-sm">Add</span> <span className="text-base">+</span>
+            </div>
+          )
+          }
         </div>
       ))}
     </div>
@@ -275,7 +274,13 @@ const useCreateGroup = () => {
   const chats = usePushChatStore((state) => state.chats);
   const setChat = usePushChatStore((state) => state.setChat);
   const { fetchChat } = useFetchChat();
+  const [currentProfilestate, setCurrentProfilestate] = useState<Profile[]>([]);
 
+  useEffect(() => {
+    if (currentProfile) {
+      setCurrentProfilestate([currentProfile]);
+    }
+  }, [])
   const [modalInfo, setModalInfo] = useState<{
     title: string;
     type: string;
@@ -648,7 +653,7 @@ const useCreateGroup = () => {
           </div>
           {searchedMembers && (
             <MemberProfileList
-              isOwner={adminAddresses}
+              isOwner={currentProfilestate}
               memberList={searchedMembers}
               adminAddress={adminAddresses}
               onAddMembers={onAddMembers}
@@ -661,7 +666,7 @@ const useCreateGroup = () => {
           <div className="mt-5">
             {!!members && !!members.length && (
               <MemberProfileList
-                isOwner={adminAddresses}
+                isOwner={currentProfilestate}
                 memberList={members}
                 adminAddress={adminAddresses}
                 removeUserAdmin={removeUserAdmin}

@@ -69,8 +69,6 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
     }
   }
 
-
-
   const isUserAdminaddress = async () => {
     const MembersAdminlist = groupInfo?.members ? groupInfo?.members.filter((member) => member.isAdmin === true).map((member) => member.wallet.split(":")[4]) : [];
     console.log(MembersAdminlist, 'MembersAdminlist');
@@ -81,10 +79,24 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
     }
   }
 
+
+  const pendingMembersss = async () => {
+    const pendingMembersList = groupInfo ? groupInfo?.pendingMembers.map((member) => member.wallet.split(":")[4]) : [];
+    for (const member of pendingMembersList) {
+      const result = await loadLensProfiles([member]);
+      const lensProfile: any = result?.get(member);
+      chatProfile.push(lensProfile);
+      console.log(chatProfile, 'chatProfile');
+    }
+  }
+
+
+
   useEffect(() => {
     // console.log('groupInfo');
     acceptedMember();
     isUserAdminaddress();
+    pendingMembersss();
   }, []);
 
 
@@ -180,13 +192,14 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
   };
 
   const onRemoveUpdateMembers = (profile: Profile) => {
-    const indexToRemove = groupInfo.pendingMembers.findIndex((member) => member.wallet.includes(profile.id));
+    const indexToRemove = groupInfo.members.findIndex((member) => member.wallet.includes(profile.id));
     console.log(indexToRemove, 'indexToRemove');
     if (indexToRemove !== -1) {
       groupInfo.pendingMembers.splice(indexToRemove, 1);
       console.log(`Removed member with wallet ${profile.ownedBy}`);
-      console.log(groupInfo.pendingMembers, 'groupInfo.pendingMembers');
+      console.log(groupInfo.members, 'groupInfo.pendingMembers');
       setChatprofile(chatProfile.filter((member) => member.ownedBy !== profile.ownedBy));
+      setacceptedMembers(acceptedMembers.filter((member) => member.ownedBy !== profile.ownedBy));
     }
   };
 
@@ -214,18 +227,16 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
     }
   }
 
-
-
-  const pendingMembersss = async () => {
-    const pendingMembersList = groupInfo?.pendingMembers.map((member) => member.wallet.split(":")[4]);
-    for (const member of pendingMembersList) {
-      const result = await loadLensProfiles([member]);
-      const lensProfile: any = result?.get(member);
-      chatProfile.push(lensProfile);
-      console.log(chatProfile, 'chatProfile');
+  const onRemoveUseradmin = (profile: Profile) => {
+    const indexToRemove = groupInfo.members.findIndex((member) => member.wallet.includes(profile.id));
+    console.log(indexToRemove, 'indexToRemove');
+    if (indexToRemove !== -1) {
+      groupInfo?.members.splice(indexToRemove, 1);
+      console.log(`Removed member with wallet ${profile.handle}`);
+      console.log(groupInfo?.members, 'groupInfo?.members');
+      setacceptedMembers(acceptedMembers.filter((member) => member.ownedBy !== profile.ownedBy));
     }
-  }
-
+  };
 
 
   const handleShowallPendingmembers = () => {
@@ -237,7 +248,6 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
       isUserAdminaddress();
       console.log(adminAddressesinPendingmembers, "sdsdf")
       setShowpendingMembers(true);
-      pendingMembersss();
     }
   };
 
@@ -280,7 +290,6 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
     const totalAdminaddress = [...trying2, ...tryingAdmininMembers, ...tryingAdmininpendingMembers];
     // }
 
-    await pendingMembersss();
     try {
       console.log(totalMembers, 'totalMembers');
       const response = await PushAPI.chat.updateGroup({
@@ -340,7 +349,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
                 {groupInfo.groupDescription}
               </div>
             </div>
-            <div onClick={() => acceptedMember()} className='mt-6 ml-9 border border-[#D7D7D7] rounded-2xl flex w-[85%] h-[62px] items-center flex-row'>
+            <div className='mt-6 ml-9 border border-[#D7D7D7] rounded-2xl flex w-[85%] h-[62px] items-center flex-row'>
               <div className='ml-[20px]'>
                 <Image src='/push/lock.svg' alt='lock' />
               </div>
@@ -386,7 +395,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
               </li>
             </div> */}
             <div className='mt-[90px] ml-[36px] w-[85%] items-center justify-center'>
-              <MemberProfileList isOwner={toCheckadmin} memberList={acceptedMembers} adminAddress={adminAddressesinPendingmembers} onMakeAdmin={onMakeAdminUpdateMembers} onRemoveMembers={onRemoveUpdateMembers} removeAdmin={onRemoveAdminUpdateMembers} messageUser={messageUser} />
+              <MemberProfileList isOwner={toCheckadmin} memberList={acceptedMembers} adminAddress={adminAddressesinPendingmembers} onMakeAdmin={onMakeAdminUpdateMembers} onRemoveMembers={onRemoveUpdateMembers} removeAdmin={onRemoveAdminUpdateMembers} removeUserAdmin={onRemoveUseradmin} messageUser={messageUser} />
             </div>
             <div className='flex mt-4 mb-4 items-center justify-center'>
               <Button onClick={handleUpdateGroup} className='h-12 w-64'>Update Members</Button>
@@ -408,7 +417,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
         <div className=''>
           <div className='ml-[85px] w-[350px]'>
             {showSearchmembers && (
-              <MemberProfileList isOwner={toCheckadmin} memberList={showSearchedmembertoAdd} onAddMembers={onAddMembers} adminAddress={adminAddresses} onMakeAdmin={onMakeAdmin} onRemoveMembers={onRemoveMembers} removeAdmin={removeAdmin} />
+              <MemberProfileList isOwner={toCheckadmin} removeUserAdmin={onRemoveUseradmin} memberList={showSearchedmembertoAdd} onAddMembers={onAddMembers} adminAddress={adminAddresses} onMakeAdmin={onMakeAdmin} onRemoveMembers={onRemoveMembers} removeAdmin={removeAdmin} />
             )}
           </div>
           <div className=' ml-[85px] w-[350px]'>
