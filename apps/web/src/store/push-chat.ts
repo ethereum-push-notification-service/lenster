@@ -31,6 +31,8 @@ type ChatMessagetype = { messages: IMessageIPFS[]; lastThreadHash: string | null
 export const PUSH_ENV = IS_MAINNET ? ENV.PROD : ENV.STAGING;
 
 interface IPushChatStore {
+  showPendingMembers: boolean;
+  setShowPendingMembers: (showPendingMembers: boolean) => void;
   connectedProfile: IUser | undefined;
   setConnectedProfile: (connectedProfile: IUser) => void;
   activeTab: PushTabs;
@@ -87,6 +89,8 @@ export const usePushChatStore = create<IPushChatStore>((set) => ({
       return { chats };
     });
   },
+  showPendingMembers: false,
+  setShowPendingMembers: (showPendingMembers) => set(() => ({ showPendingMembers })),
   chatsFeed: {} as { [key: string]: IFeeds },
   setChatsFeed: (chatsFeed) => set(() => ({ chatsFeed })),
   setChatFeed: (id: string, newChatFeed: IFeeds) => {

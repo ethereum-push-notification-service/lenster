@@ -16,7 +16,7 @@ import { useAppStore } from 'src/store/app';
 import { PUSH_ENV, usePushChatStore } from 'src/store/push-chat';
 import { Button, Image, Input } from 'ui';
 import { useSigner } from 'wagmi';
-
+import useOnClickOutside from '../useOnClickOutside';
 import useFetchChat from './useFetchChat';
 
 type handleSetPassFunc = () => void;
@@ -67,7 +67,7 @@ type memberProfileListType = {
   removeAdmin?: (profile: Profile) => void;
   removeUserAdmin?: (profile: Profile) => void;
   messageUser?: (profile: Profile) => void;
-  isOwner?: (profile: Profile) => void;
+  isOwner: Profile[];
 };
 
 export const MemberProfileList = ({
@@ -80,11 +80,18 @@ export const MemberProfileList = ({
   removeAdmin,
   removeUserAdmin,
   messageUser,
-  isOwner
+  isOwner,
 }: memberProfileListType) => {
   // have used this state instead of boolean since if I used boolean than I still had to check if the user id is equal to the id selected to make it unique and open only that modal which is suppose to open and not open every modal
   const [showModalgroupOptions, setShowModalgroupOptions] = useState(-1);
   const [showModalAdmingroupOptions, setShowModalAdmingroupOptions] = useState(-2);
+  const downRef = useRef(null)
+  const showPendingmembers = usePushChatStore((state) => state.showPendingMembers);
+  const handleCloseAllmodals = () => {
+    setShowModalgroupOptions(-1);
+    setShowModalAdmingroupOptions(-2);
+  }
+  useOnClickOutside(downRef, () => handleCloseAllmodals())
 
   const handleRemoveClick = (profile: Profile) => {
     if (onRemoveMembers) {
@@ -137,10 +144,16 @@ export const MemberProfileList = ({
     return isAdmin;
   };
 
-  // const isOwner = (member: Profile) => {
-  //   const isOwner = adminAddress?.some((admin) => admin.ownedBy === );
-  //   return isOwner;
-  // }
+  const currentProfile = useAppStore((s) => s.currentProfile);
+  console.log(currentProfile, "creategroupchat");
+
+  const isOwners = (member: Profile) => {
+    const isOwners = isOwner?.some((admin) => admin.id === currentProfile?.id);
+    console.log(isOwners, "isonwer");
+    return isOwners;
+  }
+  console.log(currentProfile?.id, "tryingsomething")
+  // console.log(showPendingmembers, "SHowpendingmebers")
 
   return (
     <div className="flex flex-col gap-2 py-2" onClick={handleRemoveModal}>
@@ -169,13 +182,13 @@ export const MemberProfileList = ({
             </div>
           </div>
           {isAdmin(member) && !onAddMembers ? (
-            <div className="absolute left-[250px] rounded-lg bg-[#E5DAFF] pb-1 pl-2.5 pr-2.5 pt-1 text-xs text-[#8B5CF6]">
+            <div className="absolute right-[80px] rounded-lg bg-[#E5DAFF] pb-1 pl-2.5 pr-2.5 pt-1 text-xs text-[#8B5CF6]">
               Admin
             </div>
           ) : (
             <div />
           )}
-          {!onAddMembers && (
+          {!onAddMembers && (showPendingmembers ? !isOwners(member) : isOwners(member)) && (
             <div className="relative flex">
               <div
                 className="w-fit cursor-pointer"
@@ -184,7 +197,7 @@ export const MemberProfileList = ({
                 <img className="h-10 w-9" src="/push/more.svg" alt="more icon" />
               </div>
               {showModalgroupOptions === i && (
-                <div
+                <div ref={downRef}
                   key={`${member.id}${i}`}
                   className="absolute right-[-16px] z-50 mt-[-17px] w-[260px] rounded-lg border border-gray-300 bg-white p-4 p-4"
                 >
@@ -227,12 +240,14 @@ export const MemberProfileList = ({
           )}
           {/* change to icon for Add + */}
           {onAddMembers && (
-            <div
-              className="cursor-pointer rounded-lg border border-violet-600 px-2 text-violet-600"
-              onClick={() => onAddMembers(member)}
-            >
-              <span className="text-sm">Add</span> <span className="text-base">+</span>
-            </div>
+            (showPendingmembers ? !isOwners(member) : isOwners(member)) && (
+              <div
+                className="cursor-pointer rounded-lg border border-violet-600 px-2 text-violet-600"
+                onClick={() => onAddMembers(member)}
+              >
+                <span className="text-sm">Add</span> <span className="text-base">+</span>
+              </div>
+            )
           )}
         </div>
       ))}
@@ -423,7 +438,9 @@ const useCreateGroup = () => {
   };
 
   const onProfileSelected = (profile: Profile) => {
+    console.log('profile');
     setSearchedMembers((prevMembers) => [...prevMembers, profile]);
+    console.log(searchedMembers, 'profile');
   };
 
   const onAddMembers = (profile: Profile) => {
@@ -616,11 +633,10 @@ const useCreateGroup = () => {
           <div className="mb-4 mt-1 text-center text-xl font-medium">{modalInfo.title}</div>
           <div className="flex flex-row justify-between pt-4 text-base">
             <span className="font-medium">Add users</span>
-            <span className="text-sm text-slate-500">{`0${
-              memberAddressList?.length || adminAddresses.length
-                ? memberAddressList?.length + adminAddresses.length
-                : ''
-            } / 09 Members`}</span>
+            <span className="text-sm text-slate-500">{`0${memberAddressList?.length || adminAddresses.length
+              ? memberAddressList?.length + adminAddresses.length
+              : ''
+              } / 09 Members`}</span>
           </div>
           <div className="h-fit w-full pt-4">
             <Search
@@ -632,6 +648,7 @@ const useCreateGroup = () => {
           </div>
           {searchedMembers && (
             <MemberProfileList
+              isOwner={adminAddresses}
               memberList={searchedMembers}
               adminAddress={adminAddresses}
               onAddMembers={onAddMembers}
@@ -644,6 +661,7 @@ const useCreateGroup = () => {
           <div className="mt-5">
             {!!members && !!members.length && (
               <MemberProfileList
+                isOwner={adminAddresses}
                 memberList={members}
                 adminAddress={adminAddresses}
                 removeUserAdmin={removeUserAdmin}
