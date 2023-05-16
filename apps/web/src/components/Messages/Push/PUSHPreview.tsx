@@ -189,6 +189,19 @@ const PUSHPreview = () => {
     }
   };
 
+  const handleAccountPassword = async () => {
+    try {
+      // if (!isProfileExist(connectedProfile)) {
+      //   await createChatProfile();
+      // }
+      if (decryptedPgpPvtKey) {
+        createPassword();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="flex h-full flex-col justify-between" ref={containerRef}>
       <Card className="flex h-full flex-col p-4 pt-7">
@@ -240,7 +253,7 @@ const PUSHPreview = () => {
           {showDropdown && (
             <div
               className="absolute -bottom-3 right-0 z-10 flex flex-row rounded-2xl border-2 border-gray-200 bg-white px-6 py-3"
-              onClick={() => setShowCreatePasswordModal(true)}
+              onClick={handleAccountPassword}
             >
               <BsKey size={27} style={{ transform: 'scaleX(-1)', rotate: '-45deg' }} />
               <div className="ml-2">Account Password</div>

@@ -1,15 +1,20 @@
 import { XIcon } from '@heroicons/react/outline';
 import type { ProgressHookType } from '@pushprotocol/restapi';
 import * as PushAPI from '@pushprotocol/restapi';
+import { ENCRYPTION_TYPE } from '@pushprotocol/restapi/src/lib/constants';
 import { LENSHUB_PROXY } from 'data';
 import { useCallback, useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { CHAIN_ID } from 'src/constants';
 import { useAppStore } from 'src/store/app';
 import { PUSH_ENV, usePushChatStore } from 'src/store/push-chat';
 import { Button, Image, Input, Spinner } from 'ui';
 import { useSigner } from 'wagmi';
 
+import usePushDecryption from './usePushDecryption';
+
 const totalSteps: number = 2;
+type handleSetPassFunc = () => void;
 enum ProgressType {
   INITIATE = 'INITIATE',
   INFO = 'INFO',
@@ -35,10 +40,15 @@ const useCreatePassword = () => {
   const connectedProfile = usePushChatStore((state) => state.connectedProfile);
   const setShowCreatePasswordModal = usePushChatStore((state) => state.setShowCreatePasswordModal);
   const [step, setStep] = useState<number>(0);
-  const [password, setPassword] = useState<string>('testtest');
+  const [password, setPassword] = useState<string>('');
+  const [oldPassword, setOldPassword] = useState<string>('testtest');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [modalClosable, setModalClosable] = useState<boolean>(true);
   const [modalInfo, setModalInfo] = useState<modalInfoType>(initModalInfo);
+  const [error, setError] = useState<string | null>(null);
+  const { decryptKey } = usePushDecryption();
+  const setConnectedProfile = usePushChatStore((state) => state.setConnectedProfile);
+
   // const setPgpPrivateKey = usePushChatStore((state) => state.setPgpPrivateKey);
 
   const handleProgress = useCallback(
@@ -68,9 +78,13 @@ const useCreatePassword = () => {
     setStep(0);
     setModalInfo(initModalInfo);
     setModalClosable(true);
+    setOldPassword('testtest');
+    setPassword('');
+    setModalClosable(true);
+    setShowPassword(false);
   }, []);
 
-  const createPassword = useCallback(async (): Promise<{
+  const createAccountPassword = useCallback(async (): Promise<{
     password?: string | undefined;
     error?: string | undefined;
   }> => {
@@ -96,6 +110,7 @@ const useCreatePassword = () => {
         return { password: undefined, error: undefined };
       }
       setPassword(response);
+      setOldPassword(response);
       setShowPassword(true);
       return { password: response, error: undefined };
     } catch (error: Error | any) {
@@ -104,6 +119,63 @@ const useCreatePassword = () => {
       return { password: undefined, error: error.message };
     }
   }, [currentProfile, handleProgress, reset, setShowCreatePasswordModal, signer, connectedProfile]);
+
+  const initiateProcess = useCallback(() => {
+    reset();
+  }, [reset]);
+
+  const handleNext: handleSetPassFunc = useCallback(async () => {
+    if (!signer || !currentProfile || !connectedProfile) {
+      return;
+    }
+
+    try {
+      const { decryptedKey, error } = await decryptKey({
+        encryptedText: connectedProfile?.encryptedPrivateKey,
+        additionalMeta: { NFTPGP_V1: { password } }
+      });
+
+      if (!decryptedKey) {
+        throw new Error(error);
+      }
+
+      const response = await PushAPI.user.auth.update({
+        pgpPrivateKey: decryptedKey,
+        pgpEncryptionVersion: ENCRYPTION_TYPE.NFTPGP_V1,
+        signer: signer,
+        pgpPublicKey: connectedProfile?.publicKey,
+        account: connectedProfile?.did,
+        env: PUSH_ENV,
+        additionalMeta: {
+          NFTPGP_V1: {
+            password: oldPassword
+          }
+        },
+        progressHook: handleProgress
+      });
+
+      if (response) {
+        setConnectedProfile(response);
+        toast.success('Account Password Updated successfully!');
+        setShowCreatePasswordModal(false);
+      }
+    } catch (error: Error | any) {
+      console.log(error);
+      if (error.message && error.message.includes('OperationError')) {
+        setError('Incorrect Password! Please try again!');
+      }
+      // handle error here
+      const timeout = 3000; // after this time, show modal state to 1st step
+      setTimeout(() => {
+        initiateProcess();
+      }, timeout);
+    }
+  }, [signer, currentProfile, connectedProfile, password, setConnectedProfile, initiateProcess, oldPassword]);
+
+  const createPassword = async () => {
+    setShowCreatePasswordModal(true);
+    reset();
+  };
 
   let modalContent: JSX.Element;
   switch (modalInfo.type) {
@@ -123,25 +195,23 @@ const useCreatePassword = () => {
           <div className="my-4">
             <div className="flex items-center justify-between">
               <div className="pb-2 text-base font-medium">Current Password</div>
-              {/* <span className="text-sm text-slate-500">{50 - groupName.length}</span> */}
             </div>
             <Input
               type={showPassword ? 'text' : 'password'}
               className="px-4 py-4 text-sm"
-              value={password}
+              value={oldPassword}
               autoComplete="off"
               onChange={(e) => {
-                setPassword(e.target.value), console.log(e.target.value);
+                setOldPassword(e.target.value), console.log(e.target.value);
               }}
               iconRight={
                 <div
-                  onClick={() => createPassword()}
-                  className="whitespace-nowrap text-xs font-[350] text-[#494D5F]"
+                  onClick={() => createAccountPassword()}
+                  className="cursor-pointer whitespace-nowrap text-xs font-[350] text-[#494D5F]"
                 >
                   Tap to view
                 </div>
               }
-              // onChange={(e) => setGroupName(e.target.value.slice(0, 50))}
             />
           </div>
 
@@ -151,7 +221,7 @@ const useCreatePassword = () => {
               variant="primary"
               disabled={!showPassword ? true : false}
               // disabled={isModalInputsEmpty()}
-              // onClick={handleNext}
+              onClick={() => handleNext()}
             >
               <span className="">Change Password</span>
             </Button>
