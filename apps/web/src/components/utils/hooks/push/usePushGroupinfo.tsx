@@ -44,10 +44,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
   const [chatProfilemembers, setChatprofilemembers] = useState<Profile[]>([]);
   const [acceptedMembers, setacceptedMembers] = useState<Profile[]>([]);
   const [showAdmins, setShowAdmins] = useState<Profile[]>([]);
-  // console.log(groupInfo, 'groupInfo');
-  // console.log(showSearchedmembertoAdd, 'showSearchedmembertoAdd')
-
-  // console.log(adminAddresses, 'adminAddressList');
+  const [adding, setAdding] = useState<boolean>(false);
   const pendingMemberisAdmin = async () => {
     const pendingMembersAdminlist = groupInfo?.members
       ? groupInfo?.members
@@ -117,6 +114,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
     setAdminAddresses([]);
     setChatprofilemembers([]);
     setShowpendingMembers(false);
+    setAdding(false);
   };
 
   useOnClickOutside(downRef, () => {
@@ -269,6 +267,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
     if (!signer || !currentProfile || !decryptedPgpPvtKey) {
       return;
     }
+    setAdding(true);
     showPendingmembers ? setShowpendingMembers(false) : null;
 
     const mapOfaddress = updatedMembers
@@ -322,6 +321,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
       handleCloseall();
     } catch (error: Error | any) {
       console.log(error.message);
+      setAdding(false);
       toast.error(error.message)
     }
   };
@@ -438,7 +438,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
             </div>
             <div className="mb-4 mt-4 flex items-center justify-center">
               <Button onClick={handleUpdateGroup} className="h-12 w-64">
-                Update Members
+                {adding ? `Updating Members...` : `Update Members`}
               </Button>
             </div>
           </div>
@@ -487,7 +487,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
           {showSearchmembers && (
             <div className="mb-4 mt-2 flex items-center justify-center">
               <Button onClick={handleUpdateGroup} className="bottom-16 h-12 w-64">
-                Add members
+                {adding ? `Adding...` : `Add Members`}
               </Button>
             </div>
           )}
