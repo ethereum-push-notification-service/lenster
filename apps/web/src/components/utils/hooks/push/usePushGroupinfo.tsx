@@ -116,7 +116,6 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
     setUpdatedMembers([]);
     setAdminAddresses([]);
     setChatprofilemembers([]);
-    // setChatprofile([]);
     setShowpendingMembers(false);
   };
 
@@ -332,7 +331,6 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
     setShowSearchedmembertoAdd([]);
     setUpdatedMembers([]);
     setShowpendingMembers(false);
-    setChatprofile([]);
   };
 
   console.log(showPendingmembers, 'showPendingmembers');
