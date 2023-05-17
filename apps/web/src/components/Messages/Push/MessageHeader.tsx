@@ -72,12 +72,18 @@ export default function MessageHeader({ profile, groupInfo }: MessageHeaderProps
           </div>
         )}
         {groupInfo && showModal && (
-          <div ref={downRef} className='absolute top-36 ml-[-80px] px-4 w-40 border border-[#BAC4D6] rounded-2xl p-2 cursor-pointer flex bg-white' onClick={() => { setShowGroupinfoModal(true); setShowModal(false) }}>
-
+          <div
+            ref={downRef}
+            className="absolute top-36 ml-[-80px] flex w-40 cursor-pointer items-center rounded-2xl border border-[#BAC4D6] bg-white p-2 px-4"
+            onClick={() => {
+              setShowGroupinfoModal(true);
+              setShowModal(false);
+            }}
+          >
             <div>
-              <Image className="mr-1 h-8 w-8" src="/push/info.svg" alt="group info settings" />
+              <Image className="mr-1 h-6 w-6" src="/push/info.svg" alt="group info settings" />
             </div>
-            <div className="items-center text-[18px] text-[#657795]">Group Info</div>
+            <div className="items-center text-[17px] font-[400] text-[#657795]">Group Info</div>
           </div>
         )}
         {useGroupInfoModal({
