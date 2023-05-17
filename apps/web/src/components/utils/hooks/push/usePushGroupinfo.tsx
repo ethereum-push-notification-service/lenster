@@ -116,7 +116,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
     setUpdatedMembers([]);
     setAdminAddresses([]);
     setChatprofilemembers([]);
-    setChatprofile([]);
+    // setChatprofile([]);
     setShowpendingMembers(false);
   };
 
@@ -142,6 +142,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
       updatedMembers.length < 9
     ) {
       setUpdatedMembers((prevMembers) => [...prevMembers, profile]);
+      setChatprofile((prevMembers) => [...prevMembers, profile]);
     }
   };
   // console.log(updatedMembers, 'updatedMembers');
@@ -322,6 +323,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
       handleCloseall();
     } catch (error: Error | any) {
       console.log(error.message);
+      toast.error(error.message)
     }
   };
 
