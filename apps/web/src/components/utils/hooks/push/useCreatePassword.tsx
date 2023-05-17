@@ -38,6 +38,8 @@ const useCreatePassword = () => {
   const { data: signer } = useSigner();
   const currentProfile = useAppStore((state) => state.currentProfile);
   const connectedProfile = usePushChatStore((state) => state.connectedProfile);
+  const setPasswordStore = usePushChatStore((state) => state.setPassword);
+  const { decrypted: decryptedPassword } = usePushChatStore((state) => state.password);
   const setShowCreatePasswordModal = usePushChatStore((state) => state.setShowCreatePasswordModal);
   const [step, setStep] = useState<number>(0);
   const [password, setPassword] = useState<string>('');
@@ -45,6 +47,7 @@ const useCreatePassword = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [modalClosable, setModalClosable] = useState<boolean>(true);
   const [modalInfo, setModalInfo] = useState<modalInfoType>(initModalInfo);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const { decryptKey } = usePushDecryption();
   const setConnectedProfile = usePushChatStore((state) => state.setConnectedProfile);
@@ -82,13 +85,24 @@ const useCreatePassword = () => {
     setPassword('');
     setModalClosable(true);
     setShowPassword(false);
+    setLoading(false);
   }, []);
 
-  const createAccountPassword = useCallback(async (): Promise<{
+  const viewAccountPassword = useCallback(async (): Promise<{
     password?: string | undefined;
     error?: string | undefined;
   }> => {
-    reset();
+    if (decryptedPassword) {
+      setPassword(decryptedPassword);
+      setPasswordStore({
+        decrypted: decryptedPassword
+      });
+      setOldPassword(decryptedPassword);
+      setShowPassword(true);
+      return { password: decryptedPassword, error: undefined };
+    } else {
+      reset();
+    }
     if (!connectedProfile || !signer || !currentProfile) {
       return { password: undefined, error: undefined };
     }
@@ -110,6 +124,9 @@ const useCreatePassword = () => {
         return { password: undefined, error: undefined };
       }
       setPassword(response);
+      setPasswordStore({
+        decrypted: response
+      });
       setOldPassword(response);
       setShowPassword(true);
       return { password: response, error: undefined };
@@ -118,7 +135,15 @@ const useCreatePassword = () => {
       // handle error here
       return { password: undefined, error: error.message };
     }
-  }, [currentProfile, handleProgress, reset, setShowCreatePasswordModal, signer, connectedProfile]);
+  }, [
+    currentProfile,
+    handleProgress,
+    reset,
+    setShowCreatePasswordModal,
+    signer,
+    connectedProfile,
+    decryptedPassword
+  ]);
 
   const initiateProcess = useCallback(() => {
     reset();
@@ -139,6 +164,7 @@ const useCreatePassword = () => {
         throw new Error(error);
       }
 
+      setLoading(true);
       const response = await PushAPI.user.auth.update({
         pgpPrivateKey: decryptedKey,
         pgpEncryptionVersion: ENCRYPTION_TYPE.NFTPGP_V1,
@@ -156,6 +182,9 @@ const useCreatePassword = () => {
 
       if (response) {
         setConnectedProfile(response);
+        setPasswordStore({
+          decrypted: oldPassword
+        });
         toast.success('Account Password Updated successfully!');
         setShowCreatePasswordModal(false);
       }
@@ -169,8 +198,19 @@ const useCreatePassword = () => {
       setTimeout(() => {
         initiateProcess();
       }, timeout);
+    } finally {
+      setLoading(false);
     }
-  }, [signer, currentProfile, connectedProfile, password, setConnectedProfile, initiateProcess, oldPassword]);
+  }, [
+    signer,
+    currentProfile,
+    connectedProfile,
+    password,
+    setConnectedProfile,
+    initiateProcess,
+    oldPassword,
+    decryptedPassword
+  ]);
 
   const createPassword = async () => {
     setShowCreatePasswordModal(true);
@@ -206,7 +246,7 @@ const useCreatePassword = () => {
               }}
               iconRight={
                 <div
-                  onClick={() => createAccountPassword()}
+                  onClick={() => viewAccountPassword()}
                   className="cursor-pointer whitespace-nowrap text-xs font-[350] text-[#494D5F]"
                 >
                   Tap to view
@@ -223,7 +263,10 @@ const useCreatePassword = () => {
               // disabled={isModalInputsEmpty()}
               onClick={() => handleNext()}
             >
-              <span className="">Change Password</span>
+              <span className="flex">
+                Change Password{' '}
+                {loading && <Spinner variant="primary" size="xs" className="ml-2 self-center" />}
+              </span>
             </Button>
           </div>
         </div>

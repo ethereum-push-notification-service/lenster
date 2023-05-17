@@ -1,4 +1,5 @@
 import Search from '@components/Messages/Push/Search';
+import Slug from '@components/Shared/Slug';
 import useCreateChatProfile from '@components/utils/hooks/push/useCreateChatProfile';
 import useCreatePassword from '@components/utils/hooks/push/useCreatePassword';
 import useFetchRequests from '@components/utils/hooks/push/useFetchRequests';
@@ -9,6 +10,7 @@ import usePushDecryption from '@components/utils/hooks/push/usePushDecryption';
 import useUpgradeChatProfile from '@components/utils/hooks/push/useUpgradeChatProfile';
 import { Trans } from '@lingui/macro';
 import type { IFeeds } from '@pushprotocol/restapi';
+import formatHandle from 'lib/formatHandle';
 import getAvatar from 'lib/getAvatar';
 import router from 'next/router';
 import { useEffect, useRef, useState } from 'react';
@@ -252,7 +254,7 @@ const PUSHPreview = () => {
           {/* sections for requests */}
           {showDropdown && (
             <div
-              className="absolute -bottom-3 right-0 z-10 flex flex-row rounded-2xl border-2 border-gray-200 bg-white px-6 py-3"
+              className="absolute -bottom-3 right-0 z-10 flex cursor-pointer flex-row rounded-2xl border-2 border-gray-200 bg-white px-6 py-3"
               onClick={handleAccountPassword}
             >
               <BsKey size={27} style={{ transform: 'scaleX(-1)', rotate: '-45deg' }} />
@@ -262,15 +264,20 @@ const PUSHPreview = () => {
         </div>
 
         <div className="flex flex-row items-center border-t-2 border-[#E4E8EF] pt-2">
-          <Image
-            src={getAvatar(currentProfile)}
-            loading="lazy"
-            className="h-12 w-12 rounded-full border bg-gray-200 dark:border-gray-700"
-            height={40}
-            width={40}
-            alt="Profile Picture"
-          />
-          <div className="ml-2 text-sm">{currentProfile?.handle}</div>
+          <div className="flex flex-row items-center space-x-3">
+            <Image
+              src={getAvatar(currentProfile)}
+              loading="lazy"
+              className="h-12 w-12 rounded-full border bg-gray-200 dark:border-gray-700"
+              height={40}
+              width={40}
+              alt="Profile Picture"
+            />
+            <div className="flex flex-col">
+              <p className="text-base">{currentProfile?.name ?? formatHandle(currentProfile?.handle)}</p>
+              <Slug className="text-sm" slug={formatHandle(currentProfile?.handle)} prefix="@" />
+            </div>
+          </div>
 
           <div
             className="relative ml-auto h-fit w-fit cursor-pointer"
