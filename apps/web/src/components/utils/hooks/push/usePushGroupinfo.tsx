@@ -391,24 +391,24 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
                 </div>
               </div>
             </div>
-            <div className="absolute z-50 ml-9 mt-[30px] max-h-[50vh] min-h-[60px] w-[85%] cursor-pointer rounded-2xl border border-[#D7D7D7] text-lg font-normal ">
+            <div className="ml-9 mt-[30px] max-h-[50vh] min-h-[60px] w-[85%] cursor-pointer rounded-2xl border border-[#D7D7D7] text-lg font-normal ">
               <div onClick={handleShowallPendingmembers}>
-                <div className="ml-4 flex w-28 pb-1">
-                  <div className="absolute mt-[14px] text-[18px]">Pending requests</div>
-                  <div className="pt-0.25 pb-0.25 bg-brand-500 absolute left-48 ml-[-20px] mt-[14px] rounded-lg pl-3 pr-3 text-white">
+                <div className="pb-4 mt-4 ml-4 flex w-[200px]">
+                  <div className="text-[18px]">Pending requests</div>
+                  <div className="pt-0.25 pb-0.25 bg-brand-500 absolute left-48 ml-2 mt-0 rounded-lg pl-3 pr-3 text-white">
                     {groupInfo?.pendingMembers.length}
                   </div>
                 </div>
                 <div>
                   <Image
-                    className={`mt-[14px] cursor-pointer ${showPendingmembers ? 'ml-[380px] rotate-180' : 'ml-[380px]'
+                    className={`mt-[-40px] cursor-pointer ${showPendingmembers ? 'ml-[380px] rotate-180' : 'ml-[380px]'
                       }`}
                     src="/push/CaretRight.svg"
                     alt="arrow"
                   />
                 </div>
               </div>
-              <div className=" z-50 ml-[0px] mt-2 max-h-[12rem] w-[100%] items-center justify-center overflow-auto bg-white">
+              <div className=" z-50 max-h-[12rem] w-[100%] items-center justify-center overflow-auto bg-white">
                 {showPendingmembers && (
                   <MemberProfileList
                     isOwner={[]}
@@ -424,7 +424,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
                 {showPendingmembers && <MemberProfileList isOwner={toCheckadmin} memberList={chatProfile} adminAddress={adminAddressesinPendingmembers} onMakeAdmin={onMakeAdminUpdateMembers} onRemoveMembers={onRemoveUpdateMembers} removeAdmin={onRemoveAdminUpdateMembers} messageUser={messageUser} />}
               </li>
             </div> */}
-            <div className="ml-[36px] mt-[90px] w-[85%] items-center justify-center">
+            <div className="ml-[36px] mt-[10px] w-[85%] items-center justify-center">
               <MemberProfileList
                 isOwner={toCheckadmin}
                 memberList={acceptedMembers}
