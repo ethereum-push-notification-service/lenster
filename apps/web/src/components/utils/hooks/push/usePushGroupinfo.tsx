@@ -43,13 +43,12 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
   const [chatProfile, setChatprofile] = useState<Profile[]>([]);
   const [chatProfilemembers, setChatprofilemembers] = useState<Profile[]>([]);
   const [acceptedMembers, setacceptedMembers] = useState<Profile[]>([]);
-  const [updateResponse, setUpdateresponse] = useState<GroupDTO>();
   const [adding, setAdding] = useState<boolean>(false);
   const pendingMemberisAdmin = async () => {
     const pendingMembersAdminlist = groupInfo?.members
       ? groupInfo?.members
-        .filter((member) => member.isAdmin === true)
-        .map((member) => member.wallet.split(':')[4])
+          .filter((member) => member.isAdmin === true)
+          .map((member) => member.wallet.split(':')[4])
       : [];
     // console.log(pendingMembersAdminlist, 'pendingMembersAdminlist');
     for (const member of pendingMembersAdminlist) {
@@ -80,8 +79,8 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
   const isUserAdminaddress = async () => {
     const MembersAdminlist = groupInfo?.members
       ? groupInfo?.members
-        .filter((member) => member.isAdmin === true)
-        .map((member) => member.wallet.split(':')[4])
+          .filter((member) => member.isAdmin === true)
+          .map((member) => member.wallet.split(':')[4])
       : [];
     // console.log(MembersAdminlist, 'MembersAdminlist');
     for (const member of MembersAdminlist) {
@@ -283,8 +282,8 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
 
     const alreadyMembers = groupInfo?.members
       ? groupInfo?.members
-        .filter((member) => member.wallet !== currentProfile?.ownedBy)
-        .map((member) => member.wallet)
+          .filter((member) => member.wallet !== currentProfile?.ownedBy)
+          .map((member) => member.wallet)
       : [];
 
     const alreadyPendingmembers = groupInfo?.pendingMembers
@@ -322,19 +321,14 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
         pgpPrivateKey: decryptedPgpPvtKey, //decrypted private key
         env: PUSH_ENV
       });
-      setUpdateresponse(response);
-      console.log(response, 'response');
-      console.log(updateResponse);
       toast.success('Group updated successfully');
       handleCloseall();
     } catch (error: Error | any) {
       console.log(error.message);
       setAdding(false);
-      toast.error(error.message)
+      toast.error(error.message);
     }
   };
-
-  console.log(updateResponse, 'updateResponse')
 
   const handleGoback = () => {
     setShowsearchMembers(false);
@@ -372,7 +366,9 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
               <div className="relative left-4 top-1 w-[200px]">
                 <p className="text-[15px] font-[500]">{groupInfo.groupName}</p>
                 <p className="text-[13px] font-[400] text-[#27272A]">
-                  {updateResponse ? (updateResponse.members.length + (updateResponse.pendingMembers ? updateResponse.pendingMembers.length : 0)) : (groupInfo.members.length + (groupInfo.pendingMembers ? groupInfo.pendingMembers.length : 0))} members
+                  {groupInfo.members.length +
+                    (groupInfo.pendingMembers ? groupInfo.pendingMembers.length : 0)}{' '}
+                  members
                 </p>
               </div>
             </div>
@@ -414,13 +410,14 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
                 <div className="ml-4 mt-4 flex w-[200px] pb-4">
                   <div className="text-[15px] font-[500]">Pending requests</div>
                   <div className="bg-brand-500 absolute left-44 ml-2 mt-0 h-fit rounded-lg pl-3 pr-3 text-[14px] font-[500] text-white">
-                    {updateResponse ? updateResponse.pendingMembers.length : groupInfo?.pendingMembers.length}
+                    {groupInfo?.pendingMembers.length}
                   </div>
                 </div>
                 <div>
                   <Image
-                    className={`mt-[-40px] cursor-pointer ${showPendingmembers ? 'ml-[380px] rotate-180' : 'ml-[380px]'
-                      }`}
+                    className={`mt-[-40px] cursor-pointer ${
+                      showPendingmembers ? 'ml-[380px] rotate-180' : 'ml-[380px]'
+                    }`}
                     src="/push/CaretRight.svg"
                     alt="arrow"
                   />
