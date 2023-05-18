@@ -8,6 +8,7 @@ import getAvatar from 'lib/getAvatar';
 import React, { useEffect, useState } from 'react';
 import { CHAT_TYPES, usePushChatStore } from 'src/store/push-chat';
 import { Image } from 'ui';
+import usePushoutgoingCall from '@components/utils/hooks/push/usePushoutgoingCall';
 
 import ModifiedImage from './ModifiedImage';
 
@@ -29,6 +30,8 @@ export default function MessageHeader({
   const selectedChatId = usePushChatStore((state) => state.selectedChatId);
   const selectedChatType = usePushChatStore((state) => state.selectedChatType);
   const lensProfiles = usePushChatStore((state) => state.lensProfiles);
+
+  const { openModal, closeModal, CallModal, showCallmodal } = usePushoutgoingCall();
 
   const deprecatedChat = selectedChat?.deprecated ? true : false;
 
@@ -107,10 +110,15 @@ export default function MessageHeader({
           </div>
         )}
         <img
+          onClick={openModal}
           className="cursor-pointer"
           src="/push/video.svg"
           alt="video icon"
         />
+        {profile && (
+          
+        <CallModal />
+        )}
         {profile &&
           (following ? (
             <Unfollow profile={profile!} setFollowing={setFollowing} showText />
