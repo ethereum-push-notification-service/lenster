@@ -1,6 +1,7 @@
 import Follow from '@components/Shared/Follow';
 import Slug from '@components/Shared/Slug';
 import Unfollow from '@components/Shared/Unfollow';
+import usePushOutgoingCall from '@components/utils/hooks/push/usePushOutgoingCall';
 import type { GroupDTO, IFeeds } from '@pushprotocol/restapi';
 import type { Profile } from 'lens';
 import formatHandle from 'lib/formatHandle';
@@ -8,7 +9,6 @@ import getAvatar from 'lib/getAvatar';
 import React, { useEffect, useState } from 'react';
 import { CHAT_TYPES, usePushChatStore } from 'src/store/push-chat';
 import { Image } from 'ui';
-import usePushoutgoingCall from '@components/utils/hooks/push/usePushoutgoingCall';
 
 import ModifiedImage from './ModifiedImage';
 
@@ -31,7 +31,8 @@ export default function MessageHeader({
   const selectedChatType = usePushChatStore((state) => state.selectedChatType);
   const lensProfiles = usePushChatStore((state) => state.lensProfiles);
 
-  const { openModal, closeModal, CallModal, showCallmodal } = usePushoutgoingCall();
+  const { openModal, closeModal, CallModal, showCallModal } =
+  usePushOutgoingCall();
 
   const deprecatedChat = selectedChat?.deprecated ? true : false;
 
@@ -109,15 +110,16 @@ export default function MessageHeader({
             />
           </div>
         )}
-        <img
-          onClick={openModal}
-          className="cursor-pointer"
-          src="/push/video.svg"
-          alt="video icon"
-        />
         {profile && (
-          
-        <CallModal />
+          <div>
+            <img
+              onClick={openModal}
+              className="cursor-pointer"
+              src="/push/video.svg"
+              alt="video icon"
+            />
+            <CallModal />
+          </div>
         )}
         {profile &&
           (following ? (

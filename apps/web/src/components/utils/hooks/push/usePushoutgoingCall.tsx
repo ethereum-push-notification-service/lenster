@@ -1,65 +1,63 @@
-import { Modal, Image } from "ui";
-import { useRef, useState } from "react";
-import useOnClickOutside from "../useOnClickOutside";
-import Video from "@components/Video/Video";
-import type { Profile } from 'lens';
-import ProfileInfo from "@components/Video/ProfileInfo";
-import CallButtons from "@components/Video/CallButtons";
+import CallButton from '@components/Messages/Push/Video/CallButton';
+import ProfileInfo from '@components/Messages/Push/Video/ProfileInfo';
+import Video from '@components/Messages/Push/Video/Video';
+import { useRef, useState } from 'react';
+import { Image, Modal } from 'ui';
 
-const usePushoutgoingCall = () => {
-    const [showCallmodal, setShowcallModal] = useState(false);
+const usePushOutgoingCall = () => {
+  const [showCallModal, setShowCallModal] = useState(false);
 
-    const openModal = () => {
-        setShowcallModal(true);
+  const openModal = () => {
+    setShowCallModal(true);
+  };
+
+  const closeModal = () => {
+    setShowCallModal(false);
+  };
+
+  const CallModal = () => {
+    const downRef = useRef(null);
+    const handleCloseall = () => {
+      if (showCallModal) {
+        setShowCallModal(false);
+      }
     };
-
-    const closeModal = () => {
-        setShowcallModal(false);
-    };
-
-    const CallModal = () => {
-        const downRef = useRef(null);
-        const handleCloseall = () => {
-            if (showCallmodal) {
-                setShowcallModal(false);
-            }
-        }
-        useOnClickOutside(downRef, handleCloseall)
-        return (
-            <div>
-                <Modal size="md" show={showCallmodal}>
-                    <div ref={downRef} className="my-4">
-                        <span className="sm:static md:static absolute left-0 right-0 m-auto top-5 flex items-center justify-center">
-                            <div className="mb-2 bg-[#F4F4F5] p-2 rounded-lg flex items-center">
-                                <Image className="mr-2" src="/push/lock.svg" alt="lock" />
-                                <span className="text-[#9E9EA9] text-[13px]">End-to-end encrypted</span>
-                            </div>
-                        </span>
-                        <div className="mt-2">
-                            <ProfileInfo />
-                        </div>
-                        <span className="mt-2 sm:static md:static absolute left-0 right-0 m-auto top-32 text-[15px] flex items-center justify-center mb-2">
-                            Calling...
-                        </span>
-                        <div>
-                            <Video />
-                        </div>
-                        <div>
-                            <CallButtons />
-                        </div>
-                    </div>
-                </Modal>
+    return (
+      <div>
+        <Modal size="md" show={showCallModal}>
+          <div ref={downRef} className="my-4">
+            <span className="absolute left-0 right-0 top-5 m-auto flex items-center justify-center sm:static md:static">
+              <div className="mb-2 flex items-center rounded-lg bg-[#F4F4F5] px-2 py-0.5 sm:p-2 md:p-2">
+                <Image className="mr-2 h-2 " src="/push/lock.svg" alt="lock" />
+                <span className="text-[10px] text-[#9E9EA9] sm:text-[13px] md:text-[15px]">
+                  End-to-end encrypted
+                </span>
+              </div>
+            </span>
+            <div className="mt-2">
+              <ProfileInfo />
             </div>
+            <span className="absolute left-0 right-0 top-[105px] m-auto mb-2 mt-2 flex items-center justify-center text-[15px] sm:static md:static">
+              Calling...
+            </span>
+            <div>
+              <Video />
+            </div>
+            <div>
+              <CallButton />
+            </div>
+          </div>
+        </Modal>
+      </div>
+    );
+  };
 
-        );
-    };
-
-    return {
-        openModal,
-        closeModal,
-        CallModal,
-        showCallmodal,
-    };
+  return {
+    openModal,
+    closeModal,
+    CallModal,
+    showCallModal
+  };
 };
 
-export default usePushoutgoingCall;
+export default usePushOutgoingCall;
