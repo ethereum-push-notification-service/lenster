@@ -1,6 +1,7 @@
 import Follow from '@components/Shared/Follow';
 import Slug from '@components/Shared/Slug';
 import Unfollow from '@components/Shared/Unfollow';
+import usePushIncomingCall from '@components/utils/hooks/push/usePushIncomingCall';
 import usePushOutgoingCall from '@components/utils/hooks/push/usePushOutgoingCall';
 import type { GroupDTO, IFeeds } from '@pushprotocol/restapi';
 import type { Profile } from 'lens';
@@ -20,19 +21,16 @@ interface MessageHeaderProps {
 
 const ImageWithDeprecatedIcon = ModifiedImage(Image);
 
-export default function MessageHeader({
-  profile,
-  groupInfo,
-  selectedChat
-}: MessageHeaderProps) {
+export default function MessageHeader({ profile, groupInfo, selectedChat }: MessageHeaderProps) {
   // get the connected profile
   const [following, setFollowing] = useState(false);
   const selectedChatId = usePushChatStore((state) => state.selectedChatId);
   const selectedChatType = usePushChatStore((state) => state.selectedChatType);
   const lensProfiles = usePushChatStore((state) => state.lensProfiles);
 
-  const { openModal, closeModal, CallModal, showCallModal } =
-  usePushOutgoingCall();
+  // const { openModal, closeModal, IncomingCallModal, showCallModal } = usePushOutgoingCall();
+  const { openIncomingCallModal, closeIncomingCallModal, IncomingCallModal, showIncomingCallModal } =
+    usePushIncomingCall();
 
   const deprecatedChat = selectedChat?.deprecated ? true : false;
 
@@ -75,14 +73,8 @@ export default function MessageHeader({
               />
             )}
             <div className="flex flex-col">
-              <p className="text-base">
-                {profile?.name ?? formatHandle(profile?.handle)}
-              </p>
-              <Slug
-                className="text-sm"
-                slug={formatHandle(profile?.handle)}
-                prefix="@"
-              />
+              <p className="text-base">{profile?.name ?? formatHandle(profile?.handle)}</p>
+              <Slug className="text-sm" slug={formatHandle(profile?.handle)} prefix="@" />
             </div>
           </div>
         )}{' '}
@@ -103,22 +95,21 @@ export default function MessageHeader({
       <div className="flex items-center gap-4	">
         {groupInfo && (
           <div className="w-fit cursor-pointer">
-            <Image
-              className="h-10 w-9"
-              src="/push/more.svg"
-              alt="group info settings"
-            />
+            <Image className="h-10 w-9" src="/push/more.svg" alt="group info settings" />
           </div>
         )}
         {profile && (
           <div>
+            {/* <img onClick={openModal} className="cursor-pointer" src="/push/video.svg" alt="video icon" /> */}
+            {/* <CallModal /> */}
+
             <img
-              onClick={openModal}
+              onClick={openIncomingCallModal}
               className="cursor-pointer"
               src="/push/video.svg"
               alt="video icon"
             />
-            <CallModal />
+            <IncomingCallModal />
           </div>
         )}
         {profile &&
