@@ -1,9 +1,9 @@
 import Follow from '@components/Shared/Follow';
 import Unfollow from '@components/Shared/Unfollow';
 import UserProfile from '@components/Shared/UserProfile';
-// import useGroupInfoModal from '@components/utils/hooks/push/usePushGroupInfo';
+import useGroupInfoModal from '@components/utils/hooks/push/usePushGroupInfo';
 import useOnClickOutside from '@components/utils/hooks/useOnClickOutside';
-import type { GroupDTO } from '@pushprotocol/restapi';
+import type { GroupDTO, IFeeds } from '@pushprotocol/restapi';
 import type { Profile } from 'lens';
 import React, { useEffect, useRef, useState } from 'react';
 import { CHAT_TYPES, usePushChatStore } from 'src/store/push-chat';
@@ -13,9 +13,15 @@ interface MessageHeaderProps {
   profile?: Profile;
   groupInfo?: GroupDTO;
   setGroupInfo?: (groupInfo: GroupDTO) => void;
+  selectedChat: IFeeds;
 }
 
-export default function MessageHeader({ profile, groupInfo, setGroupInfo }: MessageHeaderProps) {
+export default function MessageHeader({
+  profile,
+  groupInfo,
+  setGroupInfo,
+  selectedChat
+}: MessageHeaderProps) {
   // get the connected profile
   const [following, setFollowing] = useState(false);
   const selectedChatId = usePushChatStore((state) => state.selectedChatId);
@@ -87,12 +93,12 @@ export default function MessageHeader({ profile, groupInfo, setGroupInfo }: Mess
             <div className="items-center text-[17px] font-[400] text-[#657795]">Group Info</div>
           </div>
         )}
-        {/* {useGroupInfoModal({
+        {useGroupInfoModal({
           groupInfo: groupInfo,
           setGroupInfo: setGroupInfo,
           show: showGroupInfoModal,
           setShow: setShowGroupInfoModal
-        })} */}
+        })}
       </div>
     </section>
   );

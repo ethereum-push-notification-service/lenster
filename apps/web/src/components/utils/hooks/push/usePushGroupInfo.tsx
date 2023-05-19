@@ -1,11 +1,15 @@
+import Search from '@components/Shared/Navbar/Search';
 import type { GroupDTO } from '@pushprotocol/restapi';
 import * as PushAPI from '@pushprotocol/restapi';
+import { LENSHUB_PROXY } from 'data/constants';
 import type { Profile } from 'lens';
+import router from 'next/router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
+import { CHAIN_ID } from 'src/constants';
 import { useAppStore } from 'src/store/app';
 import { PUSH_ENV, usePushChatStore } from 'src/store/push-chat';
-import { Image, Modal } from 'ui';
+import { Button, Image, Modal } from 'ui';
 
 import useOnClickOutside from '../useOnClickOutside';
 import useFetchLensProfiles from './useFetchLensProfiles';
@@ -24,7 +28,7 @@ type MembersType = {
 };
 
 export const useGroupInfoModal = (options: GroupInfoModalProps) => {
-  const { groupInfo, show, setShow } = options;
+  const { groupInfo, setGroupInfo, show, setShow } = options;
   const downRef = useRef(null);
   const currentProfile = useAppStore((state) => state.currentProfile);
   const connectedProfile = usePushChatStore((state) => state.connectedProfile);
@@ -32,36 +36,96 @@ export const useGroupInfoModal = (options: GroupInfoModalProps) => {
   const pgpPrivateKey = usePushChatStore((state) => state.pgpPrivateKey);
   const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
 
-  const [chatProfile, setChatprofile] = useState<Profile[]>([]);
+  const [chatProfile, setChatProfile] = useState<Profile[]>([]);
   const [adminAddressesinPendingMembers, setAdminAddressesinPendingMembers] = useState<Profile[]>([]);
+  const [showPendingMembers, setShowPendingMembers] = useState<boolean>(false);
+  const [acceptedMembers, setAcceptedMembers] = useState<Profile[]>([]);
+  const [toCheckAdmin, setToCheckAdmin] = useState<Profile[]>([]);
+  const [showSearchMembers, setShowSearchMembers] = useState<boolean>(false);
+  const [showSearchedMemberToAdd, setShowSearchedMemberToAdd] = useState<Array<Profile>>([]);
+  const [adminAddresses, setAdminAddresses] = useState<Profile[]>([]);
+  const [updatedMembers, setUpdatedMembers] = useState<Profile[]>([]);
+  const [adding, setAdding] = useState<boolean>(false);
   // console.log(groupInfo, 'did it change');
 
   const closeModal = () => {
     setShow(false);
+    setShowSearchMembers(false);
+    setShowSearchedMemberToAdd([]);
+    setUpdatedMembers([]);
+    setAdminAddresses([]);
+    // setChatProfile([]);
+    setShowPendingMembers(false);
+    setAdding(false);
   };
 
   useOnClickOutside(downRef, () => {
     closeModal();
   });
 
+  const handleGoback = () => {
+    setShowSearchMembers(false);
+    setShowSearchedMemberToAdd([]);
+    setUpdatedMembers([]);
+    setShowPendingMembers(false);
+  };
+
+  const handleUpdateGroup = async ({ totalMembers, totalAdminAddress }: MembersType) => {
+    if (!currentProfile || !decryptedPgpPvtKey) {
+      return;
+    }
+
+    try {
+      const response = await PushAPI.chat.updateGroup({
+        groupName: groupInfo?.groupName || '',
+        chatId: groupInfo?.chatId || '',
+        groupDescription: groupInfo?.groupDescription as string,
+        members: totalMembers,
+        groupImage: groupInfo?.groupImage ? groupInfo?.groupImage : '',
+        admins: totalAdminAddress, // pass the adminAddresses array here
+        account: groupInfo?.groupCreator,
+        pgpPrivateKey: decryptedPgpPvtKey, //decrypted private key
+        env: PUSH_ENV
+      });
+      // toast.success('Group updated successfully');
+      if (response && setGroupInfo) {
+        setGroupInfo(response);
+      }
+      // handleCloseall();
+      return response;
+    } catch (error: Error | any) {
+      console.log(error.message);
+      // setAdding(false);
+      toast.error(error.message);
+    }
+  };
+
+  const updateGroupMembers = async () => {
+    console.log('add them all');
+    setAdding(true);
+
+    const oldPendingMembers = chatProfile?.map(
+      (member) => `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${member.id}`
+    );
+
+    const adminMembers = acceptedMembers?.map(
+      (member) => `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${member.id}`
+    );
+
+    // eslint-disable-next-line no-use-before-define
+    let getResponse = await handleUpdateGroup({
+      totalMembers: [...oldPendingMembers, ...adminMembers],
+      totalAdminAddress: [...adminMembers]
+    });
+    toast.success('Group updated successfully');
+    setAdding(false);
+    closeModal();
+  };
+
   // ask Nilesh about this
   const isAccountOwnerAdmin = groupInfo?.members?.some(
     (member) => member?.wallet === connectedProfile?.did && member?.isAdmin
   );
-
-  // const pendingMemberisAdmin = async () => {
-  //   const pendingMembersAdminlist = groupInfo?.members
-  //     ? groupInfo?.members
-  //         .filter((member) => member.isAdmin === true)
-  //         .map((member) => member.wallet.split(':')[4])
-  //     : [];
-  //   for (const member of pendingMembersAdminlist) {
-  //     const result = await loadLensProfiles([member]);
-  //     const lensProfile: any = result?.get(member);
-  //     setAdminAddressesinPendingMembers((current) => [...current, lensProfile]);
-  //   }
-  //   console.log(adminAddressesinPendingMembers, 'adminAddressesinPendingmemberssss');
-  // };
 
   const pendingMemberisAdmin = useCallback(async () => {
     const pendingMembersAdminlist = groupInfo?.members
@@ -74,27 +138,48 @@ export const useGroupInfoModal = (options: GroupInfoModalProps) => {
       const lensProfile: any = result?.get(member);
       setAdminAddressesinPendingMembers((current) => [...current, lensProfile]);
     }
-    // console.log(adminAddressesinPendingMembers, 'adminAddressesinPendingmemberssss');
   }, [groupInfo]);
 
   const acceptedMember = useCallback(async () => {
+    console.log('start');
     let membersList = [];
     let allPendingMembersList = [];
     await pendingMemberisAdmin();
+
+    //members list
     const acceptedMembersList = groupInfo?.members
       ? groupInfo?.members.map((member) => member.wallet.split(':')[4])
       : [];
 
     for (const member of acceptedMembersList) {
-      // let checkList = acceptedMembers?.some((item) => item.id === member);
-      // if (checkList) {
-      //   return;
-      // }
+      let checkList = acceptedMembers?.some((item) => item.id === member);
+      if (checkList) {
+        return;
+      }
       const result = await loadLensProfiles([member]);
       const lensProfile: any = result?.get(member);
+      setAcceptedMembers((current) => [...current, lensProfile]);
       membersList.push(lensProfile);
     }
 
+    // admin list
+    const MembersAdminlist = groupInfo?.members
+      ? groupInfo?.members
+          .filter((member) => member.isAdmin === true)
+          .map((member) => member.wallet.split(':')[4])
+      : [];
+    for (const member of MembersAdminlist) {
+      let checkList = toCheckAdmin?.some((item) => item.id === member);
+      if (checkList) {
+        return;
+      }
+      const result = await loadLensProfiles([member]);
+      const lensProfile: any = result?.get(member);
+      setToCheckAdmin((current) => [...current, lensProfile]);
+      // toCheckAdmin.push(lensProfile);
+    }
+
+    // pending members list
     const pendingMembersList = groupInfo
       ? groupInfo?.pendingMembers.map((member) => member.wallet.split(':')[4])
       : [];
@@ -105,74 +190,147 @@ export const useGroupInfoModal = (options: GroupInfoModalProps) => {
       }
       const result = await loadLensProfiles([member]);
       const lensProfile: any = result?.get(member);
+      setChatProfile((current) => [...current, lensProfile]);
       allPendingMembersList.push(lensProfile);
     }
 
+    const trying2 = membersList
+      ? membersList.map((member) => `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${member.id}`)
+      : [];
+
+    const trying3 = allPendingMembersList
+      ? allPendingMembersList.map((member) => `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${member.id}`)
+      : [];
+
     // eslint-disable-next-line no-use-before-define
     let getResponse = await handleUpdateGroup({
-      totalMembers: allPendingMembersList,
-      totalAdminAddress: membersList
+      totalMembers: [...trying2, ...trying3],
+      totalAdminAddress: [...trying2]
     });
-    console.log(getResponse, allPendingMembersList, membersList, 'newewewwew');
   }, [groupInfo]);
 
   useEffect(() => {
-    // acceptedMember();
-    // console.log('one call');
+    acceptedMember();
   }, []);
-  // const acceptedMember = async () => {
-  //   await pendingMemberisAdmin();
-  //   const acceptedMembersList = groupInfo?.members
-  //     ? groupInfo?.members.map((member) => member.wallet.split(':')[4])
-  //     : [];
 
-  //   for (const member of acceptedMembersList) {
-  //     let checkList = acceptedMembers?.some((item) => item.id === member);
-  //     if (checkList) {
-  //       return;
-  //     }
-  //     const result = await loadLensProfiles([member]);
-  //     const lensProfile: any = result?.get(member);
-  //     setacceptedMembers((b) => [...b, lensProfile]);
-  //   }
-  // };
-
-  const handleUpdateGroup = async ({ totalMembers, totalAdminAddress }: MembersType) => {
-    if (!currentProfile || !decryptedPgpPvtKey) {
-      return;
+  const handleShowAllPendingMembers = () => {
+    if (showPendingMembers) {
+      setShowPendingMembers(false);
+    } else {
+      // isUserAdminaddress();
+      setShowPendingMembers(true);
     }
+  };
 
-    try {
-      // console.log(groupInfo);
-      console.log({
-        groupName: groupInfo?.groupName || '',
-        chatId: groupInfo?.chatId || '',
-        groupDescription: groupInfo?.groupDescription as string,
-        members: totalMembers,
-        groupImage: groupInfo?.groupImage ? groupInfo?.groupImage : '',
-        admins: totalAdminAddress, // pass the adminAddresses array here
-        account: groupInfo?.groupCreator,
-        pgpPrivateKey: decryptedPgpPvtKey, //decrypted private key
-        env: PUSH_ENV
-      });
-      const response = await PushAPI.chat.updateGroup({
-        groupName: groupInfo?.groupName || '',
-        chatId: groupInfo?.chatId || '',
-        groupDescription: groupInfo?.groupDescription as string,
-        members: totalMembers,
-        groupImage: groupInfo?.groupImage ? groupInfo?.groupImage : '',
-        admins: totalAdminAddress, // pass the adminAddresses array here
-        account: groupInfo?.groupCreator,
-        pgpPrivateKey: decryptedPgpPvtKey, //decrypted private key
-        env: PUSH_ENV
-      });
-      toast.success('Group updated successfully');
-      // handleCloseall();
-      return response;
-    } catch (error: Error | any) {
-      console.log(error.message);
-      // setAdding(false);
-      toast.error(error.message);
+  if (!groupInfo || !show) {
+    return null;
+  }
+
+  const onProfileSelected = (profile: Profile) => {
+    setShowSearchedMemberToAdd((prevMembers) => [...prevMembers, profile]);
+  };
+
+  const onAddMembers = (profile: Profile) => {
+    setShowSearchedMemberToAdd(showSearchedMemberToAdd.filter((member) => member !== profile));
+    if (
+      !groupInfo?.pendingMembers.some((member) => member.wallet.includes(profile.id)) &&
+      !groupInfo?.members.some((member) => member.wallet.includes(profile.id)) &&
+      !updatedMembers.some((member) => member.ownedBy === profile.ownedBy) &&
+      updatedMembers.length < 9
+    ) {
+      setUpdatedMembers((prevMembers) => [...prevMembers, profile]);
+      setChatProfile((prevMembers) => [...prevMembers, profile]);
+    }
+  };
+
+  const onRemoveMembers = (profile: Profile) => {
+    setUpdatedMembers(updatedMembers.filter((member) => member !== profile));
+  };
+
+  const onMakeAdmin = (profile: Profile) => {
+    const newMembers = updatedMembers.map((member) => {
+      if (member.ownedBy === profile.ownedBy) {
+        return {
+          ...member,
+          isAdmin: true
+        };
+      }
+      return member;
+    });
+    setUpdatedMembers(newMembers);
+    setAdminAddresses((prevMembers) => [...prevMembers, profile]);
+  };
+
+  const removeAdmin = (profile: Profile) => {
+    const newMembers = updatedMembers.map((member) => {
+      if (member.ownedBy === profile.ownedBy) {
+        return {
+          ...member,
+          isAdmin: false
+        };
+      }
+      return member;
+    });
+    setAdminAddresses(adminAddresses.filter((member) => member.ownedBy !== profile.ownedBy));
+    setUpdatedMembers(newMembers);
+  };
+
+  const removeUserAdmin = (profile: Profile) => {
+    const updatedAdminAddress = adminAddresses.filter((admin) => admin.ownedBy !== profile.ownedBy);
+    setAdminAddresses(updatedAdminAddress);
+    const newMembers = updatedMembers.filter((member) => {
+      if (member.ownedBy === profile.ownedBy) {
+        return false;
+      }
+      return true;
+    });
+    setUpdatedMembers(newMembers);
+  };
+
+  const messageUser = (profile: Profile) => {
+    router.push(`/messages/push/chat/${profile.id}`);
+  };
+
+  const onRemoveUpdateMembers = (profile: Profile) => {
+    const indexToRemove = groupInfo.members.findIndex((member) => member.wallet.includes(profile.id));
+    if (indexToRemove !== -1) {
+      groupInfo.pendingMembers.splice(indexToRemove, 1);
+      setChatProfile(chatProfile.filter((member) => member.ownedBy !== profile.ownedBy));
+      setAcceptedMembers(acceptedMembers.filter((member) => member.ownedBy !== profile.ownedBy));
+    }
+  };
+
+  const onMakeAdminUpdateMembers = (profile: Profile) => {
+    const indexToMakeAdmin = groupInfo.members.findIndex(
+      (member) => member.wallet.includes(profile.id) && !member.isAdmin
+    );
+    if (indexToMakeAdmin !== -1) {
+      groupInfo.members[indexToMakeAdmin].isAdmin = true;
+      setAdminAddressesinPendingMembers((prevMembers) => [...prevMembers, profile]);
+    } else {
+      alert('User is already an admin');
+    }
+  };
+
+  const onRemoveAdminUpdateMembers = (profile: Profile) => {
+    const indexToRemoveAdmin = groupInfo.members.findIndex(
+      (member) => member.wallet.includes(profile.id) && member.isAdmin
+    );
+    if (indexToRemoveAdmin !== -1) {
+      groupInfo.members[indexToRemoveAdmin].isAdmin = false;
+      setAdminAddressesinPendingMembers(
+        adminAddressesinPendingMembers.filter((member) => member.ownedBy !== profile.ownedBy)
+      );
+    } else {
+      alert('User is not an admin');
+    }
+  };
+
+  const onRemoveUserAdmin = (profile: Profile) => {
+    const indexToRemove = groupInfo.members.findIndex((member) => member.wallet.includes(profile.id));
+    if (indexToRemove !== -1) {
+      groupInfo?.members.splice(indexToRemove, 1);
+      setAcceptedMembers(acceptedMembers.filter((member) => member.ownedBy !== profile.ownedBy));
     }
   };
 
@@ -180,114 +338,117 @@ export const useGroupInfoModal = (options: GroupInfoModalProps) => {
     <Modal show={show}>
       <div ref={downRef}>
         <div className="flex items-center justify-center pt-4 text-center text-lg font-[500]">
-          <Image
-            // onClick={handleGoback}
-            className="absolute left-9 cursor-pointer"
-            src="/push/ArrowLeft.svg"
-            alt="new"
-          />
+          {showSearchMembers && (
+            <Image
+              onClick={handleGoback}
+              className="absolute left-9 cursor-pointer"
+              src="/push/ArrowLeft.svg"
+              alt="new"
+            />
+          )}
           <Image
             onClick={closeModal}
             className="absolute right-9 cursor-pointer"
             src="/push/X.svg"
             alt="new"
           />
-          Group Info
+          {!showSearchMembers ? `Group Info` : `Edit Group`}
         </div>
-        {/* {!showSearchmembers && ( */}
-        <div>
-          <div className="ml-9 mt-4 flex">
-            <Image className="h-12 w-12 rounded-full" src={groupInfo?.groupImage!} alt={'group name'} />
-            <div className="relative left-4 top-1 w-[200px]">
-              <p className="text-[15px] font-[500]">{groupInfo?.groupName}</p>
-              <p className="text-[13px] font-[400] text-[#27272A]">
-                {groupInfo?.members.length +
-                  (groupInfo?.pendingMembers ? groupInfo?.pendingMembers.length : 0)}{' '}
-                members
-              </p>
-            </div>
-          </div>
-          <div className="ml-9 mt-6">
-            <div className="flex text-[15px] font-[500]">Group Description</div>
-            <div className="text-[13px] font-[400] text-[#27272A]">{groupInfo?.groupDescription}</div>
-          </div>
-          <div className="ml-9 mt-6 flex h-[62px] w-[85%] flex-row items-center rounded-2xl border border-[#D7D7D7]">
-            <div className="ml-[20px]">
-              <Image src="/push/lock.svg" alt="lock" />
-            </div>
-            <div className="ml-4">
-              <div>
-                <p className="text-[15px] font-[500]">
-                  {groupInfo?.isPublic === true ? `Public` : `Private`}
+        {!showSearchMembers && (
+          <div>
+            <div className="ml-9 mt-4 flex">
+              <Image className="h-12 w-12 rounded-full" src={groupInfo?.groupImage!} alt={'group name'} />
+              <div className="relative left-4 top-1 w-[200px]">
+                <p className="text-[15px] font-[500]">{groupInfo?.groupName}</p>
+                <p className="text-[13px] font-[400] text-[#27272A]">
+                  {groupInfo?.members.length +
+                    (groupInfo?.pendingMembers ? groupInfo?.pendingMembers.length : 0)}{' '}
+                  members
                 </p>
               </div>
-              <div className="text-[13px] font-[300] text-[#82828A]">
-                {groupInfo?.isPublic === true ? `Chats are not encrypted` : `Chats are encrypted`}
-              </div>
             </div>
-          </div>
-          <div
-            className="ml-9 mt-3 flex h-[62px] w-[85%] cursor-pointer rounded-2xl border border-[#D7D7D7]"
-            onClick={() => {
-              // setShowsearchMembers(true);
-              // setShowpendingMembers(false);
-            }}
-          >
-            <div className="flex w-full items-center justify-center">
-              <div className="flex items-center justify-center text-center text-[15px] font-[500]">
-                <Image src="/push/Add.svg" className="mr-2" alt="lock" />
-                Add more wallets
-              </div>
+            <div className="ml-9 mt-6">
+              <div className="flex text-[15px] font-[500]">Group Description</div>
+              <div className="text-[13px] font-[400] text-[#27272A]">{groupInfo?.groupDescription}</div>
             </div>
-          </div>
-          <div className="ml-9 mt-3 max-h-[50vh] min-h-[60px] w-[85%] cursor-pointer rounded-2xl border border-[#D7D7D7] text-lg font-normal ">
-            <div>
-              <div className="ml-4 mt-4 flex w-[200px] pb-4">
-                <div className="text-[15px] font-[500]">Pending requests</div>
-                <div className="bg-brand-500 absolute left-44 ml-2 mt-0 h-fit rounded-lg pl-3 pr-3 text-[14px] font-[500] text-white">
-                  {groupInfo?.pendingMembers.length}
+            <div className="ml-9 mt-6 flex h-[62px] w-[85%] flex-row items-center rounded-2xl border border-[#D7D7D7]">
+              <div className="ml-[20px]">
+                <Image src="/push/lock.svg" alt="lock" />
+              </div>
+              <div className="ml-4">
+                <div>
+                  <p className="text-[15px] font-[500]">
+                    {groupInfo?.isPublic === true ? `Public` : `Private`}
+                  </p>
+                </div>
+                <div className="text-[13px] font-[300] text-[#82828A]">
+                  {groupInfo?.isPublic === true ? `Chats are not encrypted` : `Chats are encrypted`}
                 </div>
               </div>
-              <div>
-                <Image
-                  className={`mt-[-40px] cursor-pointer ${'ml-[380px]'}`}
-                  src="/push/CaretRight.svg"
-                  alt="arrow"
-                />
+            </div>
+            <div
+              className="ml-9 mt-3 flex h-[62px] w-[85%] cursor-pointer rounded-2xl border border-[#D7D7D7]"
+              onClick={() => {
+                setShowSearchMembers(true);
+                setShowPendingMembers(false);
+              }}
+            >
+              <div className="flex w-full items-center justify-center">
+                <div className="flex items-center justify-center text-center text-[15px] font-[500]">
+                  <Image src="/push/Add.svg" className="mr-2" alt="lock" />
+                  Add more wallets
+                </div>
               </div>
             </div>
-            <div className=" z-50 max-h-[12rem] w-[100%] items-center justify-center overflow-auto bg-transparent">
-              {groupInfo?.pendingMembers && (
-                <MemberProfileList
-                  isOwner={[]}
-                  memberList={chatProfile}
-                  // adminAddress={groupInfo.pendingMembers}
-                  adminAddress={adminAddressesinPendingMembers}
-                />
-              )}
+            <div className="ml-9 mt-3 max-h-[50vh] min-h-[60px] w-[85%] cursor-pointer rounded-2xl border border-[#D7D7D7] text-lg font-normal ">
+              <div onClick={handleShowAllPendingMembers}>
+                <div className="ml-4 mt-4 flex w-[200px] pb-4">
+                  <div className="text-[15px] font-[500]">Pending requests</div>
+                  <div className="bg-brand-500 absolute left-44 ml-2 mt-0 h-fit rounded-lg pl-3 pr-3 text-[14px] font-[500] text-white">
+                    {groupInfo?.pendingMembers.length}
+                  </div>
+                </div>
+                <div>
+                  <Image
+                    className={`mt-[-40px] cursor-pointer ${
+                      showPendingMembers ? 'ml-[380px] rotate-180' : 'ml-[380px]'
+                    }`}
+                    src="/push/CaretRight.svg"
+                    alt="arrow"
+                  />
+                </div>
+              </div>
+              <div className=" z-50 max-h-[12rem] w-[100%] items-center justify-center overflow-auto bg-transparent">
+                {showPendingMembers && (
+                  <MemberProfileList
+                    isOwner={[]}
+                    memberList={chatProfile}
+                    adminAddress={adminAddressesinPendingMembers}
+                  />
+                )}
+              </div>
             </div>
-          </div>
 
-          <div className="ml-[36px] mt-[10px] w-[85%] items-center justify-center">
-            {/* <MemberProfileList
-                isOwner={toCheckadmin}
+            <div className="ml-[36px] mt-[10px] w-[85%] items-center justify-center">
+              <MemberProfileList
+                isOwner={toCheckAdmin}
                 memberList={acceptedMembers}
-                adminAddress={adminAddressesinPendingmembers}
+                adminAddress={adminAddressesinPendingMembers}
                 onMakeAdmin={onMakeAdminUpdateMembers}
                 onRemoveMembers={onRemoveUpdateMembers}
                 removeAdmin={onRemoveAdminUpdateMembers}
-                removeUserAdmin={onRemoveUseradmin}
+                removeUserAdmin={onRemoveUserAdmin}
                 messageUser={messageUser}
-              /> */}
-          </div>
-          <div className="mb-4 mt-4 flex items-center justify-center">
-            {/* <Button onClick={handleUpdateGroup} className="h-12 w-64">
+              />
+            </div>
+            <div className="mb-4 mt-4 flex items-center justify-center">
+              <Button onClick={updateGroupMembers} className="h-12 w-64">
                 {adding ? `Updating Members...` : `Update Members`}
-              </Button> */}
+              </Button>
+            </div>
           </div>
-        </div>
-        {/* // )} */}
-        {/* {showSearchmembers && (
+        )}
+        {showSearchMembers && (
           <div className="flex w-full justify-center pb-4 pt-4">
             <div className="flex w-[300px] items-center">
               <Search
@@ -298,26 +459,26 @@ export const useGroupInfoModal = (options: GroupInfoModalProps) => {
               />
             </div>
           </div>
-        )} */}
+        )}
         <div className="">
           <div className="ml-[85px] w-[350px]">
-            {/* {showSearchmembers && (
+            {showSearchMembers && (
               <MemberProfileList
-                isOwner={toCheckadmin}
-                removeUserAdmin={onRemoveUseradmin}
-                memberList={showSearchedmembertoAdd}
+                isOwner={toCheckAdmin}
+                removeUserAdmin={onRemoveUserAdmin}
+                memberList={showSearchedMemberToAdd}
                 onAddMembers={onAddMembers}
                 adminAddress={adminAddresses}
                 onMakeAdmin={onMakeAdmin}
                 onRemoveMembers={onRemoveMembers}
                 removeAdmin={removeAdmin}
               />
-            )} */}
+            )}
           </div>
           <div className=" ml-[85px] w-[350px]">
-            {/* {updatedMembers && (
+            {updatedMembers && (
               <MemberProfileList
-                isOwner={toCheckadmin}
+                isOwner={toCheckAdmin}
                 removeUserAdmin={removeUserAdmin}
                 removeAdmin={removeAdmin}
                 adminAddress={adminAddresses}
@@ -326,15 +487,15 @@ export const useGroupInfoModal = (options: GroupInfoModalProps) => {
                 onMakeAdmin={onMakeAdmin}
                 onRemoveMembers={onRemoveMembers}
               />
-            )} */}
+            )}
           </div>
-          {/* {showSearchmembers && (
+          {showSearchMembers && (
             <div className="mb-4 mt-2 flex items-center justify-center">
-              <Button onClick={handleUpdateGroup} className="bottom-16 h-12 w-64">
+              <Button onClick={updateGroupMembers} className="bottom-16 h-12 w-64">
                 {adding ? `Adding...` : `Add Members`}
               </Button>
             </div>
-          )} */}
+          )}
         </div>
       </div>
     </Modal>
