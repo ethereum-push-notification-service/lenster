@@ -1,7 +1,7 @@
 import Follow from '@components/Shared/Follow';
 import Slug from '@components/Shared/Slug';
 import Unfollow from '@components/Shared/Unfollow';
-import usePushOutgoingCall from '@components/utils/hooks/push/usePushOutgoingCall';
+// import usePushOutgoingCall from '@components/utils/hooks/push/usePushOutgoingCall';
 import type { GroupDTO, IFeeds } from '@pushprotocol/restapi';
 import type { Profile } from 'lens';
 import formatHandle from 'lib/formatHandle';
@@ -31,8 +31,8 @@ export default function MessageHeader({
   const selectedChatType = usePushChatStore((state) => state.selectedChatType);
   const lensProfiles = usePushChatStore((state) => state.lensProfiles);
 
-  const { openModal, closeModal, CallModal, showCallModal } =
-  usePushOutgoingCall();
+  // const { openModal, closeModal, CallModal, showCallModal } =
+  // usePushOutgoingCall();
 
   const deprecatedChat = selectedChat?.deprecated ? true : false;
 
@@ -113,12 +113,12 @@ export default function MessageHeader({
         {profile && (
           <div>
             <img
-              onClick={openModal}
+              // onClick={openModal}
               className="cursor-pointer"
               src="/push/video.svg"
               alt="video icon"
             />
-            <CallModal />
+            {/* <CallModal /> */}
           </div>
         )}
         {profile &&
