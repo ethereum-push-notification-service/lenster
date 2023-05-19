@@ -224,6 +224,7 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
                   <>
                     <MessageHeader
                       groupInfo={groupInfo}
+                      setGroupInfo={setGroupInfo}
                       selectedChat={
                         chatsFeed[selectedChatId] ??
                         requestsFeed[selectedChatId] ??

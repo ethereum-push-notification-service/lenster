@@ -9,7 +9,7 @@ import type { Profile } from 'lens';
 import formatHandle from 'lib/formatHandle';
 import getAvatar from 'lib/getAvatar';
 import router from 'next/router';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { CHAIN_ID } from 'src/constants';
 import { useAppStore } from 'src/store/app';
@@ -65,9 +65,11 @@ type memberProfileListType = {
   adminAddress: Profile[];
   removeAdmin?: (profile: Profile) => void;
   removeUserAdmin?: (profile: Profile) => void;
+  messageUser?: (profile: Profile) => void;
+  isOwner: Profile[];
 };
 
-const MemberProfileList = ({
+export const MemberProfileList = ({
   memberList,
   isAddedMembersList = false,
   onAddMembers,
@@ -75,12 +77,24 @@ const MemberProfileList = ({
   onMakeAdmin,
   adminAddress,
   removeAdmin,
-  removeUserAdmin
+  removeUserAdmin,
+  messageUser,
+  isOwner
 }: memberProfileListType) => {
   // have used this state instead of boolean since if I used boolean than I still had to check if the user id is equal to the id selected to make it unique and open only that modal which is suppose to open and not open every modal
   const [showModalgroupOptions, setShowModalgroupOptions] = useState(-1);
   const [showModalAdmingroupOptions, setShowModalAdmingroupOptions] =
     useState(-2);
+
+  const handleCloseAllmodals = () => {
+    setShowModalgroupOptions(-1);
+    setShowModalAdmingroupOptions(-2);
+  };
+  // useOnClickOutside(downRef, () => handleCloseAllmodals());
+  const currentProfile = useAppStore((s) => s.currentProfile);
+  const setShowCreateGroupModal = usePushChatStore(
+    (s) => s.setShowCreateGroupModal
+  );
 
   const handleRemoveClick = (profile: Profile) => {
     if (onRemoveMembers) {
@@ -119,10 +133,6 @@ const MemberProfileList = ({
     }
   };
 
-  const setShowCreateGroupModal = usePushChatStore(
-    (s) => s.setShowCreateGroupModal
-  );
-
   const onProfileSelected = (profile: Profile) => {
     setShowCreateGroupModal(false);
     router.push(`/messages/push/chat/${profile.id}`);
@@ -132,13 +142,19 @@ const MemberProfileList = ({
     return isAdmin;
   };
 
+  const isOwners = (member: Profile) => {
+    const isOwners = isOwner?.some((admin) => admin.id === currentProfile?.id);
+    // console.log(isOwners, 'isonwer');
+    return isOwners;
+  };
+
   return (
     <div className="flex flex-col gap-2 py-2" onClick={handleRemoveModal}>
       {memberList.map((member, i) => (
         //  put styles into a object
         <div
           className={clsx(
-            isAddedMembersList ? 'border border-gray-300 ' : 'bg-gray-100',
+            isAddedMembersList ? 'border border-gray-300 ' : '',
             'flex flex-row items-center justify-between rounded-xl  px-2 py-2'
           )}
           key={`${member.id}${i}`}
@@ -282,6 +298,13 @@ const useCreateGroup = () => {
   const chats = usePushChatStore((state) => state.chats);
   const setChat = usePushChatStore((state) => state.setChat);
   const { fetchChat } = useFetchChat();
+  const [currentProfileState, setCurrentProfileState] = useState<Profile[]>([]);
+
+  useEffect(() => {
+    if (currentProfile) {
+      setCurrentProfileState([currentProfile]);
+    }
+  }, []);
 
   const [modalInfo, setModalInfo] = useState<{
     title: string;
@@ -683,6 +706,7 @@ const useCreateGroup = () => {
           </div>
           {searchedMembers && (
             <MemberProfileList
+              isOwner={currentProfileState}
               memberList={searchedMembers}
               adminAddress={adminAddresses}
               onAddMembers={onAddMembers}
@@ -694,6 +718,7 @@ const useCreateGroup = () => {
           <div className="mt-5">
             {!!members && !!members.length && (
               <MemberProfileList
+                isOwner={currentProfileState}
                 memberList={members}
                 adminAddress={adminAddresses}
                 removeUserAdmin={removeUserAdmin}

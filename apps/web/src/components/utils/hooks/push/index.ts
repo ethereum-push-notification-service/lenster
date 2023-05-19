@@ -13,5 +13,6 @@ export * from './useGetUsersBatch';
 export * from './usePushChatSocket';
 export * from './usePushCreateGroupChat';
 export * from './usePushDecryption';
+export * from './usePushGroupInfo';
 export * from './usePushSendMessage';
 export * from './useUpgradeChatProfile';
