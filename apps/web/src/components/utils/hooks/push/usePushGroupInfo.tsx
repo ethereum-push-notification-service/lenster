@@ -104,18 +104,43 @@ export const useGroupInfoModal = (options: GroupInfoModalProps) => {
     console.log('add them all');
     setAdding(true);
 
-    const oldPendingMembers = chatProfile?.map(
+    // const oldPendingMembers = chatProfile?.map(
+    //   (member) => `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${member.id}`
+    // );
+    const mapOfaddress = updatedMembers?.map(
       (member) => `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${member.id}`
     );
 
-    const adminMembers = acceptedMembers?.map(
+    const alreadyMembers = groupInfo?.members
+      .filter((member) => member.wallet !== currentProfile?.ownedBy)
+      .map((member) => member.wallet) as String[];
+
+    const alreadyPendingmembers = groupInfo?.pendingMembers.map((member) => member.wallet) as String[];
+
+    const tryingAdminMembers = groupInfo?.members
+      ?.filter((member) => member.isAdmin === true)
+      .map((member) => member.wallet) as String[];
+
+    const tryingAdminPendingMembers = groupInfo?.pendingMembers
+      ?.filter((member) => member.isAdmin === true)
+      .map((member) => member.wallet) as String[];
+
+    const adminMembers = adminAddresses?.map(
       (member) => `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${member.id}`
     );
+
+    // console.log(...adminMembers, ...tryingAdminMembers, ...tryingAdminPendingMembers);
+    const onlyTotalMembers = [...mapOfaddress, ...alreadyMembers, ...alreadyPendingmembers] as Array<string>;
+    const onlyAdminAddress = [
+      ...adminMembers,
+      ...tryingAdminMembers,
+      ...tryingAdminPendingMembers
+    ] as Array<string>;
 
     // eslint-disable-next-line no-use-before-define
     let getResponse = await handleUpdateGroup({
-      totalMembers: [...oldPendingMembers, ...adminMembers],
-      totalAdminAddress: [...adminMembers]
+      totalMembers: onlyTotalMembers,
+      totalAdminAddress: onlyAdminAddress
     });
     toast.success('Group updated successfully');
     setAdding(false);
@@ -213,6 +238,8 @@ export const useGroupInfoModal = (options: GroupInfoModalProps) => {
     acceptedMember();
   }, []);
 
+  console.log(updatedMembers, chatProfile, acceptedMembers);
+
   const handleShowAllPendingMembers = () => {
     if (showPendingMembers) {
       setShowPendingMembers(false);
@@ -276,9 +303,9 @@ export const useGroupInfoModal = (options: GroupInfoModalProps) => {
   };
 
   const removeUserAdmin = (profile: Profile) => {
-    const updatedAdminAddress = adminAddresses.filter((admin) => admin.ownedBy !== profile.ownedBy);
+    const updatedAdminAddress = adminAddresses?.filter((admin) => admin.ownedBy !== profile.ownedBy);
     setAdminAddresses(updatedAdminAddress);
-    const newMembers = updatedMembers.filter((member) => {
+    const newMembers = updatedMembers?.filter((member) => {
       if (member.ownedBy === profile.ownedBy) {
         return false;
       }
