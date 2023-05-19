@@ -49,7 +49,7 @@ const Video = ({ isVideoOn, profileId, stream }: VideoPropsType) => {
           muted
         />
       ) : (
-        <div className="flex h-[87vh] w-[95%] rounded-2xl bg-[#F4F4F5] sm:block sm:h-[57vh] md:h-[65]">
+        <div className="flex h-[87vh] w-[95%] rounded-2xl bg-[#F4F4F5] sm:h-[57vh] md:h-[65]">
           <Image
             onError={({ currentTarget }) => {
               currentTarget.src = getAvatar(lensProfile, false);
