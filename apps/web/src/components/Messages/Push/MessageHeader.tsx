@@ -2,7 +2,6 @@ import Follow from '@components/Shared/Follow';
 import Slug from '@components/Shared/Slug';
 import Unfollow from '@components/Shared/Unfollow';
 import usePushIncomingCall from '@components/utils/hooks/push/usePushIncomingCall';
-import usePushOutgoingCall from '@components/utils/hooks/push/usePushOutgoingCall';
 import type { GroupDTO, IFeeds } from '@pushprotocol/restapi';
 import type { Profile } from 'lens';
 import formatHandle from 'lib/formatHandle';

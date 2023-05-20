@@ -1,4 +1,3 @@
-import CallButton from '@components/Messages/Push/Video/CallButton';
 import ProfileInfo from '@components/Messages/Push/Video/ProfileInfo';
 import Video from '@components/Messages/Push/Video/Video';
 import { useRef, useState } from 'react';
