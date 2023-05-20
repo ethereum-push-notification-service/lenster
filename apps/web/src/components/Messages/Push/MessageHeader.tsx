@@ -28,8 +28,12 @@ export default function MessageHeader({
   const selectedChatType = usePushChatStore((state) => state.selectedChatType);
   const lensProfiles = usePushChatStore((state) => state.lensProfiles);
   const [showModal, setShowModal] = useState(false);
-  const showGroupInfoModal = usePushChatStore((state) => state.showGroupInfoModal);
-  const setShowGroupInfoModal = usePushChatStore((state) => state.setShowGroupInfoModal);
+  const showGroupInfoModal = usePushChatStore(
+    (state) => state.showGroupInfoModal
+  );
+  const setShowGroupInfoModal = usePushChatStore(
+    (state) => state.setShowGroupInfoModal
+  );
 
   // const [showGroupInfoModal, setShowGroupInfoModal] = useState(false);
 
@@ -86,7 +90,11 @@ export default function MessageHeader({
         )}
       </div>
       <div className="flex items-center gap-4	">
-        <img className="cursor-pointer" src="/push/video.svg" alt="video icon" />
+        <img
+          className="cursor-pointer"
+          src="/push/video.svg"
+          alt="video icon"
+        />
         {profile &&
           (following ? (
             <Unfollow profile={profile!} setFollowing={setFollowing} showText />
@@ -96,9 +104,15 @@ export default function MessageHeader({
         {groupInfo && (
           <div
             className="w-fit cursor-pointer"
-            onClick={() => (showModal === false ? setShowModal(true) : setShowModal(false))}
+            onClick={() =>
+              showModal === false ? setShowModal(true) : setShowModal(false)
+            }
           >
-            <Image className="h-10 w-9" src="/push/more.svg" alt="group info settings" />
+            <Image
+              className="h-10 w-9"
+              src="/push/more.svg"
+              alt="group info settings"
+            />
           </div>
         )}
         {groupInfo && showModal && (
@@ -108,9 +122,15 @@ export default function MessageHeader({
             onClick={handleGroupInfo}
           >
             <div>
-              <Image className="mr-2 h-6 w-6" src="/push/info.svg" alt="group info settings" />
+              <Image
+                className="mr-2 h-6 w-6"
+                src="/push/info.svg"
+                alt="group info settings"
+              />
             </div>
-            <div className="items-center text-[17px] font-[400] text-[#657795]">Group Info</div>
+            <div className="items-center text-[17px] font-[400] text-[#657795]">
+              Group Info
+            </div>
           </div>
         )}
         {/* {(useGroupInfoModal({
@@ -120,9 +140,12 @@ export default function MessageHeader({
           setShow: setShowGroupInfoModal
         }))} */}
         <Modal
-          size="xs"
           show={showGroupInfoModal}
-          onClose={isGroupInfoModalClosable ? () => setShowGroupInfoModal(false) : () => {}}
+          onClose={
+            isGroupInfoModalClosable
+              ? () => setShowGroupInfoModal(false)
+              : () => {}
+          }
         >
           {groupInfoModalContent}
         </Modal>

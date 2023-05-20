@@ -53,15 +53,20 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
   const { loadLensProfiles } = useFetchLensProfiles();
   const pgpPrivateKey = usePushChatStore((state) => state.pgpPrivateKey);
   const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
-  const setShowGroupInfoModal = usePushChatStore((state) => state.setShowGroupInfoModal);
+  const setShowGroupInfoModal = usePushChatStore(
+    (state) => state.setShowGroupInfoModal
+  );
 
   const [chatProfile, setChatProfile] = useState<Profile[]>([]);
-  const [adminAddressesinPendingMembers, setAdminAddressesinPendingMembers] = useState<Profile[]>([]);
+  const [adminAddressesinPendingMembers, setAdminAddressesinPendingMembers] =
+    useState<Profile[]>([]);
   const [showPendingMembers, setShowPendingMembers] = useState<boolean>(false);
   const [acceptedMembers, setAcceptedMembers] = useState<Profile[]>([]);
   const [toCheckAdmin, setToCheckAdmin] = useState<Profile[]>([]);
   const [showSearchMembers, setShowSearchMembers] = useState<boolean>(false);
-  const [showSearchedMemberToAdd, setShowSearchedMemberToAdd] = useState<Array<Profile>>([]);
+  const [showSearchedMemberToAdd, setShowSearchedMemberToAdd] = useState<
+    Array<Profile>
+  >([]);
   const [adminAddresses, setAdminAddresses] = useState<Profile[]>([]);
   const [updatedMembers, setUpdatedMembers] = useState<Profile[]>([]);
   const [adding, setAdding] = useState<boolean>(false);
@@ -113,7 +118,10 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
     setShowPendingMembers(false);
   };
 
-  const handleUpdateGroup = async ({ totalMembers, totalAdminAddress }: MembersType) => {
+  const handleUpdateGroup = async ({
+    totalMembers,
+    totalAdminAddress
+  }: MembersType) => {
     if (!currentProfile || !decryptedPgpPvtKey) {
       return;
     }
@@ -158,7 +166,9 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
       .filter((member) => member.wallet !== currentProfile?.ownedBy)
       .map((member) => member.wallet) as String[];
 
-    const alreadyPendingmembers = groupInfo?.pendingMembers.map((member) => member.wallet) as String[];
+    const alreadyPendingmembers = groupInfo?.pendingMembers.map(
+      (member) => member.wallet
+    ) as String[];
 
     const tryingAdminMembers = groupInfo?.members
       ?.filter((member) => member.isAdmin === true)
@@ -173,7 +183,11 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
     );
 
     // console.log(...adminMembers, ...tryingAdminMembers, ...tryingAdminPendingMembers);
-    const onlyTotalMembers = [...mapOfaddress, ...alreadyMembers, ...alreadyPendingmembers] as Array<string>;
+    const onlyTotalMembers = [
+      ...mapOfaddress,
+      ...alreadyMembers,
+      ...alreadyPendingmembers
+    ] as Array<string>;
     const onlyAdminAddress = [
       ...adminMembers,
       ...tryingAdminMembers,
@@ -263,11 +277,15 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
     }
 
     const trying2 = membersList
-      ? membersList.map((member) => `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${member.id}`)
+      ? membersList.map(
+          (member) => `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${member.id}`
+        )
       : [];
 
     const trying3 = allPendingMembersList
-      ? allPendingMembersList.map((member) => `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${member.id}`)
+      ? allPendingMembersList.map(
+          (member) => `nft:eip155:${CHAIN_ID}:${LENSHUB_PROXY}:${member.id}`
+        )
       : [];
 
     // eslint-disable-next-line no-use-before-define
@@ -407,6 +425,10 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
   const groupInfoModal = async () => {
     setShowGroupInfoModal(true);
     acceptedMember();
+
+    if (!groupInfo) {
+      return null;
+    }
   };
 
   let modalContent: JSX.Element;
@@ -434,9 +456,15 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
           {!showSearchMembers && (
             <div>
               <div className="ml-9 mt-4 flex">
-                <Image className="h-12 w-12 rounded-full" src={groupInfo?.groupImage!} alt={'group name'} />
+                <Image
+                  className="h-12 w-12 rounded-full"
+                  src={groupInfo?.groupImage!}
+                  alt={'group name'}
+                />
                 <div className="relative left-4 top-1 w-[200px]">
-                  <p className="text-[15px] font-[500]">{groupInfo?.groupName}</p>
+                  <p className="text-[15px] font-[500]">
+                    {groupInfo?.groupName}
+                  </p>
                   <p className="text-[13px] font-[400] text-[#27272A]">
                     {/* {groupInfo?.members.length +
                       (groupInfo?.pendingMembers
@@ -447,8 +475,12 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
                 </div>
               </div>
               <div className="ml-9 mt-6">
-                <div className="flex text-[15px] font-[500]">Group Description</div>
-                <div className="text-[13px] font-[400] text-[#27272A]">{groupInfo?.groupDescription}</div>
+                <div className="flex text-[15px] font-[500]">
+                  Group Description
+                </div>
+                <div className="text-[13px] font-[400] text-[#27272A]">
+                  {groupInfo?.groupDescription}
+                </div>
               </div>
               <div className="ml-9 mt-6 flex h-[62px] w-[85%] flex-row items-center rounded-2xl border border-[#D7D7D7]">
                 <div className="ml-[20px]">
@@ -461,7 +493,9 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
                     </p>
                   </div>
                   <div className="text-[13px] font-[300] text-[#82828A]">
-                    {groupInfo?.isPublic === true ? `Chats are not encrypted` : `Chats are encrypted`}
+                    {groupInfo?.isPublic === true
+                      ? `Chats are not encrypted`
+                      : `Chats are encrypted`}
                   </div>
                 </div>
               </div>
@@ -592,7 +626,10 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
             {/* {totalSteps}/{totalSteps} - {modalInfo.title} */}
           </div>
           <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
-            <div className="bg-brand-500 h-2 rounded-full p-0.5 leading-none" style={{ width: `100%` }} />
+            <div
+              className="bg-brand-500 h-2 rounded-full p-0.5 leading-none"
+              style={{ width: `100%` }}
+            />
           </div>
         </div>
       );
