@@ -193,7 +193,7 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
             </div>
           </Card>
         ) : (
-          <Card className="flex h-full flex-col justify-between">
+          <Card className="relative flex h-full flex-col justify-between">
             {showLoading || loading ? (
               <div className="flex h-full flex-grow items-center justify-center">
                 <Loader message={t`Loading messages`} />

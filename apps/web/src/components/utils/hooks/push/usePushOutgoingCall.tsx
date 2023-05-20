@@ -43,9 +43,10 @@ const usePushOutgoingCall = () => {
             <div>
               <Video />
             </div>
-            <div>
+            {/* check call button component to make changes where neccessary */}
+            {/* <div>
               <CallButton />
-            </div>
+            </div> */}
           </div>
         </Modal>
       </div>
