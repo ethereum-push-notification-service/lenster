@@ -179,8 +179,8 @@ export const MemberProfileList = ({
             />
 
             <div className="flex flex-col">
-              {!isAddedMembersList && isAdmin(member) && (
-                <p className="truncate font-bold">
+              {!isAddedMembersList && (
+                <p className="text-md truncate font-bold">
                   {member?.name ?? formatHandle(member?.handle)}
                 </p>
               )}

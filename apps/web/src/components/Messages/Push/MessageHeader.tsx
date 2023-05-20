@@ -35,11 +35,8 @@ export default function MessageHeader({
     (state) => state.setShowGroupInfoModal
   );
 
-  // const [showGroupInfoModal, setShowGroupInfoModal] = useState(false);
-
   const downRef = useRef(null);
   useOnClickOutside(downRef, () => {
-    // setShowGroupInfoModal(false);
     setShowModal(false);
   });
 
@@ -133,12 +130,6 @@ export default function MessageHeader({
             </div>
           </div>
         )}
-        {/* {(useGroupInfoModal({
-          groupInfo: groupInfo,
-          setGroupInfo: setGroupInfo,
-          show: showGroupInfoModal,
-          setShow: setShowGroupInfoModal
-        }))} */}
         <Modal
           show={showGroupInfoModal}
           onClose={
