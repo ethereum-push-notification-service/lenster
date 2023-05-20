@@ -47,6 +47,9 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
   const setShowGroupInfoModal = usePushChatStore(
     (state) => state.setShowGroupInfoModal
   );
+  const showGroupInfoModal = usePushChatStore(
+    (state) => state.showGroupInfoModal
+  );
 
   const [chatProfile, setChatProfile] = useState<Profile[]>([]);
   const [adminAddressesinPendingMembers, setAdminAddressesinPendingMembers] =
@@ -123,8 +126,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
         pgpPrivateKey: decryptedPgpPvtKey, //decrypted private key
         env: PUSH_ENV
       });
-      // toast.success('Group updated successfully');
-      if (response && setGroupInfo) {
+      if (response && setGroupInfo && showGroupInfoModal) {
         setGroupInfo(response);
       }
       // handleCloseall();
@@ -224,13 +226,6 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
       }
       const result = await loadLensProfiles([member]);
       const lensProfile: any = result?.get(member);
-      console.log(
-        '2',
-        checkList,
-        acceptedMembers?.some((item) => item.id === member),
-        acceptedMembers,
-        member
-      );
       setAcceptedMembers((current) => [...current, lensProfile]);
       membersList.push(lensProfile);
     }
@@ -281,25 +276,11 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
 
     // eslint-disable-next-line no-use-before-define
 
-    try {
-      let getResponse = await handleUpdateGroup({
-        totalMembers: [...trying2, ...trying3],
-        totalAdminAddress: [...trying2]
-      });
-      if (getResponse) {
-        toast.success('Group updated successfully');
-        setAdding(false);
-        reset();
-        setShowGroupInfoModal(false);
-      }
-    } catch (error) {}
-  }, []);
-
-  console.log(acceptedMembers);
-
-  // useEffect(() => {
-  //   acceptedMember();
-  // }, []);
+    let getResponse = await handleUpdateGroup({
+      totalMembers: [...trying2, ...trying3],
+      totalAdminAddress: [...trying2]
+    });
+  }, [groupInfo]);
 
   const handleShowAllPendingMembers = () => {
     if (showPendingMembers) {
@@ -396,7 +377,6 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
     if (indexToRemove !== -1) {
       groupInfo.pendingMembers.splice(indexToRemove, 1);
       setChatProfile(chatProfile.filter((member) => member.id !== profile.id));
-      console.log('3');
       setAcceptedMembers(
         acceptedMembers.filter((member) => member.id !== profile.id)
       );
@@ -449,19 +429,21 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
     );
     if (indexToRemove !== -1) {
       groupInfo?.members.splice(indexToRemove, 1);
-      console.log('1');
       setAcceptedMembers(
         acceptedMembers.filter((member) => member.id !== profile.id)
       );
     }
   };
   useEffect(() => {
+    if (!groupInfo) {
+      return;
+    }
     acceptedMember();
-  }, []);
+  }, [groupInfo]);
 
   const groupInfoModal = useCallback(async () => {
     setShowGroupInfoModal(true);
-  }, [groupInfo]);
+  }, []);
 
   let modalContent: JSX.Element;
   switch (modalInfo.type) {
