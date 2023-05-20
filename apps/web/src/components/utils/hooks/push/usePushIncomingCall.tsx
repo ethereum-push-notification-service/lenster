@@ -1,5 +1,4 @@
 import CallButton from '@components/Messages/Push/Video/CallButton';
-import MediaToggleButton from '@components/Messages/Push/Video/MediaToggleButton';
 import ProfileInfo from '@components/Messages/Push/Video/ProfileInfo';
 import Video from '@components/Messages/Push/Video/Video';
 import { useRef, useState } from 'react';
@@ -46,18 +45,19 @@ const usePushIncomingCall = () => {
               </div>
 
               <div className="flex flex-row items-center justify-center gap-4">
-                <MediaToggleButton
-                  buttonStyles="py-[12px] px-[18px] w-[60px] h-[48px] bg-[#30CC8B] rounded-[16px]"
+                <CallButton
+                  buttonStyles="py-[12px] px-[18px] w-[60px] h-[48px] bg-[#30CC8B] rounded-[16px] cursor-pointer"
                   iconSrc={'/push/whitevideobtn.svg'}
                   onClick={() => {
                     console.log('one');
                   }}
                 />
                 <CallButton
-                  buttonStyles="py-[12px] px-[16px] w-[55px] h-[48px] bg-[red] rounded-[16px]"
+                  buttonStyles="py-[12px] px-[16px] w-[55px] h-[48px] bg-[red] rounded-[16px] cursor-pointer"
                   iconSrc={'/push/callendbtn.svg'}
                   onClick={() => {
                     console.log('one');
+                    closeIncomingCallModal();
                   }}
                 />
               </div>
@@ -81,18 +81,19 @@ const usePushIncomingCall = () => {
                 <Video />
               </div>
               <div className="flex w-full flex-row items-center justify-center gap-4">
-                <MediaToggleButton
-                  buttonStyles="py-[12px] px-[28px] w-[80px] h-[48px] bg-[#30CC8B] rounded-[16px]"
+                <CallButton
+                  buttonStyles="py-[12px] px-[28px] w-[80px] h-[48px] bg-[#30CC8B] rounded-[16px] cursor-pointer"
                   iconSrc={'/push/whitevideobtn.svg'}
                   onClick={() => {
                     console.log('one');
                   }}
                 />
                 <CallButton
-                  buttonStyles="py-[12px] px-[22px] w-[70px] h-[48px] bg-[red] rounded-[16px]"
+                  buttonStyles="py-[12px] px-[22px] w-[70px] h-[48px] bg-[red] rounded-[16px] cursor-pointer"
                   iconSrc={'/push/callendbtn.svg'}
                   onClick={() => {
                     console.log('one');
+                    closeIncomingCallModal();
                   }}
                 />
               </div>
