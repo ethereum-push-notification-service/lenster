@@ -39,7 +39,7 @@ const usePushIncomingCall = () => {
     return (
       <div>
         {isIncomingCallMinimized ? (
-          <div className="absolute bottom-[15%] left-0 right-0 z-50 ml-auto mr-auto box-border w-11/12 rounded-[24px] bg-[#F4F4F5] dark:border dark:border-[#3F3F46] dark:bg-[#18181B] md:bottom-[80px] md:left-auto md:right-[20px] md:m-0 md:ml-1 md:mr-1 md:w-fit md:w-fit">
+          <div className="absolute bottom-[10%] left-0 right-0 z-50 ml-auto mr-auto box-border w-11/12 rounded-[24px] bg-[#F4F4F5] dark:border dark:border-[#3F3F46] dark:bg-[#18181B] md:bottom-[80px] md:left-auto md:right-[20px] md:m-0 md:ml-1 md:mr-1 md:w-fit md:w-fit">
             <div className="flex flex-row items-center gap-8 p-4">
               <div className="">
                 <ProfileInfo status={'Incoming Video Call'} removeSlug={true} />

@@ -201,7 +201,7 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
             ) : (
               <>
                 {profile !== '' && profile && (
-                  <div className='h-full relative'>
+                  <>
                     <MessageHeader
                       profile={profile}
                       selectedChat={
@@ -217,7 +217,7 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
                         selectedChat
                       }
                     />
-                  </div>
+                  </>
                 )}
                 {groupInfo !== '' && groupInfo && (
                   <>
