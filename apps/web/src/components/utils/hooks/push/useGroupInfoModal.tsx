@@ -5,7 +5,7 @@ import * as PushAPI from '@pushprotocol/restapi';
 import { LENSHUB_PROXY } from 'data/constants';
 import type { Profile } from 'lens';
 import router from 'next/router';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { CHAIN_ID } from 'src/constants';
 import { useAppStore } from 'src/store/app';
@@ -144,7 +144,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
     );
 
     const alreadyMembers = groupInfo?.members
-      .filter((member) => member.wallet !== currentProfile?.ownedBy)
+      .filter((member) => member.wallet !== currentProfile?.id)
       .map((member) => member.wallet) as String[];
 
     const alreadyPendingmembers = groupInfo?.pendingMembers.map(
@@ -175,14 +175,18 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
     ] as Array<string>;
 
     // eslint-disable-next-line no-use-before-define
-    let getResponse = await handleUpdateGroup({
-      totalMembers: onlyTotalMembers,
-      totalAdminAddress: onlyAdminAddress
-    });
-    toast.success('Group updated successfully');
-    setAdding(false);
-    reset();
-    setShowGroupInfoModal(false);
+    try {
+      let getResponse = await handleUpdateGroup({
+        totalMembers: onlyTotalMembers,
+        totalAdminAddress: onlyAdminAddress
+      });
+      if (getResponse) {
+        toast.success('Group updated successfully');
+        setAdding(false);
+        reset();
+        setShowGroupInfoModal(false);
+      }
+    } catch (error) {}
   };
 
   // ask Nilesh about this
@@ -214,12 +218,19 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
       : [];
 
     for (const member of acceptedMembersList) {
-      let checkList = acceptedMembers?.some((item) => item.id === member);
+      let checkList = acceptedMembers.some((item) => item.id === member);
       if (checkList) {
         return;
       }
       const result = await loadLensProfiles([member]);
       const lensProfile: any = result?.get(member);
+      console.log(
+        '2',
+        checkList,
+        acceptedMembers?.some((item) => item.id === member),
+        acceptedMembers,
+        member
+      );
       setAcceptedMembers((current) => [...current, lensProfile]);
       membersList.push(lensProfile);
     }
@@ -269,11 +280,22 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
       : [];
 
     // eslint-disable-next-line no-use-before-define
-    let getResponse = await handleUpdateGroup({
-      totalMembers: [...trying2, ...trying3],
-      totalAdminAddress: [...trying2]
-    });
-  }, [groupInfo]);
+
+    try {
+      let getResponse = await handleUpdateGroup({
+        totalMembers: [...trying2, ...trying3],
+        totalAdminAddress: [...trying2]
+      });
+      if (getResponse) {
+        toast.success('Group updated successfully');
+        setAdding(false);
+        reset();
+        setShowGroupInfoModal(false);
+      }
+    } catch (error) {}
+  }, []);
+
+  console.log(acceptedMembers);
 
   // useEffect(() => {
   //   acceptedMember();
@@ -303,7 +325,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
       !groupInfo?.members.some((member) =>
         member.wallet.includes(profile.id)
       ) &&
-      !updatedMembers.some((member) => member.ownedBy === profile.ownedBy) &&
+      !updatedMembers.some((member) => member.id === profile.id) &&
       updatedMembers.length < 9
     ) {
       setUpdatedMembers((prevMembers) => [...prevMembers, profile]);
@@ -317,7 +339,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
 
   const onMakeAdmin = (profile: Profile) => {
     const newMembers = updatedMembers.map((member) => {
-      if (member.ownedBy === profile.ownedBy) {
+      if (member.id === profile.id) {
         return {
           ...member,
           isAdmin: true
@@ -331,7 +353,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
 
   const removeAdmin = (profile: Profile) => {
     const newMembers = updatedMembers.map((member) => {
-      if (member.ownedBy === profile.ownedBy) {
+      if (member.id === profile.id) {
         return {
           ...member,
           isAdmin: false
@@ -340,18 +362,18 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
       return member;
     });
     setAdminAddresses(
-      adminAddresses.filter((member) => member.ownedBy !== profile.ownedBy)
+      adminAddresses.filter((member) => member.id !== profile.id)
     );
     setUpdatedMembers(newMembers);
   };
 
   const removeUserAdmin = (profile: Profile) => {
     const updatedAdminAddress = adminAddresses?.filter(
-      (admin) => admin.ownedBy !== profile.ownedBy
+      (admin) => admin.id !== profile.id
     );
     setAdminAddresses(updatedAdminAddress);
     const newMembers = updatedMembers?.filter((member) => {
-      if (member.ownedBy === profile.ownedBy) {
+      if (member.id === profile.id) {
         return false;
       }
       return true;
@@ -373,11 +395,10 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
     );
     if (indexToRemove !== -1) {
       groupInfo.pendingMembers.splice(indexToRemove, 1);
-      setChatProfile(
-        chatProfile.filter((member) => member.ownedBy !== profile.ownedBy)
-      );
+      setChatProfile(chatProfile.filter((member) => member.id !== profile.id));
+      console.log('3');
       setAcceptedMembers(
-        acceptedMembers.filter((member) => member.ownedBy !== profile.ownedBy)
+        acceptedMembers.filter((member) => member.id !== profile.id)
       );
     }
   };
@@ -411,7 +432,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
       groupInfo.members[indexToRemoveAdmin].isAdmin = false;
       setAdminAddressesinPendingMembers(
         adminAddressesinPendingMembers.filter(
-          (member) => member.ownedBy !== profile.ownedBy
+          (member) => member.id !== profile.id
         )
       );
     } else {
@@ -428,15 +449,18 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
     );
     if (indexToRemove !== -1) {
       groupInfo?.members.splice(indexToRemove, 1);
+      console.log('1');
       setAcceptedMembers(
-        acceptedMembers.filter((member) => member.ownedBy !== profile.ownedBy)
+        acceptedMembers.filter((member) => member.id !== profile.id)
       );
     }
   };
+  useEffect(() => {
+    acceptedMember();
+  }, []);
 
   const groupInfoModal = useCallback(async () => {
     setShowGroupInfoModal(true);
-    acceptedMember();
   }, [groupInfo]);
 
   let modalContent: JSX.Element;
