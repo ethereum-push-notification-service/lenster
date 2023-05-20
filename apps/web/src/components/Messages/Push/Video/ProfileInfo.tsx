@@ -45,15 +45,19 @@ const ProfileInfo = ({ status, removeSlug }: ProfileInfoType) => {
                 alt={formatHandle(profile?.handle)}
               />
               <div className="flex flex-col">
-                <span className="text-[15px] font-[500px] text-[#333333]">
+                <span className="text-[12px] font-[500px] text-[#333333] dark:text-white md:text-[15px]">
                   {profile?.name ?? formatHandle(profile?.handle)}
                 </span>
                 <Slug
-                  className={removeSlug !== undefined ? 'hidden' : 'text-[14px]'}
+                  className={
+                    removeSlug !== undefined ? 'hidden' : 'text-[14px]'
+                  }
                   slug={formatHandle(profile?.handle)}
                   prefix="@"
                 />
-                <span className="whitespace-nowrap text-[14px] font-[300px] text-[#82828A]">{status}</span>
+                <span className="whitespace-nowrap text-[12px] font-[300px] text-[#82828A] dark:text-[#D4D4D8] md:text-[14px]">
+                  {status}
+                </span>
               </div>
             </div>
           </div>
