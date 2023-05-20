@@ -65,7 +65,7 @@ const usePushIncomingCall = () => {
             </div>
           </div>
         ) : (
-          <Modal size="sm" show={showIncomingCallModal} darkModeBgColor='bg-black'>
+          <Modal size="sm" show={showIncomingCallModal}>
             <div ref={downRef} className="my-4 px-6">
               <div className="mt-8 flex w-full justify-end">
                 <MdExpandMore
