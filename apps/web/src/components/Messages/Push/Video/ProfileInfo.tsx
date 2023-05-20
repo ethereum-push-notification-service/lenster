@@ -34,7 +34,7 @@ const ProfileInfo = ({ status, removeSlug }: ProfileInfoType) => {
       <div>
         {showProfile.map((profile) => (
           <div key={profile.id}>
-            <div className="absolute left-0 right-0 top-12 m-auto mb-0 flex flex-row items-center justify-center sm:static md:static">
+            <div className="flex flex-row items-center">
               <Image
                 src={getAvatar(profile)}
                 className={
