@@ -43,7 +43,7 @@ const usePushOutgoingCall = () => {
             <div>
               <Video />
             </div>
-            <div>
+            <div className="absolute bottom-8 left-0 right-0  m-auto sm:static md:static">
               <CallButton />
             </div>
           </div>

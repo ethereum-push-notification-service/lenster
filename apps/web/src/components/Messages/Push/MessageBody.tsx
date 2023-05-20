@@ -337,7 +337,7 @@ const MessageField = ({
       </div>
     </div>
   ) : (
-    <>
+    <div>
       <Image
         onClick={() => setEmojiOpen((o) => !o)}
         className="absolute left-2 top-2.5 cursor-pointer"
@@ -366,6 +366,7 @@ const MessageField = ({
           </div>
         )}
       </div>
+
       {emojiOpen && (
         <div ref={modalRef} className="absolute bottom-[50px]">
           <EmojiPicker onEmojiClick={appendEmoji} />
@@ -392,7 +393,7 @@ const MessageField = ({
         disabled={msgSendLoading || requestFeedids.includes(selectedChatId)}
         placeholder="Type your message..."
       />
-    </>
+    </div>
   );
 };
 
@@ -612,7 +613,6 @@ export default function MessageBody({
         ) : (
           ''
         )}
-
         <div className="flex flex-col gap-2.5">
           {disablePrivateGroup ? (
             <div className="m-auto mt-8 flex flex-row space-x-2 rounded-md bg-[#F4F4F5] p-2">

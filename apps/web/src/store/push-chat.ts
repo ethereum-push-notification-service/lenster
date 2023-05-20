@@ -34,6 +34,8 @@ type ChatMessagetype = {
 export const PUSH_ENV = IS_MAINNET ? ENV.PROD : ENV.STAGING;
 
 interface IPushChatStore {
+  showVideoCall: boolean;
+  setShowVideoCall: (showVideoCall: boolean) => void;
   connectedProfile: IUser | undefined;
   setConnectedProfile: (connectedProfile: IUser) => void;
   activeTab: PushTabs;
@@ -84,6 +86,8 @@ interface IPushChatStore {
 }
 
 export const usePushChatStore = create<IPushChatStore>((set) => ({
+  showVideoCall: true,
+  setShowVideoCall: (showVideoCall) => set(() => ({ showVideoCall })),
   connectedProfile: undefined,
   setConnectedProfile: (connectedProfile) => set(() => ({ connectedProfile })),
   activeTab: PUSH_TABS.CHATS,
