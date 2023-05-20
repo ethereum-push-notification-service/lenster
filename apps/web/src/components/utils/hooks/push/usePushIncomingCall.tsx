@@ -75,13 +75,13 @@ const usePushIncomingCall = () => {
                   onClick={minimizeCallHandler}
                 />
               </div>
-              <div className="mt-4 w-fit sm:justify-start">
+              <div className="mt-2 mb-4 w-fit sm:justify-start">
                 <ProfileInfo status={'Incoming Video Call'} />
               </div>
               <div>
-                <Video />
+                <Video videoFramestyles='bg-black h-[50vh] w-[100%] rounded-2xl object-cover sm:block sm:h-[240px] md:h-[240px]'/>
               </div>
-              <div className="flex w-full flex-row items-center justify-center gap-4">
+              <div className="flex w-full mt-4 flex-row items-center justify-center gap-4">
                 <CallButton
                   buttonStyles="py-[12px] px-[28px] w-[80px] h-[48px] bg-[#30CC8B] rounded-[16px] cursor-pointer"
                   iconSrc={'/push/callacceptbtn.svg'}

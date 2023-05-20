@@ -1,6 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 
-const Video = () => {
+type VideoProps = {
+  videoFramestyles: string;
+};
+
+const Video = ({videoFramestyles}: VideoProps) => {
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const incomingVideoRef = useRef<HTMLVideoElement>(null);
 
@@ -17,7 +21,7 @@ const Video = () => {
     <div className="flex items-center justify-center">
       <video
         id="localVideo"
-        className="h-[87vh] w-[95%] rounded-2xl object-cover sm:block sm:h-[57vh] md:h-[65]"
+        className={videoFramestyles}
         ref={localVideoRef}
         autoPlay
         muted
