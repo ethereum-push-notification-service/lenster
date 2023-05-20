@@ -182,7 +182,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
     toast.success('Group updated successfully');
     setAdding(false);
     reset();
-    // closeModal();
+    setShowGroupInfoModal(false);
   };
 
   // ask Nilesh about this

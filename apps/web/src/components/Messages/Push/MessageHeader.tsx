@@ -55,8 +55,6 @@ export default function MessageHeader({
   } = useGroupInfoModal({
     groupInfo: groupInfo,
     setGroupInfo: setGroupInfo
-    // show: showGroupInfoModal,
-    // setShow: setShowGroupInfoModal
   });
 
   const handleGroupInfo = async () => {
