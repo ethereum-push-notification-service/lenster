@@ -2,6 +2,7 @@ import Follow from '@components/Shared/Follow';
 import Slug from '@components/Shared/Slug';
 import Unfollow from '@components/Shared/Unfollow';
 import usePushIncomingCall from '@components/utils/hooks/push/usePushIncomingCall';
+import usePushOutgoingCall from '@components/utils/hooks/push/usePushOutgoingCall';
 import type { GroupDTO, IFeeds } from '@pushprotocol/restapi';
 import type { Profile } from 'lens';
 import formatHandle from 'lib/formatHandle';
@@ -31,7 +32,12 @@ export default function MessageHeader({
   const selectedChatType = usePushChatStore((state) => state.selectedChatType);
   const lensProfiles = usePushChatStore((state) => state.lensProfiles);
 
-  // const { openModal, closeModal, IncomingCallModal, showCallModal } = usePushOutgoingCall();
+  const {
+    openOutgoingCallModal,
+    closeOutgoingCallModal,
+    OutgoingCallModal,
+    setShowOutgoingCallModal
+  } = usePushOutgoingCall();
   const {
     openIncomingCallModal,
     closeIncomingCallModal,
@@ -118,15 +124,20 @@ export default function MessageHeader({
         {profile && (
           <div className="">
             {/* <img onClick={openModal} className="cursor-pointer" src="/push/video.svg" alt="video icon" /> */}
-            {/* <CallModal /> */}
-
+            <OutgoingCallModal />
             <img
-              onClick={openIncomingCallModal}
-              className="cursor-pointer"
+              onClick={openOutgoingCallModal}
+              className="hidden cursor-pointer dark:flex"
+              src="/push/videobtndarkmode.svg"
+              alt="video icon"
+            />
+            <img
+              onClick={openOutgoingCallModal}
+              className="flex cursor-pointer dark:hidden"
               src="/push/video.svg"
               alt="video icon"
             />
-            <IncomingCallModal />
+            {/* <IncomingCallModal /> */}
           </div>
         )}
         {profile &&
