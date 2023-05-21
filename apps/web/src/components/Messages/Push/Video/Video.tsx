@@ -18,9 +18,8 @@ const Video = ({ videoFramestyles, showOngoingCall }: VideoProps) => {
     }
   }, []);
 
-
   return (
-    <div className='relative'>
+    <div className="relative">
       <div className="flex items-center justify-center">
         <video
           id="localVideo"

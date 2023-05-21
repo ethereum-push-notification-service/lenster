@@ -32,7 +32,8 @@ export default function MessageHeader({
   const selectedChatType = usePushChatStore((state) => state.selectedChatType);
   const lensProfiles = usePushChatStore((state) => state.lensProfiles);
 
-  const { openModal, closeModal, showCallModal, CallModal } = usePushOutgoingCall();
+  const { openModal, closeModal, showCallModal, CallModal } =
+    usePushOutgoingCall();
   const {
     openIncomingCallModal,
     closeIncomingCallModal,
@@ -122,13 +123,13 @@ export default function MessageHeader({
             <CallModal />
             <img
               onClick={openModal}
-              className="cursor-pointer dark:flex hidden"
+              className="hidden cursor-pointer dark:flex"
               src="/push/videobtndarkmode.svg"
               alt="video icon"
             />
             <img
               onClick={openModal}
-              className="cursor-pointer dark:hidden flex"
+              className="flex cursor-pointer dark:hidden"
               src="/push/video.svg"
               alt="video icon"
             />

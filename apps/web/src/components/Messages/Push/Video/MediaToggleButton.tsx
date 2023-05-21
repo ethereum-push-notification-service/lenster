@@ -8,7 +8,11 @@ type MediaToggleButtonProps = {
 };
 
 // toggle media on and off
-const MediaToggleButton = ({ buttonStyles, iconSrc, onClick }: MediaToggleButtonProps) => {
+const MediaToggleButton = ({
+  buttonStyles,
+  iconSrc,
+  onClick
+}: MediaToggleButtonProps) => {
   return (
     <div
       // className=

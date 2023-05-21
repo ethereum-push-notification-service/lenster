@@ -5,6 +5,7 @@ import useFetchLensProfiles from '@components/utils/hooks/push/useFetchLensProfi
 import useGetChatProfile from '@components/utils/hooks/push/useGetChatProfile';
 import useGetGroup from '@components/utils/hooks/push/useGetGroup';
 import useGroupByName from '@components/utils/hooks/push/useGetGroupbyName';
+import useOngoingCall from '@components/utils/hooks/push/usePushOngoing';
 import { t } from '@lingui/macro';
 import type { GroupDTO, IFeeds } from '@pushprotocol/restapi';
 import { APP_NAME } from 'data/constants';
@@ -19,14 +20,12 @@ import { useAppStore } from 'src/store/app';
 import type { ChatTypes } from 'src/store/push-chat';
 import { CHAT_TYPES, usePushChatStore } from 'src/store/push-chat';
 import { Card, GridItemEight, GridLayout } from 'ui';
-import useOngoingCall from '@components/utils/hooks/push/usePushOngoing';
+
 import PreviewList from '../PreviewList';
 import { getCAIPFromLensID, getIsHandle, getProfileFromDID } from './helper';
 import MessageBody from './MessageBody';
 import MessageHeader from './MessageHeader';
 import PUSHNoConversationSelected from './PUSHNoConversationSelected';
-import LensHandleTag from './Video/LensHandleTag';
-import CallButton from './Video/CallButton';
 
 type MessagePropType = {
   conversationType: ChatTypes;
@@ -185,9 +184,7 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
 
   return (
     <>
-      {showOngoingCall && (
-        <OngoingCall />
-      )}
+      {showOngoingCall && <OngoingCall />}
       {!showOngoingCall && (
         <GridLayout classNameChild="md:gap-8">
           <MetaTags title={APP_NAME} />
@@ -255,7 +252,7 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
       )}
     </>
   );
-}
+};
 const MessagePage: NextPage = () => {
   const currentProfileId = useAppStore((state) => state.currentProfile?.id);
 

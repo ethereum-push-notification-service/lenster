@@ -44,7 +44,7 @@ const usePushOutgoingCall = () => {
                 </span>
               </div>
             </span>
-            <div className="absolute z-50 left-0 right-0 top-16 m-auto mt-2 flex items-center justify-center sm:static sm:flex md:static md:flex">
+            <div className="absolute left-0 right-0 top-16 z-50 m-auto mt-2 flex items-center justify-center sm:static sm:flex md:static md:flex">
               <ProfileInfo />
             </div>
             <span className="absolute left-0 right-0 top-[130px] m-auto mb-2 mt-2 flex items-center justify-center text-[15px] sm:static sm:flex md:static md:flex">
