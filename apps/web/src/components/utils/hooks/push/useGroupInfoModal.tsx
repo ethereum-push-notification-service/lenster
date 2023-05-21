@@ -480,7 +480,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
                     {groupInfo?.groupName}
                   </p>
                   {groupInfo && (
-                    <p className="text-[13px] font-[400] text-[#27272A]">
+                    <p className="text-[13px] font-[400] text-[#27272A] dark:text-white">
                       {groupInfo?.members.length +
                         (groupInfo?.pendingMembers
                           ? groupInfo?.pendingMembers.length
@@ -515,20 +515,22 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
                   </div>
                 </div>
               </div>
-              <div
-                className="ml-9 mt-3 flex h-[62px] w-[85%] cursor-pointer rounded-2xl border border-[#D7D7D7]"
-                onClick={() => {
-                  setShowSearchMembers(true);
-                  setShowPendingMembers(false);
-                }}
-              >
-                <div className="flex w-full items-center justify-center">
-                  <div className="flex items-center justify-center text-center text-[15px] font-[500]">
-                    <Image src="/push/Add.svg" className="mr-2" alt="lock" />
-                    Add more wallets
+              {isAccountOwnerAdmin && (
+                <div
+                  className="ml-9 mt-3 flex h-[62px] w-[85%] cursor-pointer rounded-2xl border border-[#D7D7D7]"
+                  onClick={() => {
+                    setShowSearchMembers(true);
+                    setShowPendingMembers(false);
+                  }}
+                >
+                  <div className="flex w-full items-center justify-center">
+                    <div className="flex items-center justify-center text-center text-[15px] font-[500]">
+                      <Image src="/push/Add.svg" className="mr-2" alt="lock" />
+                      Add more wallets
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
               <div className="ml-9 mt-3 max-h-[50vh] min-h-[60px] w-[85%] cursor-pointer rounded-2xl border border-[#D7D7D7] text-lg font-normal ">
                 <div onClick={handleShowAllPendingMembers}>
                   <div className="ml-4 mt-4 flex w-[200px] pb-4">

@@ -157,16 +157,21 @@ export const MemberProfileList = ({
     return isOwners;
   };
 
+  const isCurrentlyLoggedinAdmin = (member: Profile) => {
+    const isCurrentlyLoggedinAdmin = member?.id === currentProfile?.id;
+    return isCurrentlyLoggedinAdmin;
+  };
+
   return (
-    <div className="flex flex-col gap-2 py-2" onClick={handleRemoveModal}>
+    <div className="relative flex flex-col gap-2 py-2" onClick={handleRemoveModal}>
       {memberList.map((member, i) => (
         //  put styles into a object
         <div
           className={clsx(
             isAddedMembersList
               ? 'border border-gray-300 dark:border-[#3F3F46]'
-              : 'bg-gray-100 dark:bg-[#3F3F46]',
-            'flex flex-row items-center justify-between rounded-xl  px-2 py-2'
+              : 'dark:bg-[#3F3F46]',
+            'flex flex-row items-center justify-between rounded-xl  px-2 py-1'
           )}
           key={`${member.id}${i}`}
         >
@@ -176,8 +181,7 @@ export const MemberProfileList = ({
                 currentTarget.src = getAvatar(member, false);
               }}
               src={getAvatar(member)}
-
-              className="mr-2 h-14 w-14 rounded-full border bg-gray-200 dark:border-gray-700 dark:bg-[#3F3F46]"
+              className="mr-2 h-12 w-12 rounded-full border bg-gray-200 dark:border-gray-700 dark:bg-[#3F3F46]"
               alt={formatHandle(member?.handle)}
             />
 
@@ -195,87 +199,91 @@ export const MemberProfileList = ({
             </div>
           </div>
           {isAdmin(member) && !onAddMembers ? (
-            <div className="absolute right-[80px] rounded-lg bg-[#E5DAFF] pb-1 pl-2.5 pr-2.5 pt-1 text-xs text-[#8B5CF6]">
+            <div className="absolute right-[40px] rounded-lg bg-[#E5DAFF] pb-1 pl-2.5 pr-2.5 pt-1 text-xs text-[#8B5CF6]">
               Admin
             </div>
           ) : (
             <div />
           )}
-          {!onAddMembers && isOwners(member) && (
-            <div className="relative flex">
-              <div
-                className="w-fit cursor-pointer"
-                onClick={() =>
-                  setShowModalgroupOptions(showModalgroupOptions === i ? -1 : i)
-                }
-              >
-                <img
-                  className="h-10 w-9"
-                  src="/push/more.svg"
-                  alt="more icon"
-                />
-              </div>
-              {showModalgroupOptions === i && (
+          {!onAddMembers &&
+            isOwners(member) &&
+            !isCurrentlyLoggedinAdmin(member) && (
+              <div className="relative flex">
                 <div
-                  ref={downRef}
-                  key={`${member.id}${i}`}
-                  className="absolute right-[-16px] z-50 mt-[-17px] w-[260px] rounded-lg border border-gray-300 bg-white p-4 p-4 dark:bg-[#3F3F46]"
+                  className="w-fit cursor-pointer"
+                  onClick={() =>
+                    setShowModalgroupOptions(
+                      showModalgroupOptions === i ? -1 : i
+                    )
+                  }
                 >
-                  <div
-                    className="flex cursor-pointer items-center p-[8px] text-lg font-medium"
-                    onClick={() => handleMessageUser(member)}
-                  >
-                    <Image
-                      src="/push/createmessage.svg"
-                      className="mt-[4px] h-[20px] pr-[10px]"
-                      alt="remove icon"
-                    />
-                    <div className="text-[15px] font-[450]">Message user</div>
-                  </div>
-                  <div
-                    className="flex cursor-pointer items-center p-[8px] text-lg font-medium"
-                    onClick={() =>
-                      isAdmin(member)
-                        ? handleRemoveAdmin(member)
-                        : handleMakeAdmin(member)
-                    }
-                  >
-                    <Image
-                      src={
-                        isAdmin(member)
-                          ? '/push/dismissadmin.svg'
-                          : '/push/Shield.svg'
-                      }
-                      className="h-[20px] pr-[10px]"
-                      alt="admin icon"
-                    />
-                    <div className="text-[15px] font-[450]">
-                      {isAdmin(member)
-                        ? `Dismiss as admin`
-                        : `Make group admin`}
-                    </div>
-                  </div>
-                  <div
-                    className="flex cursor-pointer items-center p-[8px] text-lg font-medium"
-                    onClick={() =>
-                      isAdmin(member)
-                        ? handleRemoveUseradmin(member)
-                        : handleRemoveClick(member)
-                    }
-                  >
-                    <Image
-                      src="/push/MinusCircle.svg"
-                      className="h-[20px] pr-[10px]"
-                      alt="remove icon"
-                    />
-                    <div className="text-[15px] font-[450] text-red-600">
-                      Remove
-                    </div>
-                  </div>
+                  <img
+                    className="h-10 w-9"
+                    src="/push/more.svg"
+                    alt="more icon"
+                  />
                 </div>
-              )}
-            </div>
-          )}
+                {showModalgroupOptions === i && (
+                  <div
+                    ref={downRef}
+                    key={`${member.id}${i}`}
+                    className="absolute right-[-16px] z-50 mt-[-17px] w-[260px] rounded-lg border border-gray-300 bg-white p-4 p-4 dark:bg-[#3F3F46]"
+                  >
+                    <div
+                      className="flex cursor-pointer items-center p-[8px] text-lg font-medium"
+                      onClick={() => handleMessageUser(member)}
+                    >
+                      <Image
+                        src="/push/createmessage.svg"
+                        className="mt-[4px] h-[20px] pr-[10px]"
+                        alt="remove icon"
+                      />
+                      <div className="text-[15px] font-[450]">Message user</div>
+                    </div>
+                    <div
+                      className="flex cursor-pointer items-center p-[8px] text-lg font-medium"
+                      onClick={() =>
+                        isAdmin(member)
+                          ? handleRemoveAdmin(member)
+                          : handleMakeAdmin(member)
+                      }
+                    >
+                      <Image
+                        src={
+                          isAdmin(member)
+                            ? '/push/dismissadmin.svg'
+                            : '/push/Shield.svg'
+                        }
+                        className="h-[20px] pr-[10px]"
+                        alt="admin icon"
+                      />
+                      <div className="text-[15px] font-[450]">
+                        {isAdmin(member)
+                          ? `Dismiss as admin`
+                          : `Make group admin`}
+                      </div>
+                    </div>
+                    <div
+                      className="flex cursor-pointer items-center p-[8px] text-lg font-medium"
+                      onClick={() =>
+                        isAdmin(member)
+                          ? handleRemoveUseradmin(member)
+                          : handleRemoveClick(member)
+                      }
+                    >
+                      <Image
+                        src="/push/MinusCircle.svg"
+                        className="h-[20px] pr-[10px]"
+                        alt="remove icon"
+                      />
+                      <div className="text-[15px] font-[450] text-red-600">
+                        Remove
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           {/* change to icon for Add + */}
           {onAddMembers && isOwners(member) && (
             <div
