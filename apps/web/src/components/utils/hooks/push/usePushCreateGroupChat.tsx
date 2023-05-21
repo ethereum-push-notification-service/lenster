@@ -163,8 +163,10 @@ export const MemberProfileList = ({
         //  put styles into a object
         <div
           className={clsx(
-            isAddedMembersList ? 'border border-gray-300 ' : '',
-            'flex flex-row items-center justify-between rounded-xl  px-2 py-1'
+            isAddedMembersList
+              ? 'border border-gray-300 dark:border-[#3F3F46]'
+              : 'bg-gray-100 dark:bg-[#3F3F46]',
+            'flex flex-row items-center justify-between rounded-xl  px-2 py-2'
           )}
           key={`${member.id}${i}`}
         >
@@ -174,7 +176,8 @@ export const MemberProfileList = ({
                 currentTarget.src = getAvatar(member, false);
               }}
               src={getAvatar(member)}
-              className="mr-2 h-10 w-10 rounded-full border bg-gray-200 dark:border-gray-700"
+
+              className="mr-2 h-14 w-14 rounded-full border bg-gray-200 dark:border-gray-700 dark:bg-[#3F3F46]"
               alt={formatHandle(member?.handle)}
             />
 
@@ -216,7 +219,7 @@ export const MemberProfileList = ({
                 <div
                   ref={downRef}
                   key={`${member.id}${i}`}
-                  className="absolute right-[-16px] z-50 mt-[-17px] w-[260px] rounded-lg border border-gray-300 bg-white p-4 p-4"
+                  className="absolute right-[-16px] z-50 mt-[-17px] w-[260px] rounded-lg border border-gray-300 bg-white p-4 p-4 dark:bg-[#3F3F46]"
                 >
                   <div
                     className="flex cursor-pointer items-center p-[8px] text-lg font-medium"
@@ -656,8 +659,10 @@ const useCreateGroup = () => {
               <div
                 className={clsx(
                   option.id === 1 ? 'rounded-l-xl' : 'rounded-r-xl border-l-0',
-                  groupType?.id === option.id ? 'bg-gray-100' : 'transparent',
-                  'justigy-center flex w-1/2 cursor-pointer flex-col items-center border  border-gray-300 px-2 py-2 hover:bg-gray-100'
+                  groupType?.id === option.id
+                    ? 'bg-gray-100 dark:bg-[#3F3F46]'
+                    : 'transparent',
+                  'flex w-1/2 cursor-pointer flex-col items-center justify-center border border-gray-300 px-2 py-2 hover:bg-gray-100 dark:border-[#3F3F46] dark:hover:bg-[#3F3F46]'
                 )}
                 key={option.id}
                 onClick={() => setGroupType(option)}
