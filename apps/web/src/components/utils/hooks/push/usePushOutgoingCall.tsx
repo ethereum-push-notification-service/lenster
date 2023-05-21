@@ -6,26 +6,26 @@ import { useRef, useState } from 'react';
 import { Image, Modal } from 'ui';
 
 const usePushOutgoingCall = () => {
-  const [showCallModal, setShowCallModal] = useState(false);
+  const [showOutgoingCallModal, setShowOutgoingCallModal] = useState(false);
 
-  const openModal = () => {
-    setShowCallModal(true);
+  const openOutgoingCallModal = () => {
+    setShowOutgoingCallModal(true);
   };
 
-  const closeModal = () => {
-    setShowCallModal(false);
+  const closeOutgoingCallModal = () => {
+    setShowOutgoingCallModal(false);
   };
 
   const OutgoingCallModal = () => {
     const downRef = useRef(null);
     const handleCloseall = () => {
-      if (showCallModal) {
-        setShowCallModal(false);
+      if (showOutgoingCallModal) {
+        setShowOutgoingCallModal(false);
       }
     };
     return (
       <div>
-        <Modal size="md" show={showCallModal}>
+        <Modal size="md" show={showOutgoingCallModal}>
           <div ref={downRef} className="my-4">
             <span className="absolute left-0 right-0 top-8 m-auto flex items-center justify-center sm:static md:static">
               <div className="mb-2 flex items-center rounded-lg bg-[#F4F4F5] px-2 py-0.5 dark:bg-[#18181B] sm:p-2 md:p-2">
@@ -56,24 +56,21 @@ const usePushOutgoingCall = () => {
                 videoFramestyles="bg-black h-[87vh] w-[95%] rounded-2xl object-cover sm:block sm:h-[57vh] md:h-[57vh]"
               />
             </div>
-            {/* check call button component to make changes where neccessary */}
-            {/* <div>
-            </div> */}
             <div className="mb-8 mt-4 flex items-center justify-center gap-2.5">
               <MediaToggleButton
                 iconSrc={'/push/videobtn.svg'}
                 buttonStyles="cursor-pointer bg-white p-3 border-[#D4D4D8] border w-[48px] h-[48px] rounded-[10px]"
-                onClick={() => setShowCallModal(false)}
+                onClick={() => setShowOutgoingCallModal(false)}
               />
               <MediaToggleButton
                 iconSrc={'/push/micbtn.svg'}
                 buttonStyles="cursor-pointer bg-white w-[48px] h-[48px] p-3 border-[#D4D4D8] border rounded-[10px]"
-                onClick={() => setShowCallModal(false)}
+                onClick={() => setShowOutgoingCallModal(false)}
               />
               <CallButton
                 iconSrc={'/push/callendbtn.svg'}
                 buttonStyles="cursor-pointer py-[12px] px-[28px] w-[80px] h-[48px] bg-[red] rounded-[10px]"
-                onClick={() => setShowCallModal(false)}
+                onClick={() => setShowOutgoingCallModal(false)}
               />
             </div>
           </div>
@@ -83,10 +80,10 @@ const usePushOutgoingCall = () => {
   };
 
   return {
-    openModal,
-    closeModal,
+    openOutgoingCallModal,
+    closeOutgoingCallModal,
     OutgoingCallModal,
-    showCallModal
+    setShowOutgoingCallModal
   };
 };
 
