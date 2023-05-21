@@ -1,11 +1,14 @@
+import { getProfileFromDID } from '@components/Messages/Push/helper';
 import CallButton from '@components/Messages/Push/Video/CallButton';
 import MediaToggleButton from '@components/Messages/Push/Video/MediaToggleButton';
 import ProfileInfo from '@components/Messages/Push/Video/ProfileInfo';
 import Video from '@components/Messages/Push/Video/Video';
 import { useRef, useState } from 'react';
+import { usePushChatStore } from 'src/store/push-chat';
 import { Image, Modal } from 'ui';
 
 const usePushOutgoingCall = () => {
+  const selectedChatId = usePushChatStore((state) => state.selectedChatId);
   const [showOutgoingCallModal, setShowOutgoingCallModal] = useState(false);
 
   const openOutgoingCallModal = () => {
@@ -52,7 +55,10 @@ const usePushOutgoingCall = () => {
             </span>
             <div>
               <Video
+                isVideoOn={false}
+                profileId={getProfileFromDID(selectedChatId)}
                 showOngoingCall={false}
+                mainFrame={true}
                 videoFramestyles="bg-black h-[87vh] w-[95%] rounded-2xl object-cover sm:block sm:h-[57vh] md:h-[57vh]"
               />
             </div>
