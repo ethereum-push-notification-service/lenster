@@ -185,25 +185,9 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
 
   return (
     <>
-      {showOngoingCall &&
-        <div className='flex items-center justify-center'>
-          <div className='md:w-[80%] sm:w-[75%] w-[100%]  flex items-center justify-center'>
-            <Card className='w-[100%] sm:w-[90%] sm:w-[90%] md:mt-4 sm:mt-4 mt-1'>
-              <div>
-                <OngoingCall />
-              </div>
-              <div className='py-[3px] px-[8px] bg-[#2E313B] absolute mt-[-60px] text-white rounded-xl sm:ml-10 md:ml-10 ml-6'>
-                <LensHandleTag />
-              </div>
-              <div className='mb-4 cursor-pointer mt-2 flex items-center justify-center gap-2.5'>
-                <CallButton iconSrc={"/push/videobtn.svg"} buttonStyles='bg-white p-3 border-[#D4D4D8] border w-[48px] h-[48px] rounded-[10px]' onClick={() => setShowOngoingCall(false)} />
-                <CallButton iconSrc={"/push/micbtn.svg"} buttonStyles='bg-white w-[48px] h-[48px] p-3 border-[#D4D4D8] border rounded-[10px]' onClick={() => setShowOngoingCall(false)}/>
-                <CallButton iconSrc={"/push/callendbtn.svg"} buttonStyles='py-[12px] px-[28px] w-[80px] h-[48px] bg-[red] rounded-[10px]' onClick={() => setShowOngoingCall(false)}/>
-              </div>
-            </Card>
-          </div>
-        </div>
-      }
+      {showOngoingCall && (
+        <OngoingCall />
+      )}
       {!showOngoingCall && (
         <GridLayout classNameChild="md:gap-8">
           <MetaTags title={APP_NAME} />
@@ -271,8 +255,7 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
       )}
     </>
   );
-};
-
+}
 const MessagePage: NextPage = () => {
   const currentProfileId = useAppStore((state) => state.currentProfile?.id);
 
