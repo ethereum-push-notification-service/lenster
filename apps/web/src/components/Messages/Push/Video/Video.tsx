@@ -2,9 +2,10 @@ import React, { useEffect, useRef } from 'react';
 
 type VideoProps = {
   videoFramestyles: string;
+  showOngoingCall: boolean;
 };
 
-const Video = ({videoFramestyles}: VideoProps) => {
+const Video = ({ videoFramestyles, showOngoingCall }: VideoProps) => {
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const incomingVideoRef = useRef<HTMLVideoElement>(null);
 
@@ -17,15 +18,18 @@ const Video = ({videoFramestyles}: VideoProps) => {
     }
   }, []);
 
+
   return (
-    <div className="flex items-center justify-center">
-      <video
-        id="localVideo"
-        className={videoFramestyles}
-        ref={localVideoRef}
-        autoPlay
-        muted
-      />
+    <div className='relative'>
+      <div className="flex items-center justify-center">
+        <video
+          id="localVideo"
+          className={videoFramestyles}
+          ref={localVideoRef}
+          autoPlay
+          muted
+        />
+      </div>
     </div>
   );
 };
