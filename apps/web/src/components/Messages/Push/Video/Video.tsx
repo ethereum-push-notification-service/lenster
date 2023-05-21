@@ -20,17 +20,15 @@ const Video = ({ videoFramestyles, showOngoingCall }: VideoProps) => {
 
 
   return (
-    <div>
-      <div className='relative'>
-        <div className="flex items-center justify-center">
-          <video
-            id="localVideo"
-            className={videoFramestyles}
-            ref={localVideoRef}
-            autoPlay
-            muted
-          />
-        </div>
+    <div className='relative'>
+      <div className="flex items-center justify-center">
+        <video
+          id="localVideo"
+          className={videoFramestyles}
+          ref={localVideoRef}
+          autoPlay
+          muted
+        />
       </div>
     </div>
   );

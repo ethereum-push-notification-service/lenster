@@ -1,4 +1,5 @@
 import CallButton from '@components/Messages/Push/Video/CallButton';
+import MediaToggleButton from '@components/Messages/Push/Video/MediaToggleButton';
 import ProfileInfo from '@components/Messages/Push/Video/ProfileInfo';
 import Video from '@components/Messages/Push/Video/Video';
 import { useRef, useState } from 'react';
@@ -59,12 +60,12 @@ const usePushOutgoingCall = () => {
             {/* <div>
             </div> */}
             <div className="mb-8 mt-4 flex items-center justify-center gap-2.5">
-              <CallButton
+              <MediaToggleButton
                 iconSrc={'/push/videobtn.svg'}
                 buttonStyles="cursor-pointer bg-white p-3 border-[#D4D4D8] border w-[48px] h-[48px] rounded-[10px]"
                 onClick={() => setShowCallModal(false)}
               />
-              <CallButton
+              <MediaToggleButton
                 iconSrc={'/push/micbtn.svg'}
                 buttonStyles="cursor-pointer bg-white w-[48px] h-[48px] p-3 border-[#D4D4D8] border rounded-[10px]"
                 onClick={() => setShowCallModal(false)}
