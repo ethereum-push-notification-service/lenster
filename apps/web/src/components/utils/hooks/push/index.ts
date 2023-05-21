@@ -13,8 +13,6 @@ export * from './useGetUsersBatch';
 export * from './usePushChatSocket';
 export * from './usePushCreateGroupChat';
 export * from './usePushDecryption';
-export * from './usePushIncomingCall';
-export * from './usePushOutgoingCall';
 export * from './usePushSendMessage';
 export * from './usePushVideoCall';
 export * from './useUpgradeChatProfile';

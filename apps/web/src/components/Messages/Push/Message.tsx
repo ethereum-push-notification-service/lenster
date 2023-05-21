@@ -5,7 +5,6 @@ import useFetchLensProfiles from '@components/utils/hooks/push/useFetchLensProfi
 import useGetChatProfile from '@components/utils/hooks/push/useGetChatProfile';
 import useGetGroup from '@components/utils/hooks/push/useGetGroup';
 import useGroupByName from '@components/utils/hooks/push/useGetGroupbyName';
-import useOngoingCall from '@components/utils/hooks/push/usePushOngoing';
 import { t } from '@lingui/macro';
 import type { GroupDTO, IFeeds } from '@pushprotocol/restapi';
 import { APP_NAME } from 'data/constants';
@@ -54,7 +53,6 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
   const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
   const connectedProfile = usePushChatStore((state) => state.connectedProfile);
   const currentProfile = useAppStore((state) => state.currentProfile);
-  const { showOngoingCall, setShowOngoingCall, OngoingCall } = useOngoingCall();
   const [profile, setProfile] = useState<Profile | null | ''>('');
   const [groupInfo, setGroupInfo] = useState<GroupDTO | null | ''>('');
   const [selectedChat, setSelectedChat] = useState<IFeeds>();
@@ -183,74 +181,69 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
   }
 
   return (
-    <>
-      {showOngoingCall && <OngoingCall />}
-      {!showOngoingCall && (
-        <GridLayout classNameChild="md:gap-8">
-          <MetaTags title={APP_NAME} />
-          <PreviewList className="xs:hidden sm:hidden md:hidden lg:block" />
-          <GridItemEight className="xs:h-[85vh] xs:mx-2 mb-0 sm:mx-2 sm:h-[76vh] md:col-span-8 md:h-[80vh] xl:h-[84vh]">
-            {CHAT_NOT_FOUND ? (
-              <Card className="h-full">
-                <div className="flex h-full flex-col text-center">
-                  <PUSHNoConversationSelected />
-                </div>
-              </Card>
+    <GridLayout classNameChild="md:gap-8">
+      <MetaTags title={APP_NAME} />
+      <PreviewList className="xs:hidden sm:hidden md:hidden lg:block" />
+      <GridItemEight className="xs:h-[85vh] xs:mx-2 mb-0 sm:mx-2 sm:h-[76vh] md:col-span-8 md:h-[80vh] xl:h-[84vh]">
+        {CHAT_NOT_FOUND ? (
+          <Card className="h-full">
+            <div className="flex h-full flex-col text-center">
+              <PUSHNoConversationSelected />
+            </div>
+          </Card>
+        ) : (
+          <Card className="relative flex h-full flex-col justify-between">
+            {showLoading || loading ? (
+              <div className="flex h-full flex-grow items-center justify-center">
+                <Loader message={t`Loading messages`} />
+              </div>
             ) : (
-              <Card className="relative flex h-full flex-col justify-between">
-                {showLoading || loading ? (
-                  <div className="flex h-full flex-grow items-center justify-center">
-                    <Loader message={t`Loading messages`} />
-                  </div>
-                ) : (
+              <>
+                {profile !== '' && profile && (
                   <>
-                    {profile !== '' && profile && (
-                      <>
-                        <MessageHeader
-                          profile={profile}
-                          selectedChat={
-                            chatsFeed[selectedChatId] ??
-                            requestsFeed[selectedChatId] ??
-                            selectedChat
-                          }
-                        />
-                        <MessageBody
-                          selectedChat={
-                            chatsFeed[selectedChatId] ??
-                            requestsFeed[selectedChatId] ??
-                            selectedChat
-                          }
-                        />
-                      </>
-                    )}
-                    {groupInfo !== '' && groupInfo && (
-                      <>
-                        <MessageHeader
-                          groupInfo={groupInfo}
-                          selectedChat={
-                            chatsFeed[selectedChatId] ??
-                            requestsFeed[selectedChatId] ??
-                            selectedChat
-                          }
-                        />
-                        <MessageBody
-                          groupInfo={groupInfo}
-                          selectedChat={
-                            chatsFeed[selectedChatId] ??
-                            requestsFeed[selectedChatId] ??
-                            selectedChat
-                          }
-                        />
-                      </>
-                    )}
+                    <MessageHeader
+                      profile={profile}
+                      selectedChat={
+                        chatsFeed[selectedChatId] ??
+                        requestsFeed[selectedChatId] ??
+                        selectedChat
+                      }
+                    />
+                    <MessageBody
+                      selectedChat={
+                        chatsFeed[selectedChatId] ??
+                        requestsFeed[selectedChatId] ??
+                        selectedChat
+                      }
+                    />
                   </>
                 )}
-              </Card>
+                {groupInfo !== '' && groupInfo && (
+                  <>
+                    <MessageHeader
+                      groupInfo={groupInfo}
+                      selectedChat={
+                        chatsFeed[selectedChatId] ??
+                        requestsFeed[selectedChatId] ??
+                        selectedChat
+                      }
+                    />
+                    <MessageBody
+                      groupInfo={groupInfo}
+                      selectedChat={
+                        chatsFeed[selectedChatId] ??
+                        requestsFeed[selectedChatId] ??
+                        selectedChat
+                      }
+                    />
+                  </>
+                )}
+              </>
             )}
-          </GridItemEight>
-        </GridLayout>
-      )}
-    </>
+          </Card>
+        )}
+      </GridItemEight>
+    </GridLayout>
   );
 };
 const MessagePage: NextPage = () => {

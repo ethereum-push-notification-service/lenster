@@ -7,23 +7,23 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Image } from 'ui';
 
 type VideoPropsType = {
-  isVideoOn?: boolean;
+  isVideoOn: boolean | null;
+  stream: any;
+  profileId: string;
+  isMuted?: boolean;
+  isMainFrame?: boolean;
   videoFramestyles?: string;
-  profileId?: string;
-  stream?: any;
-  mainFrame?: boolean;
-  showOngoingCall?: any;
 };
 
 const Video = ({
   isVideoOn,
-  profileId,
   stream,
-  videoFramestyles,
-  mainFrame,
-  showOngoingCall
+  profileId,
+  isMuted = true,
+  isMainFrame,
+  videoFramestyles
 }: VideoPropsType) => {
-  const localVideoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [lensProfile, setLensProfile] = useState<Profile>();
   const { getLensProfile } = useFetchLensProfiles();
 
@@ -40,13 +40,11 @@ const Video = ({
   }, [getLensProfile, profileId]);
 
   useEffect(() => {
-    if (localVideoRef.current) {
-      let video = localVideoRef.current;
-      // add the videoCallData here
-      video.srcObject = null;
-      video.play();
+    if (videoRef.current) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.play();
     }
-  }, []);
+  }, [stream]);
 
   return (
     <div className="flex flex-1 items-center justify-center">
@@ -56,15 +54,15 @@ const Video = ({
             <video
               id="localVideo"
               className={videoFramestyles}
-              ref={localVideoRef}
+              ref={videoRef}
               autoPlay
-              muted
+              muted={isMuted}
             />
           </div>
         ) : (
           <div
             className={clsx(
-              mainFrame
+              isMainFrame
                 ? 'mx-auto flex h-[87vh] w-[95%] rounded-2xl bg-[#F4F4F5] dark:bg-gray-700 sm:h-[57vh] md:h-[65]'
                 : 'flex h-[120px] w-[198px] rounded-2xl bg-gray-200 dark:bg-gray-600 sm:h-[143px] sm:w-[254px] md:h-[171px] md:w-[302px]'
             )}

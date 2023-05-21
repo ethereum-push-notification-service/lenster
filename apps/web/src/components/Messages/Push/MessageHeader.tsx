@@ -1,8 +1,6 @@
 import Follow from '@components/Shared/Follow';
 import Slug from '@components/Shared/Slug';
 import Unfollow from '@components/Shared/Unfollow';
-import usePushIncomingCall from '@components/utils/hooks/push/usePushIncomingCall';
-import usePushOutgoingCall from '@components/utils/hooks/push/usePushOutgoingCall';
 import type { GroupDTO, IFeeds } from '@pushprotocol/restapi';
 import type { Profile } from 'lens';
 import formatHandle from 'lib/formatHandle';
@@ -31,19 +29,6 @@ export default function MessageHeader({
   const selectedChatId = usePushChatStore((state) => state.selectedChatId);
   const selectedChatType = usePushChatStore((state) => state.selectedChatType);
   const lensProfiles = usePushChatStore((state) => state.lensProfiles);
-
-  const {
-    openOutgoingCallModal,
-    closeOutgoingCallModal,
-    OutgoingCallModal,
-    setShowOutgoingCallModal
-  } = usePushOutgoingCall();
-  const {
-    openIncomingCallModal,
-    closeIncomingCallModal,
-    IncomingCallModal,
-    showIncomingCallModal
-  } = usePushIncomingCall();
 
   const deprecatedChat = selectedChat?.deprecated ? true : false;
 
@@ -122,23 +107,20 @@ export default function MessageHeader({
           </div>
         )}
         {profile && (
-          <div className="">
-            {/* <img onClick={openModal} className="cursor-pointer" src="/push/video.svg" alt="video icon" /> */}
-            <OutgoingCallModal />
+          <>
             <img
-              onClick={openOutgoingCallModal}
+              // onClick={}
               className="hidden cursor-pointer dark:flex"
               src="/push/videobtndarkmode.svg"
               alt="video icon"
             />
             <img
-              onClick={openOutgoingCallModal}
+              // onClick={}
               className="flex cursor-pointer dark:hidden"
               src="/push/video.svg"
               alt="video icon"
             />
-            {/* <IncomingCallModal /> */}
-          </div>
+          </>
         )}
         {profile &&
           (following ? (

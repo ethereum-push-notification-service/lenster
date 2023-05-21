@@ -8,7 +8,7 @@ import { PUSH_ENV, usePushChatStore } from 'src/store/push-chat';
 import useEthersWalletClient from '../useEthersWalletClient';
 
 interface AcceptVideoCallRequestOptionsType {
-  signalData: any;
+  signalData?: any;
 }
 
 interface ConnectVideoCallOptionsType {
