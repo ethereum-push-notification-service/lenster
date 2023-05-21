@@ -494,11 +494,11 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
                 <div className="flex text-[15px] font-[500]">
                   Group Description
                 </div>
-                <div className="text-[13px] font-[400] text-[#27272A]">
+                <div className="text-[13px] font-[400] text-[#27272A] dark:text-white">
                   {groupInfo?.groupDescription}
                 </div>
               </div>
-              <div className="ml-9 mt-6 flex h-[62px] w-[85%] flex-row items-center rounded-2xl border border-[#D7D7D7]">
+              <div className="ml-9 mt-6 flex h-[62px] w-[85%] flex-row items-center rounded-2xl border border-[#D7D7D7] dark:border-[#3F3F46]">
                 <div className="ml-[20px]">
                   <Image src="/push/lock.svg" alt="lock" />
                 </div>
@@ -517,7 +517,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
               </div>
               {isAccountOwnerAdmin && (
                 <div
-                  className="ml-9 mt-3 flex h-[62px] w-[85%] cursor-pointer rounded-2xl border border-[#D7D7D7]"
+                  className="ml-9 mt-3 flex h-[62px] w-[85%] cursor-pointer rounded-2xl border border-[#D7D7D7] dark:border-[#3F3F46]"
                   onClick={() => {
                     setShowSearchMembers(true);
                     setShowPendingMembers(false);
@@ -531,7 +531,7 @@ const useGroupInfoModal = (options: GroupInfoModalProps) => {
                   </div>
                 </div>
               )}
-              <div className="ml-9 mt-3 max-h-[50vh] min-h-[60px] w-[85%] cursor-pointer rounded-2xl border border-[#D7D7D7] text-lg font-normal ">
+              <div className="ml-9 mt-3 max-h-[50vh] min-h-[60px] w-[85%] cursor-pointer rounded-2xl border border-[#D7D7D7] text-lg font-normal dark:border-[#3F3F46] ">
                 <div onClick={handleShowAllPendingMembers}>
                   <div className="ml-4 mt-4 flex w-[200px] pb-4">
                     <div className="text-[15px] font-[500]">

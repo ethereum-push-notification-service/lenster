@@ -104,8 +104,14 @@ export default function MessageHeader({
             }
           >
             <Image
-              className="h-10 w-9"
+              className="h-10 w-9 dark:hidden"
               src="/push/more.svg"
+              alt="group info settings"
+            />
+
+            <Image
+              className="hidden h-10 w-9 dark:flex"
+              src="/push/darkmodemore.svg"
               alt="group info settings"
             />
           </div>
@@ -113,7 +119,7 @@ export default function MessageHeader({
         {groupInfo && showModal && (
           <div
             ref={downRef}
-            className="absolute top-36 ml-[-80px] flex w-40 cursor-pointer items-center rounded-2xl border border-[#BAC4D6] bg-white p-2 px-4"
+            className="absolute top-36 ml-[-80px] flex w-40 cursor-pointer items-center rounded-2xl border border-[#BAC4D6] bg-white p-2 px-4 dark:border-[#3F3F46] dark:bg-gray-700"
             onClick={handleGroupInfo}
           >
             <div>

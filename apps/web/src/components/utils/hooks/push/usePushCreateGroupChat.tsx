@@ -163,14 +163,17 @@ export const MemberProfileList = ({
   };
 
   return (
-    <div className="relative flex flex-col gap-2 py-2" onClick={handleRemoveModal}>
+    <div
+      className="relative flex flex-col gap-2 py-2"
+      onClick={handleRemoveModal}
+    >
       {memberList.map((member, i) => (
         //  put styles into a object
         <div
           className={clsx(
             isAddedMembersList
               ? 'border border-gray-300 dark:border-[#3F3F46]'
-              : 'dark:bg-[#3F3F46]',
+              : '',
             'flex flex-row items-center justify-between rounded-xl  px-2 py-1'
           )}
           key={`${member.id}${i}`}
@@ -199,7 +202,10 @@ export const MemberProfileList = ({
             </div>
           </div>
           {isAdmin(member) && !onAddMembers ? (
-            <div className="absolute right-[40px] rounded-lg bg-[#E5DAFF] pb-1 pl-2.5 pr-2.5 pt-1 text-xs text-[#8B5CF6]">
+            <div
+              className="absolute right-[40px] rounded-lg bg-[#E5DAFF] pb-1 pl-2.5 pr-2.5 pt-1 text-xs text-[#8B5CF6] dark:bg-[#000000]
+              dark:text-[#8B5CF6]"
+            >
               Admin
             </div>
           ) : (
@@ -217,10 +223,16 @@ export const MemberProfileList = ({
                     )
                   }
                 >
-                  <img
-                    className="h-10 w-9"
+                  <Image
+                    className="h-10 w-9 dark:hidden"
                     src="/push/more.svg"
-                    alt="more icon"
+                    alt="group info settings"
+                  />
+
+                  <Image
+                    className="hidden h-10 w-9 dark:flex"
+                    src="/push/darkmodemore.svg"
+                    alt="group info settings"
                   />
                 </div>
                 {showModalgroupOptions === i && (
