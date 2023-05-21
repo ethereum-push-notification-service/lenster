@@ -16,7 +16,7 @@ const usePushOutgoingCall = () => {
     setShowCallModal(false);
   };
 
-  const CallModal = () => {
+  const OutgoingCallModal = () => {
     const downRef = useRef(null);
     const handleCloseall = () => {
       if (showCallModal) {
@@ -85,7 +85,7 @@ const usePushOutgoingCall = () => {
   return {
     openModal,
     closeModal,
-    CallModal,
+    OutgoingCallModal,
     showCallModal
   };
 };
