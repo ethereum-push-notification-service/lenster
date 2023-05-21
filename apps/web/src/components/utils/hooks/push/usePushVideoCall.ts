@@ -1,4 +1,4 @@
-import type { SignerType } from '@pushprotocol/restapi';
+import type { IFeeds, SignerType } from '@pushprotocol/restapi';
 import { video as PushVideo, VideoCallStatus } from '@pushprotocol/restapi';
 import { produce } from 'immer';
 import { useEffect } from 'react';
@@ -15,7 +15,11 @@ interface ConnectVideoCallOptionsType {
   signalData: any;
 }
 
-interface VideoCallMetaDataType {
+interface SetRequestVideoCallOptionsType {
+  selectedChat: IFeeds;
+}
+
+export interface VideoCallMetaDataType {
   recipientAddress: string;
   senderAddress: string;
   chatId: string;
@@ -34,7 +38,6 @@ const usePushVideoCall = () => {
   );
   const videoCallData = usePushChatStore((state) => state.videoCallData);
   const setVideoCallData = usePushChatStore((state) => state.setVideoCallData);
-  // const selectedChatId = usePushChatStore((state) => state.selectedChatId);
 
   useEffect(() => {
     if (videoCallObject !== null || !decryptedPgpPvtKey || !walletClient) {
@@ -125,30 +128,42 @@ const usePushVideoCall = () => {
     }
   };
 
-  const setIncomingVideoCall = (videoCallMetaData: VideoCallMetaDataType) => {
+  const setIncomingVideoCall = ({
+    recipientAddress,
+    senderAddress,
+    chatId,
+    signalData
+  }: VideoCallMetaDataType) => {
     videoCallObject?.setData((oldData) => {
       return produce(oldData, (draft) => {
-        draft.local.address = videoCallMetaData.recipientAddress;
-        draft.incoming[0].address = videoCallMetaData.senderAddress;
+        draft.local.address = recipientAddress;
+        draft.incoming[0].address = senderAddress;
         draft.incoming[0].status = VideoCallStatus.RECEIVED;
-        draft.meta.chatId = videoCallMetaData.chatId;
-        draft.meta.initiator.address = videoCallMetaData.senderAddress;
-        draft.meta.initiator.signal = videoCallMetaData.signalData;
+        draft.meta.chatId = chatId;
+        draft.meta.initiator.address = senderAddress;
+        draft.meta.initiator.signal = signalData;
       });
     });
   };
 
-  // const setRequestVideoCall = async () => {
-  //   const localUserAddress = await walletClient.getAddress();
-  //   videoCallObject?.setData((oldData) => {
-  //     return produce(oldData, (draft) => {
-  //       draft.local.address = localUserAddress;
-  //       draft.incoming[0].address = ; // get wallet address from chat id
-  //       draft.incoming[0].status = VideoCallStatus.INITIALIZED;
-  //       draft.meta.chatId = selectedChatId;
-  //     });
-  //   });
-  // };
+  const setRequestVideoCall = async ({
+    selectedChat
+  }: SetRequestVideoCallOptionsType) => {
+    const localUserAddress = await walletClient.getAddress();
+
+    videoCallObject?.setData((oldData) => {
+      return produce(oldData, (draft) => {
+        if (!selectedChat.chatId || selectedChat.wallets) {
+          return;
+        }
+
+        draft.local.address = localUserAddress;
+        draft.incoming[0].address = selectedChat.wallets;
+        draft.incoming[0].status = VideoCallStatus.INITIALIZED;
+        draft.meta.chatId = selectedChat.chatId;
+      });
+    });
+  };
 
   const toggleVideo = () => {
     try {
@@ -173,7 +188,7 @@ const usePushVideoCall = () => {
     connectVideoCall,
     disconnectVideoCall,
     setIncomingVideoCall,
-    // setRequestVideoCall,
+    setRequestVideoCall,
     toggleVideo,
     toggleAudio
   };
