@@ -7,13 +7,13 @@ import { Image } from 'ui';
 
 type VideoPropsType = {
   isVideoOn: boolean;
+  videoFramestyles?: string;
   profileId?: string;
   stream?: any;
 };
 
-const Video = ({ isVideoOn, profileId, stream }: VideoPropsType) => {
+const Video = ({ isVideoOn, profileId, stream, videoFramestyles }: VideoPropsType) => {
   const localVideoRef = useRef<HTMLVideoElement>(null);
-  const incomingVideoRef = useRef<HTMLVideoElement>(null);
   const [lensProfile, setLensProfile] = useState<Profile>();
   const { getLensProfile } = useFetchLensProfiles();
 
@@ -40,14 +40,17 @@ const Video = ({ isVideoOn, profileId, stream }: VideoPropsType) => {
 
   return (
     <div className="flex items-center justify-center">
+    <div className="relative">
       {isVideoOn ? (
+      <div className="flex items-center justify-center">
         <video
           id="localVideo"
-          className="h-[87vh] w-[95%] rounded-2xl object-cover sm:block sm:h-[57vh] md:h-[65]"
+          className={videoFramestyles}
           ref={localVideoRef}
           autoPlay
           muted
         />
+       </div>
       ) : (
         <div className="flex h-[87vh] w-[95%] rounded-2xl bg-[#F4F4F5] sm:h-[57vh] md:h-[65]">
           <Image
@@ -61,6 +64,7 @@ const Video = ({ isVideoOn, profileId, stream }: VideoPropsType) => {
           />
         </div>
       )}
+      </div>
     </div>
   );
 };

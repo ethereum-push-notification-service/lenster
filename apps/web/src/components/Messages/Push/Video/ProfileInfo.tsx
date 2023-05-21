@@ -9,7 +9,12 @@ import { Image } from 'ui';
 
 import { getProfileFromDID } from '../helper';
 
-const ProfileInfo = () => {
+type ProfileInfoType = {
+  status?: string;
+  removeSlug?: boolean;
+};
+
+const ProfileInfo = ({ status, removeSlug }: ProfileInfoType) => {
   const [showProfile, setShowProfile] = useState<Profile[]>([]);
   const selectedChatid = usePushChatStore((state) => state.selectedChatId);
   const { getLensProfile } = useFetchLensProfiles();
@@ -29,19 +34,30 @@ const ProfileInfo = () => {
       <div>
         {showProfile.map((profile) => (
           <div key={profile.id}>
-            <div className="absolute left-0 right-0 top-12 m-auto mb-2 flex flex-row items-center justify-center sm:static md:static">
+            <div className="flex flex-row items-center">
               <Image
                 src={getAvatar(profile)}
-                className="mr-3 h-12 rounded-full"
+                className={
+                  status && removeSlug === undefined
+                    ? 'mr-3 h-16 w-16 rounded-full'
+                    : 'mr-3 h-12 rounded-full'
+                }
                 alt={formatHandle(profile?.handle)}
               />
               <div className="flex flex-col">
-                {profile?.name ?? formatHandle(profile?.handle)}
+                <span className="text-[12px] font-[500px] text-[#333333] dark:text-white md:text-[15px]">
+                  {profile?.name ?? formatHandle(profile?.handle)}
+                </span>
                 <Slug
-                  className="text-sm"
+                  className={
+                    removeSlug !== undefined ? 'hidden' : 'text-[14px]'
+                  }
                   slug={formatHandle(profile?.handle)}
                   prefix="@"
                 />
+                <span className="whitespace-nowrap text-[12px] font-[300px] text-[#82828A] dark:text-[#D4D4D8] md:text-[14px]">
+                  {status}
+                </span>
               </div>
             </div>
           </div>

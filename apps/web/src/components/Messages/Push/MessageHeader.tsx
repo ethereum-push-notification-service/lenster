@@ -1,6 +1,7 @@
 import Follow from '@components/Shared/Follow';
 import Slug from '@components/Shared/Slug';
 import Unfollow from '@components/Shared/Unfollow';
+import usePushIncomingCall from '@components/utils/hooks/push/usePushIncomingCall';
 import usePushOutgoingCall from '@components/utils/hooks/push/usePushOutgoingCall';
 import type { GroupDTO, IFeeds } from '@pushprotocol/restapi';
 import type { Profile } from 'lens';
@@ -31,8 +32,18 @@ export default function MessageHeader({
   const selectedChatType = usePushChatStore((state) => state.selectedChatType);
   const lensProfiles = usePushChatStore((state) => state.lensProfiles);
 
-  const { openModal, closeModal, CallModal, showCallModal } =
-  usePushOutgoingCall();
+  const {
+    openOutgoingCallModal,
+    closeOutgoingCallModal,
+    OutgoingCallModal,
+    setShowOutgoingCallModal
+  } = usePushOutgoingCall();
+  const {
+    openIncomingCallModal,
+    closeIncomingCallModal,
+    IncomingCallModal,
+    showIncomingCallModal
+  } = usePushIncomingCall();
 
   const deprecatedChat = selectedChat?.deprecated ? true : false;
 
@@ -111,14 +122,22 @@ export default function MessageHeader({
           </div>
         )}
         {profile && (
-          <div>
+          <div className="">
+            {/* <img onClick={openModal} className="cursor-pointer" src="/push/video.svg" alt="video icon" /> */}
+            <OutgoingCallModal />
             <img
-              onClick={openModal}
-              className="cursor-pointer"
+              onClick={openOutgoingCallModal}
+              className="hidden cursor-pointer dark:flex"
+              src="/push/videobtndarkmode.svg"
+              alt="video icon"
+            />
+            <img
+              onClick={openOutgoingCallModal}
+              className="flex cursor-pointer dark:hidden"
               src="/push/video.svg"
               alt="video icon"
             />
-            <CallModal />
+            {/* <IncomingCallModal /> */}
           </div>
         )}
         {profile &&

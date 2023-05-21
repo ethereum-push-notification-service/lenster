@@ -1,10 +1,19 @@
 import React from 'react';
 import { Image } from 'ui';
 
-const CallButton = () => {
+type CallButtonProps = {
+  buttonStyles: string;
+  iconSrc: any;
+  onClick: () => void;
+};
+
+// accept or reject on and off
+const CallButton = ({ buttonStyles, iconSrc, onClick }: CallButtonProps) => {
   return (
-    <div className="absolute bottom-8 gap-2 mt-2 left-0 right-0 m-auto flex flex-row items-center justify-center sm:static md:static">
-      <Image
+    <div className="" onClick={onClick}>
+      <Image src={iconSrc} className={buttonStyles} alt="call" />
+
+      {/* <Image
         src="/push/videobtn.svg"
         className="bg-white p-3 border-[#D4D4D8] border w-[48px] h-[48px] rounded-[10px]"
         alt="call"
@@ -14,7 +23,7 @@ const CallButton = () => {
         src="/push/callendbtn.svg"
         className="py-[12px] px-[28px] w-[80px] h-[48px] bg-[red] rounded-[10px]"
         alt="call"
-      />
+      /> */}
     </div>
   );
 };

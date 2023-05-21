@@ -1,5 +1,12 @@
-import type { IFeeds, IMessageIPFS, IUser } from '@pushprotocol/restapi';
+import type {
+  IFeeds,
+  IMessageIPFS,
+  IUser,
+  video as PushVideo,
+  VideoCallData
+} from '@pushprotocol/restapi';
 import { ENV } from '@pushprotocol/restapi/src/lib/constants';
+import { initVideoCallData } from '@pushprotocol/restapi/src/lib/video';
 import { IS_MAINNET } from 'data';
 import type { Profile } from 'lens';
 import { create } from 'zustand';
@@ -81,6 +88,12 @@ interface IPushChatStore {
   }) => void;
   pushChatSocket: any; // replace any with the actual type of socket connection
   setPushChatSocket: (pushChatSocket: any) => void;
+
+  // video
+  videoCallObject: PushVideo.Video | null;
+  setVideoCallObject: (videoCallObject: PushVideo.Video) => void;
+  videoCallData: VideoCallData;
+  setVideoCallData: (fn: (data: VideoCallData) => VideoCallData) => void;
 }
 
 export const usePushChatStore = create<IPushChatStore>((set) => ({
@@ -174,6 +187,14 @@ export const usePushChatStore = create<IPushChatStore>((set) => ({
   },
   pushChatSocket: null,
   setPushChatSocket: (pushChatSocket) => set(() => ({ pushChatSocket })),
+
+  // video
+  videoCallObject: null,
+  setVideoCallObject: (videoCallObject) => set(() => ({ videoCallObject })),
+  videoCallData: initVideoCallData,
+  setVideoCallData: (fn) =>
+    set((state) => ({ videoCallData: fn(state.videoCallData) })),
+
   resetPushChatStore: () =>
     set((state) => {
       return {
@@ -196,7 +217,9 @@ export const usePushChatStore = create<IPushChatStore>((set) => ({
         pgpPrivateKey: {
           encrypted: null,
           decrypted: null
-        }
+        },
+        videoCallObject: null,
+        videoCallData: initVideoCallData
       };
     })
 }));
