@@ -119,7 +119,7 @@ export default function MessageHeader({
             <div>
               <Image
                 className="mr-2 h-6 w-6"
-                src="/push/info.svg"
+                src="/push/Info.svg"
                 alt="group info settings"
               />
             </div>
