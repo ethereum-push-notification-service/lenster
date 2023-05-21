@@ -79,7 +79,7 @@ const usePushIncomingCall = () => {
                 <ProfileInfo status={'Incoming Video Call'} />
               </div>
               <div>
-                <Video videoFramestyles='bg-black h-[50vh] w-[100%] rounded-2xl object-cover sm:block sm:h-[240px] md:h-[240px]'/>
+                <Video showOngoingCall={false} videoFramestyles='bg-black h-[50vh] w-[100%] rounded-2xl object-cover sm:block sm:h-[240px] md:h-[240px]'/>
               </div>
               <div className="flex w-full mt-4 flex-row items-center justify-center gap-4">
                 <CallButton

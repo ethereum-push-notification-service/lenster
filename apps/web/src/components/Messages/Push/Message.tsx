@@ -19,12 +19,14 @@ import { useAppStore } from 'src/store/app';
 import type { ChatTypes } from 'src/store/push-chat';
 import { CHAT_TYPES, usePushChatStore } from 'src/store/push-chat';
 import { Card, GridItemEight, GridLayout } from 'ui';
-
+import useOngoingCall from '@components/utils/hooks/push/usePushOngoing';
 import PreviewList from '../PreviewList';
 import { getCAIPFromLensID, getIsHandle, getProfileFromDID } from './helper';
 import MessageBody from './MessageBody';
 import MessageHeader from './MessageHeader';
 import PUSHNoConversationSelected from './PUSHNoConversationSelected';
+import LensHandleTag from './Video/LensHandleTag';
+import CallButton from './Video/CallButton';
 
 type MessagePropType = {
   conversationType: ChatTypes;
@@ -53,7 +55,7 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
   const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
   const connectedProfile = usePushChatStore((state) => state.connectedProfile);
   const currentProfile = useAppStore((state) => state.currentProfile);
-
+  const { showOngoingCall, setShowOngoingCall, OngoingCall } = useOngoingCall();
   const [profile, setProfile] = useState<Profile | null | ''>('');
   const [groupInfo, setGroupInfo] = useState<GroupDTO | null | ''>('');
   const [selectedChat, setSelectedChat] = useState<IFeeds>();
@@ -182,69 +184,92 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
   }
 
   return (
-    <GridLayout classNameChild="md:gap-8">
-      <MetaTags title={APP_NAME} />
-      <PreviewList className="xs:hidden sm:hidden md:hidden lg:block" />
-      <GridItemEight className="xs:h-[85vh] xs:mx-2 mb-0 sm:mx-2 sm:h-[76vh] md:col-span-8 md:h-[80vh] xl:h-[84vh]">
-        {CHAT_NOT_FOUND ? (
-          <Card className="h-full">
-            <div className="flex h-full flex-col text-center">
-              <PUSHNoConversationSelected />
-            </div>
-          </Card>
-        ) : (
-          <Card className="relative flex h-full flex-col justify-between">
-            {showLoading || loading ? (
-              <div className="flex h-full flex-grow items-center justify-center">
-                <Loader message={t`Loading messages`} />
+    <>
+      {showOngoingCall &&
+        <div className='flex items-center justify-center'>
+          <div className='md:w-[80%] sm:w-[75%] w-[100%]  flex items-center justify-center'>
+            <Card className='w-[100%] sm:w-[90%] sm:w-[90%] md:mt-4 sm:mt-4 mt-1'>
+              <div>
+                <OngoingCall />
               </div>
+              <div className='py-[3px] px-[8px] bg-[#2E313B] absolute mt-[-60px] text-white rounded-xl sm:ml-10 md:ml-10 ml-6'>
+                <LensHandleTag />
+              </div>
+              <div className='mb-4 cursor-pointer mt-2 flex items-center justify-center gap-2.5'>
+                <CallButton iconSrc={"/push/videobtn.svg"} buttonStyles='bg-white p-3 border-[#D4D4D8] border w-[48px] h-[48px] rounded-[10px]' onClick={() => setShowOngoingCall(false)} />
+                <CallButton iconSrc={"/push/micbtn.svg"} buttonStyles='bg-white w-[48px] h-[48px] p-3 border-[#D4D4D8] border rounded-[10px]' onClick={() => setShowOngoingCall(false)}/>
+                <CallButton iconSrc={"/push/callendbtn.svg"} buttonStyles='py-[12px] px-[28px] w-[80px] h-[48px] bg-[red] rounded-[10px]' onClick={() => setShowOngoingCall(false)}/>
+              </div>
+            </Card>
+          </div>
+        </div>
+      }
+      {!showOngoingCall && (
+        <GridLayout classNameChild="md:gap-8">
+          <MetaTags title={APP_NAME} />
+          <PreviewList className="xs:hidden sm:hidden md:hidden lg:block" />
+          <GridItemEight className="xs:h-[85vh] xs:mx-2 mb-0 sm:mx-2 sm:h-[76vh] md:col-span-8 md:h-[80vh] xl:h-[84vh]">
+            {CHAT_NOT_FOUND ? (
+              <Card className="h-full">
+                <div className="flex h-full flex-col text-center">
+                  <PUSHNoConversationSelected />
+                </div>
+              </Card>
             ) : (
-              <>
-                {profile !== '' && profile && (
+              <Card className="relative flex h-full flex-col justify-between">
+                {showLoading || loading ? (
+                  <div className="flex h-full flex-grow items-center justify-center">
+                    <Loader message={t`Loading messages`} />
+                  </div>
+                ) : (
                   <>
-                    <MessageHeader
-                      profile={profile}
-                      selectedChat={
-                        chatsFeed[selectedChatId] ??
-                        requestsFeed[selectedChatId] ??
-                        selectedChat
-                      }
-                    />
-                    <MessageBody
-                      selectedChat={
-                        chatsFeed[selectedChatId] ??
-                        requestsFeed[selectedChatId] ??
-                        selectedChat
-                      }
-                    />
+                    {profile !== '' && profile && (
+                      <>
+                        <MessageHeader
+                          profile={profile}
+                          selectedChat={
+                            chatsFeed[selectedChatId] ??
+                            requestsFeed[selectedChatId] ??
+                            selectedChat
+                          }
+                        />
+                        <MessageBody
+                          selectedChat={
+                            chatsFeed[selectedChatId] ??
+                            requestsFeed[selectedChatId] ??
+                            selectedChat
+                          }
+                        />
+                      </>
+                    )}
+                    {groupInfo !== '' && groupInfo && (
+                      <>
+                        <MessageHeader
+                          groupInfo={groupInfo}
+                          selectedChat={
+                            chatsFeed[selectedChatId] ??
+                            requestsFeed[selectedChatId] ??
+                            selectedChat
+                          }
+                        />
+                        <MessageBody
+                          groupInfo={groupInfo}
+                          selectedChat={
+                            chatsFeed[selectedChatId] ??
+                            requestsFeed[selectedChatId] ??
+                            selectedChat
+                          }
+                        />
+                      </>
+                    )}
                   </>
                 )}
-                {groupInfo !== '' && groupInfo && (
-                  <>
-                    <MessageHeader
-                      groupInfo={groupInfo}
-                      selectedChat={
-                        chatsFeed[selectedChatId] ??
-                        requestsFeed[selectedChatId] ??
-                        selectedChat
-                      }
-                    />
-                    <MessageBody
-                      groupInfo={groupInfo}
-                      selectedChat={
-                        chatsFeed[selectedChatId] ??
-                        requestsFeed[selectedChatId] ??
-                        selectedChat
-                      }
-                    />
-                  </>
-                )}
-              </>
+              </Card>
             )}
-          </Card>
-        )}
-      </GridItemEight>
-    </GridLayout>
+          </GridItemEight>
+        </GridLayout>
+      )}
+    </>
   );
 };
 

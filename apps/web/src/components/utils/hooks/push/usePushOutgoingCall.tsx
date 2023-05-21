@@ -42,7 +42,7 @@ const usePushOutgoingCall = () => {
               Calling...
             </span>
             <div>
-              <Video videoFramestyles='bg-black h-[87vh] w-[95%] rounded-2xl object-cover sm:block sm:h-[57vh] md:h-[57vh]' />
+              <Video showOngoingCall={false} videoFramestyles='bg-black h-[87vh] w-[95%] rounded-2xl object-cover sm:block sm:h-[57vh] md:h-[57vh]' />
             </div>
             {/* check call button component to make changes where neccessary */}
             {/* <div>
