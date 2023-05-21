@@ -58,6 +58,7 @@ const usePushOutgoingCall = () => {
                 isVideoOn={false}
                 profileId={getProfileFromDID(selectedChatId)}
                 showOngoingCall={false}
+                mainFrame={true}
                 videoFramestyles="bg-black h-[87vh] w-[95%] rounded-2xl object-cover sm:block sm:h-[57vh] md:h-[57vh]"
               />
             </div>

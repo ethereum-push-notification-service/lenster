@@ -35,11 +35,13 @@ const useOngoingCall = () => {
                 <Video
                   showOngoingCall={showOngoingCall}
                   videoFramestyles="bg-black h-[66vh] w-[95%] rounded-2xl object-cover sm:block sm:h-[62vh] md:h-[62vh]"
+                  mainFrame={true}
                 />
                 <div className="absolute bottom-2 right-5 sm:right-10 md:right-10">
                   <Video
                     showOngoingCall={showOngoingCall}
-                    videoFramestyles="h-[120px] w-[198px] rounded-2xl bg-white object-cover sm:h-[143px] sm:w-[254px] md:h-[143px] md:w-[254px]"
+                    videoFramestyles="h-[120px] w-[198px]   bg-white object-cover sm:h-[143px] sm:w-[254px] md:h-[143px] md:w-[254px] rounded-2xl"
+                    mainFrame={false}
                   />
                 </div>
               </div>

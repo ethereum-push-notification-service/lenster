@@ -81,6 +81,7 @@ const usePushIncomingCall = () => {
               <div>
                 <Video
                   showOngoingCall={false}
+                  mainFrame={true}
                   videoFramestyles="bg-black h-[50vh] w-[100%] rounded-2xl object-cover sm:block sm:h-[240px] md:h-[240px]"
                 />
               </div>
