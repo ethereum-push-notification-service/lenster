@@ -1,6 +1,7 @@
 import { isCAIP } from '@components/Messages/Push/helper';
 import type { IFeeds, IMessageIPFS } from '@pushprotocol/restapi';
 import * as PushAPI from '@pushprotocol/restapi';
+import { ADDITIONAL_META_TYPE } from '@pushprotocol/restapi/src/lib/payloads/constants';
 import { createSocketConnection, EVENTS } from '@pushprotocol/socket';
 import { LENSHUB_PROXY } from 'data';
 import { useCallback, useEffect, useState } from 'react';
@@ -9,6 +10,8 @@ import { useAppStore } from 'src/store/app';
 import { PUSH_ENV, usePushChatStore } from 'src/store/push-chat';
 
 import useFetchChat from './useFetchChat';
+import type { VideoCallMetaDataType } from './usePushVideoCall';
+import usePushVideoCall from './usePushVideoCall';
 
 const CHAT_SOCKET_TYPE = 'chat';
 
@@ -42,6 +45,14 @@ const usePushChatSocket = (): PushChatSocket => {
   const setRequestFeed = usePushChatStore((state) => state.setRequestFeed);
   const chats = usePushChatStore((state) => state.chats);
   const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
+
+  const {
+    setIncomingVideoCall,
+    connectVideoCall,
+    isVideoCallInitiator,
+    requestVideoCall,
+    acceptVideoCallRequest
+  } = usePushVideoCall();
 
   const addSocketEvents = useCallback(() => {
     pushChatSocket?.on(EVENTS.CONNECT, () => {
@@ -116,6 +127,68 @@ const usePushChatSocket = (): PushChatSocket => {
       console.log(groupInfo);
       setGroupInformationSinceLastConnection(groupInfo);
     });
+
+    pushChatSocket?.on(EVENTS.USER_FEEDS, (feedItem: any) => {
+      try {
+        const { payload } = feedItem || {};
+
+        // check for additionalMeta
+        if (
+          payload.hasOwnProperty('data') &&
+          payload['data'].hasOwnProperty('additionalMeta')
+        ) {
+          const {
+            data: { additionalMeta }
+          } = payload;
+          console.log('RECEIVED ADDITIONAL META', additionalMeta);
+
+          // check for PUSH_VIDEO
+          if (additionalMeta.type === `${ADDITIONAL_META_TYPE.PUSH_VIDEO}+1`) {
+            const videoCallMetaData: VideoCallMetaDataType = JSON.parse(
+              additionalMeta.data
+            );
+
+            if (
+              videoCallMetaData.status === PushAPI.VideoCallStatus.INITIALIZED
+            ) {
+              setIncomingVideoCall(videoCallMetaData);
+            } else if (
+              videoCallMetaData.status === PushAPI.VideoCallStatus.RECEIVED ||
+              videoCallMetaData.status ===
+                PushAPI.VideoCallStatus.RETRY_RECEIVED
+            ) {
+              connectVideoCall({ signalData: videoCallMetaData.signalData });
+            } else if (
+              videoCallMetaData.status === PushAPI.VideoCallStatus.DISCONNECTED
+            ) {
+              // reset the states
+            } else if (
+              videoCallMetaData.status ===
+                PushAPI.VideoCallStatus.RETRY_INITIALIZED &&
+              isVideoCallInitiator()
+            ) {
+              requestVideoCall({
+                retry: true
+              });
+            } else if (
+              videoCallMetaData.status ===
+                PushAPI.VideoCallStatus.RETRY_INITIALIZED &&
+              !isVideoCallInitiator()
+            ) {
+              acceptVideoCallRequest({
+                signalData: videoCallMetaData.signalData,
+                retry: true
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error(
+          'DAPP Error while diplaying received Notification: ',
+          error
+        );
+      }
+    });
   }, [
     pushChatSocket,
     connectedProfile,
@@ -126,7 +199,12 @@ const usePushChatSocket = (): PushChatSocket => {
     chats,
     setChatFeed,
     setRequestFeed,
-    fetchChat
+    fetchChat,
+    isVideoCallInitiator,
+    setIncomingVideoCall,
+    connectVideoCall,
+    requestVideoCall,
+    acceptVideoCallRequest
   ]);
 
   const removeSocketEvents = useCallback(() => {

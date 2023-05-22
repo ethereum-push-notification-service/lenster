@@ -1,4 +1,4 @@
-import type { IFeeds, SignerType } from '@pushprotocol/restapi';
+import type { SignerType } from '@pushprotocol/restapi';
 import { video as PushVideo, VideoCallStatus } from '@pushprotocol/restapi';
 import { produce } from 'immer';
 import { useEffect } from 'react';
@@ -7,8 +7,13 @@ import { PUSH_ENV, usePushChatStore } from 'src/store/push-chat';
 
 import useEthersWalletClient from '../useEthersWalletClient';
 
+interface RequestVideoCallOptionsType {
+  retry?: boolean;
+}
+
 interface AcceptVideoCallRequestOptionsType {
   signalData?: any;
+  retry?: boolean;
 }
 
 interface ConnectVideoCallOptionsType {
@@ -16,7 +21,7 @@ interface ConnectVideoCallOptionsType {
 }
 
 interface SetRequestVideoCallOptionsType {
-  selectedChat: IFeeds;
+  selectedChatId?: string;
 }
 
 export interface VideoCallMetaDataType {
@@ -29,6 +34,12 @@ export interface VideoCallMetaDataType {
 
 const usePushVideoCall = () => {
   const { data: walletClient } = useEthersWalletClient();
+
+  const connectedProfile = usePushChatStore((state) => state.connectedProfile);
+  const localDID = connectedProfile?.did;
+
+  const receiverDID = usePushChatStore((state) => state.selectedChatId);
+
   const videoCallObject = usePushChatStore((state) => state.videoCallObject);
   const setVideoCallObject = usePushChatStore(
     (state) => state.setVideoCallObject
@@ -73,14 +84,15 @@ const usePushVideoCall = () => {
     }
   };
 
-  const requestVideoCall = () => {
+  const requestVideoCall = ({ retry = false }: RequestVideoCallOptionsType) => {
     console.log('requestVideoCall');
 
     try {
       videoCallObject?.request({
         senderAddress: videoCallData.local.address,
         recipientAddress: videoCallData.incoming[0].address,
-        chatId: videoCallData.meta.chatId
+        chatId: videoCallData.meta.chatId,
+        retry
       });
     } catch (error) {
       console.log('Error in requesting video call', error);
@@ -88,7 +100,8 @@ const usePushVideoCall = () => {
   };
 
   const acceptVideoCallRequest = ({
-    signalData
+    signalData,
+    retry = false
   }: AcceptVideoCallRequestOptionsType): void => {
     console.log('acceptVideoCallRequest');
 
@@ -99,7 +112,8 @@ const usePushVideoCall = () => {
           : videoCallData.meta.initiator.signal,
         senderAddress: videoCallData.local.address,
         recipientAddress: videoCallData.incoming[0].address,
-        chatId: videoCallData.meta.chatId
+        chatId: videoCallData.meta.chatId,
+        retry
       });
     } catch (error) {
       console.log('Error in accepting request for video call', error);
@@ -147,20 +161,18 @@ const usePushVideoCall = () => {
   };
 
   const setRequestVideoCall = async ({
-    selectedChat
+    selectedChatId
   }: SetRequestVideoCallOptionsType) => {
-    const localUserAddress = await walletClient.getAddress();
-
     videoCallObject?.setData((oldData) => {
       return produce(oldData, (draft) => {
-        if (!selectedChat.chatId || selectedChat.wallets) {
+        if (!selectedChatId || !localDID || !receiverDID) {
           return;
         }
 
-        draft.local.address = localUserAddress;
-        draft.incoming[0].address = selectedChat.wallets;
+        draft.local.address = localDID;
+        draft.incoming[0].address = receiverDID;
         draft.incoming[0].status = VideoCallStatus.INITIALIZED;
-        draft.meta.chatId = selectedChat.chatId;
+        draft.meta.chatId = selectedChatId;
       });
     });
   };
@@ -181,6 +193,10 @@ const usePushVideoCall = () => {
     }
   };
 
+  const isVideoCallInitiator = (): boolean => {
+    return videoCallObject?.isInitiator()!;
+  };
+
   return {
     createMediaStream,
     requestVideoCall,
@@ -190,7 +206,8 @@ const usePushVideoCall = () => {
     setIncomingVideoCall,
     setRequestVideoCall,
     toggleVideo,
-    toggleAudio
+    toggleAudio,
+    isVideoCallInitiator
   };
 };
 

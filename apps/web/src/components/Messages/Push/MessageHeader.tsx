@@ -1,6 +1,7 @@
 import Follow from '@components/Shared/Follow';
 import Slug from '@components/Shared/Slug';
 import Unfollow from '@components/Shared/Unfollow';
+import usePushVideoCall from '@components/utils/hooks/push/usePushVideoCall';
 import type { GroupDTO, IFeeds } from '@pushprotocol/restapi';
 import type { Profile } from 'lens';
 import formatHandle from 'lib/formatHandle';
@@ -29,6 +30,8 @@ export default function MessageHeader({
   const selectedChatId = usePushChatStore((state) => state.selectedChatId);
   const selectedChatType = usePushChatStore((state) => state.selectedChatType);
   const lensProfiles = usePushChatStore((state) => state.lensProfiles);
+
+  const { setRequestVideoCall } = usePushVideoCall();
 
   const deprecatedChat = selectedChat?.deprecated ? true : false;
 
@@ -109,13 +112,17 @@ export default function MessageHeader({
         {profile && (
           <>
             <img
-              // onClick={}
+              onClick={() =>
+                setRequestVideoCall({ selectedChatId: selectedChat.chatId })
+              }
               className="hidden cursor-pointer dark:flex"
               src="/push/videobtndarkmode.svg"
               alt="video icon"
             />
             <img
-              // onClick={}
+              onClick={() =>
+                setRequestVideoCall({ selectedChatId: selectedChat.chatId })
+              }
               className="flex cursor-pointer dark:hidden"
               src="/push/video.svg"
               alt="video icon"

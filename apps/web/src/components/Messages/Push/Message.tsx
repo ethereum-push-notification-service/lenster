@@ -6,7 +6,11 @@ import useGetChatProfile from '@components/utils/hooks/push/useGetChatProfile';
 import useGetGroup from '@components/utils/hooks/push/useGetGroup';
 import useGroupByName from '@components/utils/hooks/push/useGetGroupbyName';
 import { t } from '@lingui/macro';
-import type { GroupDTO, IFeeds } from '@pushprotocol/restapi';
+import {
+  type GroupDTO,
+  type IFeeds,
+  VideoCallStatus
+} from '@pushprotocol/restapi';
 import { APP_NAME } from 'data/constants';
 import type { Profile } from 'lens';
 import { useProfileLazyQuery } from 'lens';
@@ -25,6 +29,7 @@ import { getCAIPFromLensID, getIsHandle, getProfileFromDID } from './helper';
 import MessageBody from './MessageBody';
 import MessageHeader from './MessageHeader';
 import PUSHNoConversationSelected from './PUSHNoConversationSelected';
+import VideoCall from './Video/VideoCall';
 
 type MessagePropType = {
   conversationType: ChatTypes;
@@ -52,6 +57,8 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
   const pgpPrivateKey = usePushChatStore((state) => state.pgpPrivateKey);
   const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
   const connectedProfile = usePushChatStore((state) => state.connectedProfile);
+  const videoCallData = usePushChatStore((state) => state.videoCallData);
+  const currentStatus = videoCallData.incoming[0].status;
   const currentProfile = useAppStore((state) => state.currentProfile);
   const [profile, setProfile] = useState<Profile | null | ''>('');
   const [groupInfo, setGroupInfo] = useState<GroupDTO | null | ''>('');
@@ -178,6 +185,10 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
 
   if (CHAT_NOT_FOUND) {
     toast.error('Chat Not Found!');
+  }
+
+  if (currentStatus > VideoCallStatus.UNINITIALIZED) {
+    return <VideoCall />;
   }
 
   return (
