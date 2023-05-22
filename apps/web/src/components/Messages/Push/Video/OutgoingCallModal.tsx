@@ -10,6 +10,7 @@ import { Image, Modal } from 'ui';
 
 const OutgoingCallModal = () => {
   const connectedProfile = usePushChatStore((state) => state.connectedProfile);
+  const selectedChatId = usePushChatStore((state) => state.selectedChatId);
   const localDid = connectedProfile?.did;
 
   const videoCallData = usePushChatStore((state) => state.videoCallData);
@@ -42,7 +43,7 @@ const OutgoingCallModal = () => {
           </div>
         </span>
         <div className="absolute left-0 right-0 top-16 z-50 m-auto mt-2 flex items-center justify-center sm:static sm:flex md:static md:flex">
-          <ProfileInfo />
+          <ProfileInfo profileId={getProfileFromDID(selectedChatId)} />
         </div>
         <span className="absolute left-0 right-0 top-[130px] m-auto mb-2 mt-2 flex items-center justify-center text-[15px] sm:static sm:flex md:static md:flex">
           Calling...
