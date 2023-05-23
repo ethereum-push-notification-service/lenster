@@ -643,7 +643,7 @@ export default function MessageBody({
                     (index === 0 || previousChat?.fromDID !== chat.fromDID) ? (
                       <SenderProfileInMsg chat={chat} />
                     ) : null}
-                    <Messages chat={chat} key={index} />
+                    <Messages chat={chat} key={chat.encryptedSecret} />
                   </>
                 );
               }
