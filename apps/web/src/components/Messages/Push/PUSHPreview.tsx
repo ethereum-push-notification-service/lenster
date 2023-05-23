@@ -26,6 +26,8 @@ import { useWalletClient } from 'wagmi';
 import { getProfileFromDID, isProfileExist } from './helper';
 import PUSHPreviewChats from './PUSHPreviewChats';
 import PUSHPreviewRequests from './PUSHPreviewRequest';
+import IncomingCallModal from './Video/IncomingCallModal';
+import OutgoingCallModal from './Video/OutgoingCallModal';
 
 const requestLimit: number = 30;
 const page: number = 1;
@@ -400,6 +402,10 @@ const PUSHPreview = () => {
       >
         {createPasswordModalContent}
       </Modal>
+
+      {/* video call modals */}
+      <OutgoingCallModal />
+      <IncomingCallModal />
     </div>
   );
 };

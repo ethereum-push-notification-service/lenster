@@ -5,6 +5,7 @@ import ProfileInfo from '@components/Messages/Push/Video/ProfileInfo';
 import Video from '@components/Messages/Push/Video/Video';
 import usePushVideoCall from '@components/utils/hooks/push/usePushVideoCall';
 import { VideoCallStatus } from '@pushprotocol/restapi';
+import { useEffect } from 'react';
 import { usePushChatStore } from 'src/store/push-chat';
 import { Image, Modal } from 'ui';
 
@@ -14,16 +15,36 @@ const OutgoingCallModal = () => {
   const localDid = connectedProfile?.did;
 
   const videoCallData = usePushChatStore((state) => state.videoCallData);
+  const currentStatus = videoCallData.incoming[0].status;
   const localStream = videoCallData.local.stream;
   const isVideoOn = videoCallData.local.video;
   const isAudioOn = videoCallData.local.audio;
-  const isModalViible =
+  const isModalVisible =
     videoCallData.incoming[0].status === VideoCallStatus.INITIALIZED;
 
-  const { disconnectVideoCall, toggleAudio, toggleVideo } = usePushVideoCall();
+  const {
+    createMediaStream,
+    requestVideoCall,
+    disconnectVideoCall,
+    toggleAudio,
+    toggleVideo
+  } = usePushVideoCall();
+
+  useEffect(() => {
+    (async () => {
+      if (isModalVisible) {
+        if (localStream === null) {
+          await createMediaStream();
+        } else if (currentStatus === VideoCallStatus.INITIALIZED) {
+          await requestVideoCall({});
+        }
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localStream, isModalVisible]);
 
   return (
-    <Modal size="md" show={isModalViible}>
+    <Modal size="md" show={isModalVisible}>
       <div className="my-4">
         <span className="absolute left-0 right-0 top-8 m-auto flex items-center justify-center sm:static md:static">
           <div className="mb-2 flex items-center rounded-lg bg-[#F4F4F5] px-2 py-0.5 dark:bg-[#18181B] sm:p-2 md:p-2">
