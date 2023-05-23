@@ -23,7 +23,7 @@ const OutgoingCallModal = () => {
 
   return (
     <Modal size="md" show={isModalViible}>
-      <div className="my-4">
+      <div className="sm:my-4 md:my-4 my-0 m-0">
         <span className="absolute left-0 right-0 top-8 m-auto flex items-center justify-center sm:static md:static">
           <div className="mb-2 flex items-center rounded-lg bg-[#F4F4F5] px-2 py-0.5 dark:bg-[#18181B] sm:p-2 md:p-2">
             <Image
@@ -53,18 +53,18 @@ const OutgoingCallModal = () => {
             stream={localStream}
             profileId={getProfileFromDID(localDid!)}
             isMainFrame={true}
-            videoFramestyles="bg-black h-[87vh] w-[95%] rounded-2xl object-cover sm:block sm:h-[57vh] md:h-[57vh]"
+            videoFramestyles="bg-black h-[87vh] sm:w-[95%] md:w-[95%] w-[100%] rounded-2xl object-cover sm:block sm:h-[57vh] md:h-[57vh]"
           />
         </div>
-        <div className="mb-8 mt-4 flex items-center justify-center gap-2.5">
+        <div className="md:static sm:static absolute bottom-3 left-0 right-0 m-auto mb-8 mt-4 flex items-center justify-center gap-2.5">
           <MediaToggleButton
             iconSrc={`/push/${isVideoOn ? 'cameraonbtn' : 'cameraoffbtn'}.svg`}
-            styles={`bg-${isVideoOn ? 'white' : 'red'}`}
+            styles={`bg-${isVideoOn ? '[white]' : '[red]'}`}
             onClick={toggleVideo}
           />
           <MediaToggleButton
             iconSrc={`/push/${isAudioOn ? 'miconbtn' : 'micoffbtn'}.svg`}
-            styles={`bg-${isAudioOn ? 'white' : 'red'}`}
+            styles={`bg-${isAudioOn ? '[white]' : '[red]'}`}
             onClick={toggleAudio}
           />
           <CallButton

@@ -67,17 +67,17 @@ const OngoingCall = () => {
           <div className="absolute ml-6 mt-[-60px] rounded-xl bg-[#2E313B] px-[8px] py-[3px] text-white sm:ml-10 md:ml-10">
             <LensHandleTag />
           </div>
-          <div className="mb-4 mt-2 flex cursor-pointer items-center justify-center gap-2.5">
+          <div className="md:static sm:static absolute mb-4 mt-2 flex cursor-pointer items-center justify-center gap-2.5">
             <MediaToggleButton
               iconSrc={`/push/${
                 isLocalVideoOn ? 'cameraonbtn' : 'cameraoffbtn'
               }.svg`}
-              styles={`bg-${isLocalVideoOn ? 'white' : 'red'}`}
+              styles={`bg-${isLocalVideoOn ? '[white]' : '[red]'}`}
               onClick={toggleVideo}
             />
             <MediaToggleButton
               iconSrc={`/push/${isLocalAudioOn ? 'miconbtn' : 'micoffbtn'}.svg`}
-              styles={`bg-${isLocalAudioOn ? 'white' : 'red'}`}
+              styles={`bg-${isLocalAudioOn ? '[white]' : '[red]'}`}
               onClick={toggleAudio}
             />
             <CallButton
