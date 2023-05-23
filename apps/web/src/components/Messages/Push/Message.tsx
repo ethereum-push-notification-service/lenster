@@ -5,6 +5,7 @@ import useFetchLensProfiles from '@components/utils/hooks/push/useFetchLensProfi
 import useGetChatProfile from '@components/utils/hooks/push/useGetChatProfile';
 import useGetGroup from '@components/utils/hooks/push/useGetGroup';
 import useGroupByName from '@components/utils/hooks/push/useGetGroupbyName';
+import usePushNotificationSocket from '@components/utils/hooks/push/usePushNotificationSocket';
 import { t } from '@lingui/macro';
 import {
   type GroupDTO,
@@ -63,6 +64,9 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
   const [profile, setProfile] = useState<Profile | null | ''>('');
   const [groupInfo, setGroupInfo] = useState<GroupDTO | null | ''>('');
   const [selectedChat, setSelectedChat] = useState<IFeeds>();
+
+  // connect Push Notification Socket
+  usePushNotificationSocket();
 
   useEffect(() => {
     if (!selectedChatId) {
