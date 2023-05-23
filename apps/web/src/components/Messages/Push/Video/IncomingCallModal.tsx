@@ -58,12 +58,12 @@ const IncomingCallModal = () => {
 
             <div className="flex flex-row items-center justify-center gap-2">
               <CallButton
-                styles="px-[13px] md:px-[17px] w-[60px] bg-[#30CC8B] rounded-[16px]"
+                styles="px-[13px] md:px-[17px] w-[60px] bg-[#30CC8B] rounded-[16px] focus:outline-none"
                 iconSrc={'/push/callacceptbtn.svg'}
                 onClick={() => acceptVideoCallRequest({})}
               />
               <CallButton
-                styles="px-[13px] md:px-[17px] w-[60px] bg-[red] rounded-[16px]"
+                styles="px-[13px] md:px-[17px] w-[60px] bg-[red] rounded-[16px] focus:outline-none"
                 iconSrc={'/push/callendbtn.svg'}
                 onClick={disconnectVideoCall}
               />
@@ -98,12 +98,12 @@ const IncomingCallModal = () => {
             </div>
             <div className="mt-4 flex w-full flex-row items-center justify-center gap-4">
               <CallButton
-                styles="px-[28px] w-[80px] bg-[#30CC8B] rounded-[16px]"
+                styles="px-[28px] w-[80px] bg-[#30CC8B] rounded-[16px] focus:outline-none"
                 iconSrc={'/push/callacceptbtn.svg'}
                 onClick={() => acceptVideoCallRequest({})}
               />
               <CallButton
-                styles="px-[22px] w-[70px] bg-[red] rounded-[16px]"
+                styles="px-[22px] w-[70px] bg-[red] rounded-[16px] focus:outline-none"
                 iconSrc={'/push/callendbtn.svg'}
                 onClick={disconnectVideoCall}
               />

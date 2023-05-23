@@ -199,7 +199,7 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
   }
 
   return (
-    <GridLayout classNameChild="md:gap-8 relative p-0">
+    <GridLayout classNameChild="md:gap-8 relative">
       <MetaTags title={APP_NAME} />
       <PreviewList className="xs:hidden sm:hidden md:hidden lg:block" />
 

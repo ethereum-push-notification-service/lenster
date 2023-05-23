@@ -81,17 +81,17 @@ const OutgoingCallModal = () => {
         <div className="mb-8 mt-4 flex items-center justify-center gap-2.5">
           <MediaToggleButton
             iconSrc={`/push/${isVideoOn ? 'cameraonbtn' : 'cameraoffbtn'}.svg`}
-            styles={`bg-${isVideoOn ? 'white' : 'red'}`}
+            styles={`focus:outline-none bg-${isVideoOn ? 'white' : 'red'}`}
             onClick={toggleVideo}
           />
           <MediaToggleButton
             iconSrc={`/push/${isAudioOn ? 'miconbtn' : 'micoffbtn'}.svg`}
-            styles={`bg-${isAudioOn ? 'white' : 'red'}`}
+            styles={`focus:outline-none bg-${isAudioOn ? 'white' : 'red'}`}
             onClick={toggleAudio}
           />
           <CallButton
             iconSrc={'/push/callendbtn.svg'}
-            styles="px-[28px] w-[80px] bg-[red]"
+            styles="focus:outline-none px-[28px] w-[80px] bg-[red]"
             onClick={disconnectVideoCall}
           />
         </div>
