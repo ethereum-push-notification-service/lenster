@@ -5,21 +5,43 @@ import ProfileInfo from '@components/Messages/Push/Video/ProfileInfo';
 import Video from '@components/Messages/Push/Video/Video';
 import usePushVideoCall from '@components/utils/hooks/push/usePushVideoCall';
 import { VideoCallStatus } from '@pushprotocol/restapi';
+import { useEffect } from 'react';
 import { usePushChatStore } from 'src/store/push-chat';
 import { Image, Modal } from 'ui';
 
 const OutgoingCallModal = () => {
   const connectedProfile = usePushChatStore((state) => state.connectedProfile);
+  const selectedChatId = usePushChatStore((state) => state.selectedChatId);
   const localDid = connectedProfile?.did;
 
   const videoCallData = usePushChatStore((state) => state.videoCallData);
+  const currentStatus = videoCallData.incoming[0].status;
   const localStream = videoCallData.local.stream;
   const isVideoOn = videoCallData.local.video;
   const isAudioOn = videoCallData.local.audio;
-  const isModalViible =
+  const isModalVisible =
     videoCallData.incoming[0].status === VideoCallStatus.INITIALIZED;
 
-  const { disconnectVideoCall, toggleAudio, toggleVideo } = usePushVideoCall();
+  const {
+    createMediaStream,
+    requestVideoCall,
+    disconnectVideoCall,
+    toggleAudio,
+    toggleVideo
+  } = usePushVideoCall();
+
+  useEffect(() => {
+    (async () => {
+      if (isModalVisible) {
+        if (localStream === null) {
+          await createMediaStream();
+        } else if (currentStatus === VideoCallStatus.INITIALIZED) {
+          await requestVideoCall({});
+        }
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localStream, isModalVisible]);
 
   return (
     <Modal size="md" show={isModalViible}>
@@ -42,7 +64,7 @@ const OutgoingCallModal = () => {
           </div>
         </span>
         <div className="absolute left-0 right-0 top-16 z-50 m-auto mt-2 flex items-center justify-center sm:static sm:flex md:static md:flex">
-          <ProfileInfo />
+          <ProfileInfo profileId={getProfileFromDID(selectedChatId)} />
         </div>
         <span className="absolute left-0 right-0 top-[130px] m-auto mb-2 mt-2 flex items-center justify-center text-[15px] sm:static sm:flex md:static md:flex">
           Calling...

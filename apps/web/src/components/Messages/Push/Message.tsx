@@ -30,7 +30,7 @@ import { getCAIPFromLensID, getIsHandle, getProfileFromDID } from './helper';
 import MessageBody from './MessageBody';
 import MessageHeader from './MessageHeader';
 import PUSHNoConversationSelected from './PUSHNoConversationSelected';
-import VideoCall from './Video/VideoCall';
+import OngoingCall from './Video/OngoingCall';
 
 type MessagePropType = {
   conversationType: ChatTypes;
@@ -191,8 +191,9 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
     toast.error('Chat Not Found!');
   }
 
-  if (currentStatus > VideoCallStatus.UNINITIALIZED) {
-    return <VideoCall />;
+  // If video call is connected then show the ongoing call UI otherwise the messaging UI
+  if (currentStatus >= VideoCallStatus.CONNECTED) {
+    return <OngoingCall />;
   }
 
   return (

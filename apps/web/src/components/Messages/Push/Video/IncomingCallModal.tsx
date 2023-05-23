@@ -3,7 +3,7 @@ import ProfileInfo from '@components/Messages/Push/Video/ProfileInfo';
 import Video from '@components/Messages/Push/Video/Video';
 import usePushVideoCall from '@components/utils/hooks/push/usePushVideoCall';
 import { VideoCallStatus } from '@pushprotocol/restapi';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { MdExpandMore } from 'react-icons/md';
 import { usePushChatStore } from 'src/store/push-chat';
 import { Modal } from 'ui';
@@ -23,7 +23,8 @@ const IncomingCallModal = () => {
   const localStream = videoCallData.local.stream;
   const isVideoOn = videoCallData.local.video;
 
-  const { acceptVideoCallRequest, disconnectVideoCall } = usePushVideoCall();
+  const { createMediaStream, acceptVideoCallRequest, disconnectVideoCall } =
+    usePushVideoCall();
 
   const [isIncomingCallMinimized, setIsIncomingCallMinimized] = useState(false);
 
@@ -33,13 +34,26 @@ const IncomingCallModal = () => {
     setIsIncomingCallMinimized(true);
   };
 
+  useEffect(() => {
+    (async () => {
+      if (isModalVisible && localStream === null) {
+        await createMediaStream();
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localStream, isModalVisible]);
+
   return (
     <div>
-      {isIncomingCallMinimized ? (
+      {isModalVisible && isIncomingCallMinimized ? (
         <div className="absolute bottom-[10%] left-0 right-0 z-50 ml-auto mr-auto box-border w-11/12 rounded-[24px] bg-[#F4F4F5] dark:border dark:border-[#3F3F46] dark:bg-[#18181B] md:bottom-[80px] md:left-auto md:right-[20px] md:m-0 md:ml-1 md:mr-1 md:w-fit md:w-fit">
           <div className="flex flex-row items-center gap-8 p-4">
             <div className="">
-              <ProfileInfo status={'Incoming Video Call'} removeSlug={true} />
+              <ProfileInfo
+                status={'Incoming Video Call'}
+                removeSlug={true}
+                profileId={getProfileFromDID(videoCallData.incoming[0].address)}
+              />
             </div>
 
             <div className="flex flex-row items-center justify-center gap-2">
@@ -68,7 +82,10 @@ const IncomingCallModal = () => {
               />
             </div>
             <div className="mb-4 mt-2 w-fit sm:justify-start">
-              <ProfileInfo status={'Incoming Video Call'} />
+              <ProfileInfo
+                status={'Incoming Video Call'}
+                profileId={getProfileFromDID(videoCallData.incoming[0].address)}
+              />
             </div>
             <div>
               <Video

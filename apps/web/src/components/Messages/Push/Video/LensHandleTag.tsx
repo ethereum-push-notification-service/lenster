@@ -2,20 +2,19 @@ import useFetchLensProfiles from '@components/utils/hooks/push/useFetchLensProfi
 import type { Profile } from 'lens';
 import formatHandle from 'lib/formatHandle';
 import React, { useCallback, useEffect, useState } from 'react';
-import { usePushChatStore } from 'src/store/push-chat';
 
-import { getProfileFromDID } from '../helper';
+type LensHandleTagPropType = {
+  profileId: string;
+};
 
-const LensHandle = () => {
+const LensHandleTag = ({ profileId }: LensHandleTagPropType) => {
   const [showProfile, setShowProfile] = useState<Profile[]>([]);
-  const selectedChatid = usePushChatStore((state) => state.selectedChatId);
   const { getLensProfile } = useFetchLensProfiles();
 
   const getUserlensProfile = useCallback(async () => {
-    const Id = getProfileFromDID(selectedChatid);
-    const lensProfile = await getLensProfile(Id);
+    const lensProfile = await getLensProfile(profileId);
     setShowProfile(lensProfile ? [lensProfile] : []);
-  }, []);
+  }, [getLensProfile, profileId]);
 
   useEffect(() => {
     getUserlensProfile();
@@ -32,4 +31,4 @@ const LensHandle = () => {
   );
 };
 
-export default LensHandle;
+export default LensHandleTag;
