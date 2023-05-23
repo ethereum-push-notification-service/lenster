@@ -40,11 +40,11 @@ const Video = ({
   }, [getLensProfile, profileId]);
 
   useEffect(() => {
-    if (videoRef.current) {
+    if (isVideoOn && videoRef.current) {
       videoRef.current.srcObject = stream;
       videoRef.current.play();
     }
-  }, [stream]);
+  }, [stream, videoRef, isVideoOn]);
 
   return (
     <div className="flex flex-1 items-center justify-center">

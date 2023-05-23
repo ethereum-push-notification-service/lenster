@@ -11,10 +11,10 @@ import { getProfileFromDID } from '../helper';
 
 const OngoingCall = () => {
   const connectedProfile = usePushChatStore((state) => state.connectedProfile);
-  const localDid = connectedProfile?.did;
+  const localDID = connectedProfile?.did;
 
   const videoCallData = usePushChatStore((state) => state.videoCallData);
-  const callChatId = videoCallData.meta.chatId;
+  const receiverDID = videoCallData.incoming[0].address;
   const incomingStream = videoCallData.incoming[0].stream;
   const isIncomingVideoOn = videoCallData.incoming[0].video;
   const localStream = videoCallData.local.stream;
@@ -49,7 +49,7 @@ const OngoingCall = () => {
               <Video
                 isVideoOn={isIncomingVideoOn}
                 stream={incomingStream}
-                profileId={getProfileFromDID(callChatId!)}
+                profileId={getProfileFromDID(receiverDID)}
                 isMainFrame={true}
                 videoFramestyles="bg-black h-[66vh] w-[95%] rounded-2xl object-cover sm:block sm:h-[62vh] md:h-[62vh]"
               />
@@ -57,7 +57,7 @@ const OngoingCall = () => {
                 <Video
                   isVideoOn={isLocalVideoOn}
                   stream={localStream}
-                  profileId={getProfileFromDID(localDid!)}
+                  profileId={getProfileFromDID(localDID!)}
                   isMainFrame={false}
                   videoFramestyles="h-[120px] w-[198px] bg-white object-cover sm:h-[143px] sm:w-[254px] md:h-[143px] md:w-[254px] rounded-2xl"
                 />

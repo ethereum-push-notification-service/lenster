@@ -1,5 +1,6 @@
 import type { SignerType } from '@pushprotocol/restapi';
 import { video as PushVideo, VideoCallStatus } from '@pushprotocol/restapi';
+import { initVideoCallData } from '@pushprotocol/restapi/src/lib/video';
 import { produce } from 'immer';
 import { useEffect } from 'react';
 import { CHAIN_ID } from 'src/constants';
@@ -197,6 +198,11 @@ const usePushVideoCall = () => {
     return videoCallObject?.isInitiator()!;
   };
 
+  const resetVideoCallState = () => {
+    setVideoCallObject(null);
+    setVideoCallData(() => initVideoCallData);
+  };
+
   return {
     createMediaStream,
     requestVideoCall,
@@ -207,7 +213,8 @@ const usePushVideoCall = () => {
     setRequestVideoCall,
     toggleVideo,
     toggleAudio,
-    isVideoCallInitiator
+    isVideoCallInitiator,
+    resetVideoCallState
   };
 };
 
