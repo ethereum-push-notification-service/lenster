@@ -69,17 +69,21 @@ const OngoingCall = () => {
               profileId={getProfileFromDID(videoCallData.incoming[0].address)}
             />
           </div>
-          <div className="mb-4 mt-2 flex cursor-pointer items-center justify-center gap-2.5">
+          <div className="absolute mb-4 mt-2 flex cursor-pointer items-center justify-center gap-2.5 sm:static md:static">
             <MediaToggleButton
               iconSrc={`/push/${
                 isLocalVideoOn ? 'cameraonbtn' : 'cameraoffbtn'
               }.svg`}
-              styles={`bg-${isLocalVideoOn ? 'white' : 'red'}`}
+              styles={`bg-${isLocalVideoOn ? 'white' : '[red]'} border-${
+                isLocalVideoOn ? '[#D4D4D8]' : 'none'
+              }`}
               onClick={toggleVideo}
             />
             <MediaToggleButton
               iconSrc={`/push/${isLocalAudioOn ? 'miconbtn' : 'micoffbtn'}.svg`}
-              styles={`bg-${isLocalAudioOn ? 'white' : 'red'}`}
+              styles={`bg-${isLocalAudioOn ? 'white' : '[red]'} border-${
+                isLocalAudioOn ? '[#D4D4D8]' : 'none'
+              }`}
               onClick={toggleAudio}
             />
             <CallButton
