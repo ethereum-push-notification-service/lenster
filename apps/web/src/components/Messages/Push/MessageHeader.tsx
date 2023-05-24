@@ -113,7 +113,7 @@ export default function MessageHeader({
           <>
             <img
               onClick={() =>
-                setRequestVideoCall({ selectedChatId: selectedChat.chatId })
+                setRequestVideoCall({ selectedChatId: selectedChat?.chatId })
               }
               className="hidden cursor-pointer dark:flex"
               src="/push/videobtndarkmode.svg"
@@ -121,7 +121,7 @@ export default function MessageHeader({
             />
             <img
               onClick={() =>
-                setRequestVideoCall({ selectedChatId: selectedChat.chatId })
+                setRequestVideoCall({ selectedChatId: selectedChat?.chatId })
               }
               className="flex cursor-pointer dark:hidden"
               src="/push/video.svg"

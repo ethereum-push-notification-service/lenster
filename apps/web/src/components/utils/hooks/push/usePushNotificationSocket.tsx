@@ -5,7 +5,7 @@ import { LENSHUB_PROXY } from 'data';
 import { useCallback, useEffect, useState } from 'react';
 import { CHAIN_ID } from 'src/constants';
 import { useAppStore } from 'src/store/app';
-import { PUSH_ENV, usePushChatStore } from 'src/store/push-chat';
+import { PUSH_ENV } from 'src/store/push-chat';
 
 import type { VideoCallMetaDataType } from './usePushVideoCall';
 import usePushVideoCall from './usePushVideoCall';
@@ -18,7 +18,6 @@ interface PushNotificationSocket {
 
 const usePushNotificationSocket = (): PushNotificationSocket => {
   const currentProfile = useAppStore((state) => state.currentProfile);
-  const videoCallObject = usePushChatStore((state) => state.videoCallObject);
 
   const [notificationSocket, setNotificationSocket] = useState<any>(null);
   const [isNotificationSocketConnected, setIsNotificationSocketConnected] =

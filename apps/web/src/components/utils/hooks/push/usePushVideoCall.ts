@@ -199,6 +199,14 @@ const usePushVideoCall = () => {
   };
 
   const resetVideoCallState = () => {
+    // end the local stream
+    if (videoCallData.local.stream) {
+      for (const track of videoCallData.local.stream?.getTracks()) {
+        track.stop();
+      }
+    }
+
+    // reset the state
     setVideoCallObject(null);
     setVideoCallData(() => initVideoCallData);
   };
