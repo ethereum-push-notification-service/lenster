@@ -58,12 +58,12 @@ const IncomingCallModal = () => {
 
             <div className="flex flex-row items-center justify-center gap-2">
               <CallButton
-                styles="px-[13px] md:px-[17px] w-[60px] bg-[#30CC8B] rounded-[16px] focus:outline-none"
+                styles="px-[13px] md:px-[17px] w-[47px] md:w-[60px] bg-[#30CC8B] rounded-[16px] focus:outline-none"
                 iconSrc={'/push/callacceptbtn.svg'}
                 onClick={() => acceptVideoCallRequest({})}
               />
               <CallButton
-                styles="px-[13px] md:px-[17px] w-[60px] bg-[red] rounded-[16px] focus:outline-none"
+                styles="px-[13px] md:px-[17px] w-[47px] md:w-[60px] bg-[red] rounded-[16px] focus:outline-none"
                 iconSrc={'/push/callendbtn.svg'}
                 onClick={disconnectVideoCall}
               />

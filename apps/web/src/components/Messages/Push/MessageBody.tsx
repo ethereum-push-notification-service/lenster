@@ -14,7 +14,7 @@ import type { Profile } from 'lens';
 import formatHandle from 'lib/formatHandle';
 import getAvatar from 'lib/getAvatar';
 import moment from 'moment';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { useClickAway } from 'react-use';
 import { useAppStore } from 'src/store/app';
 import { CHAT_TYPES, PUSH_TABS, usePushChatStore } from 'src/store/push-chat';
@@ -636,15 +636,15 @@ export default function MessageBody({
                 }
 
                 return (
-                  <>
+                  <Fragment key={chat.encryptedSecret}>
                     {dates.has(dateNum) ? null : renderDate({ chat, dateNum })}
                     {chat.fromDID !== connectedProfile?.did &&
                     selectedChatType === CHAT_TYPES.GROUP &&
                     (index === 0 || previousChat?.fromDID !== chat.fromDID) ? (
                       <SenderProfileInMsg chat={chat} />
                     ) : null}
-                    <Messages chat={chat} key={chat.encryptedSecret} />
-                  </>
+                    <Messages chat={chat} />
+                  </Fragment>
                 );
               }
             )
