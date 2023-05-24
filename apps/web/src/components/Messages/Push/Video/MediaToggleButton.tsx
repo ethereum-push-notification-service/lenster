@@ -16,7 +16,7 @@ const MediaToggleButton = ({
     <button onClick={onClick}>
       <Image
         src={iconSrc}
-        className={`h-[48px] w-[48px] cursor-pointer rounded-[10px] border border-[#D4D4D8] p-3 ${styles}`}
+        className={`h-[48px] w-[48px] cursor-pointer rounded-[10px] border p-3 outline-none focus:outline-none ${styles}`}
         alt="call"
       />
     </button>
