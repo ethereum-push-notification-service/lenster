@@ -63,7 +63,7 @@ const Video = ({
           <div
             className={clsx(
               isMainFrame
-                ? 'mx-auto flex h-[87vh] sm:w-[95%] md:w-[95%] w-[100%] rounded-2xl bg-[#F4F4F5] dark:bg-gray-700 sm:h-[57vh] md:h-[65]'
+                ? 'mx-auto flex h-[87vh] w-[100%] rounded-2xl bg-[#F4F4F5] dark:bg-gray-700 sm:h-[57vh] sm:w-[95%] md:h-[65] md:w-[95%]'
                 : 'flex h-[120px] w-[198px] rounded-2xl bg-gray-200 dark:bg-gray-600 sm:h-[143px] sm:w-[254px] md:h-[171px] md:w-[302px]'
             )}
           >

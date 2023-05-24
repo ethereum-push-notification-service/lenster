@@ -18,8 +18,8 @@ const IncomingCallModal = () => {
   const localDid = connectedProfile?.did;
 
   const videoCallData = usePushChatStore((state) => state.videoCallData);
-  const isModalVisible =
-    videoCallData.incoming[0].status === VideoCallStatus.RECEIVED;
+  const currentStatus = videoCallData.incoming[0].status;
+  const isModalVisible = currentStatus === VideoCallStatus.RECEIVED;
   const localStream = videoCallData.local.stream;
   const isVideoOn = videoCallData.local.video;
 
@@ -42,6 +42,13 @@ const IncomingCallModal = () => {
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localStream, isModalVisible]);
+
+  // reset the minimize state once the call has been connected
+  useEffect(() => {
+    if (currentStatus === VideoCallStatus.UNINITIALIZED) {
+      setIsIncomingCallMinimized(false);
+    }
+  }, [currentStatus]);
 
   return (
     <div>
