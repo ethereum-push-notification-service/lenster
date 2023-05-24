@@ -109,3 +109,19 @@ export const getGroupImage = (feed: IFeeds): string => {
     return feed?.profilePicture!;
   }
 };
+
+// push easter egg
+export const getPushEasterEgg = (): void => {
+  console.log(`
+  ██████╗ ██╗   ██╗███████╗██╗  ██╗    ██████╗ ███████╗██╗   ██╗
+  ██╔══██╗██║   ██║██╔════╝██║  ██║    ██╔══██╗██╔════╝██║   ██║
+  ██████╔╝██║   ██║███████╗███████║    ██║  ██║█████╗  ██║   ██║
+  ██╔═══╝ ██║   ██║╚════██║██╔══██║    ██║  ██║██╔══╝  ╚██╗ ██╔╝
+  ██║     ╚██████╔╝███████║██║  ██║    ██████╔╝███████╗ ╚████╔╝ 
+  ╚═╝      ╚═════╝ ╚══════╝╚═╝  ╚═╝    ╚═════╝ ╚══════╝  ╚═══╝  `);
+  console.log(
+    'Connected to PUSH',
+    PUSH_ENV,
+    'environment. Lets keep PUSHing! 🔔 \nhttps://github.com/ethereum-push-notification-service'
+  );
+};

@@ -26,7 +26,12 @@ import { CHAT_TYPES, usePushChatStore } from 'src/store/push-chat';
 import { Card, GridItemEight, GridLayout } from 'ui';
 
 import PreviewList from '../PreviewList';
-import { getCAIPFromLensID, getIsHandle, getProfileFromDID } from './helper';
+import {
+  getCAIPFromLensID,
+  getIsHandle,
+  getProfileFromDID,
+  getPushEasterEgg
+} from './helper';
 import MessageBody from './MessageBody';
 import MessageHeader from './MessageHeader';
 import PUSHNoConversationSelected from './PUSHNoConversationSelected';
@@ -186,6 +191,10 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId, conversationType]);
+
+  useEffect(() => {
+    getPushEasterEgg();
+  }, []);
 
   const CHAT_NOT_FOUND = profile === null || groupInfo === null;
 
