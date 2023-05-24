@@ -30,7 +30,9 @@ import { getCAIPFromLensID, getIsHandle, getProfileFromDID } from './helper';
 import MessageBody from './MessageBody';
 import MessageHeader from './MessageHeader';
 import PUSHNoConversationSelected from './PUSHNoConversationSelected';
+import IncomingCallModal from './Video/IncomingCallModal';
 import OngoingCall from './Video/OngoingCall';
+import OutgoingCallModal from './Video/OutgoingCallModal';
 
 type MessagePropType = {
   conversationType: ChatTypes;
@@ -197,9 +199,10 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
   }
 
   return (
-    <GridLayout classNameChild="md:gap-8">
+    <GridLayout classNameChild="md:gap-8 relative">
       <MetaTags title={APP_NAME} />
       <PreviewList className="xs:hidden sm:hidden md:hidden lg:block" />
+
       <GridItemEight className="xs:h-[85vh] xs:mx-2 mb-0 sm:mx-2 sm:h-[76vh] md:col-span-8 md:h-[80vh] xl:h-[84vh]">
         {CHAT_NOT_FOUND ? (
           <Card className="h-full">
@@ -259,6 +262,10 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
           </Card>
         )}
       </GridItemEight>
+
+      {/* video call modals */}
+      <OutgoingCallModal />
+      <IncomingCallModal />
     </GridLayout>
   );
 };

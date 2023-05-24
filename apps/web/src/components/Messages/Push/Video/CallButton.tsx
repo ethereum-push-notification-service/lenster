@@ -13,7 +13,7 @@ const CallButton = ({ styles, iconSrc, onClick }: CallButtonProps) => {
     <button className="" onClick={onClick}>
       <Image
         src={iconSrc}
-        className={`h-[48px] cursor-pointer rounded-[10px] py-[12px] ${styles}`}
+        className={`h-[48px] cursor-pointer rounded-[10px] py-[12px] outline-none focus:outline-none ${styles}`}
         alt="call"
       />
     </button>
