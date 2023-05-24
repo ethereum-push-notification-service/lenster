@@ -2,24 +2,24 @@ import React from 'react';
 import { Image } from 'ui';
 
 type MediaToggleButtonProps = {
-  buttonStyles: string;
+  styles: string;
   iconSrc: any;
   onClick: () => void;
 };
 
-// toggle media on and off
 const MediaToggleButton = ({
-  buttonStyles,
+  styles,
   iconSrc,
   onClick
 }: MediaToggleButtonProps) => {
   return (
-    <div
-      // className=
-      onClick={onClick}
-    >
-      <Image src={iconSrc} className={buttonStyles} alt="call" />
-    </div>
+    <button onClick={onClick}>
+      <Image
+        src={iconSrc}
+        className={`h-[48px] w-[48px] cursor-pointer rounded-[10px] border p-3 outline-none focus:outline-none ${styles}`}
+        alt="call"
+      />
+    </button>
   );
 };
 

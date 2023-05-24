@@ -91,7 +91,7 @@ interface IPushChatStore {
 
   // video
   videoCallObject: PushVideo.Video | null;
-  setVideoCallObject: (videoCallObject: PushVideo.Video) => void;
+  setVideoCallObject: (videoCallObject: PushVideo.Video | null) => void;
   videoCallData: VideoCallData;
   setVideoCallData: (fn: (data: VideoCallData) => VideoCallData) => void;
 }

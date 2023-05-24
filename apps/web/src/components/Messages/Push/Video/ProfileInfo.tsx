@@ -4,26 +4,22 @@ import type { Profile } from 'lens';
 import formatHandle from 'lib/formatHandle';
 import getAvatar from 'lib/getAvatar';
 import React, { useCallback, useEffect, useState } from 'react';
-import { usePushChatStore } from 'src/store/push-chat';
 import { Image } from 'ui';
-
-import { getProfileFromDID } from '../helper';
 
 type ProfileInfoType = {
   status?: string;
   removeSlug?: boolean;
+  profileId: string;
 };
 
-const ProfileInfo = ({ status, removeSlug }: ProfileInfoType) => {
+const ProfileInfo = ({ status, removeSlug, profileId }: ProfileInfoType) => {
   const [showProfile, setShowProfile] = useState<Profile[]>([]);
-  const selectedChatid = usePushChatStore((state) => state.selectedChatId);
   const { getLensProfile } = useFetchLensProfiles();
 
   const getUserlensProfile = useCallback(async () => {
-    const Id = getProfileFromDID(selectedChatid);
-    const lensProfile = await getLensProfile(Id);
+    const lensProfile = await getLensProfile(profileId);
     setShowProfile(lensProfile ? [lensProfile] : []);
-  }, []);
+  }, [getLensProfile, profileId]);
 
   useEffect(() => {
     getUserlensProfile();

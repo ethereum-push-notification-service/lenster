@@ -5,9 +5,13 @@ import useFetchLensProfiles from '@components/utils/hooks/push/useFetchLensProfi
 import useGetChatProfile from '@components/utils/hooks/push/useGetChatProfile';
 import useGetGroup from '@components/utils/hooks/push/useGetGroup';
 import useGroupByName from '@components/utils/hooks/push/useGetGroupbyName';
-import useOngoingCall from '@components/utils/hooks/push/usePushOngoing';
+import usePushNotificationSocket from '@components/utils/hooks/push/usePushNotificationSocket';
 import { t } from '@lingui/macro';
-import type { GroupDTO, IFeeds } from '@pushprotocol/restapi';
+import {
+  type GroupDTO,
+  type IFeeds,
+  VideoCallStatus
+} from '@pushprotocol/restapi';
 import { APP_NAME } from 'data/constants';
 import type { Profile } from 'lens';
 import { useProfileLazyQuery } from 'lens';
@@ -22,10 +26,18 @@ import { CHAT_TYPES, usePushChatStore } from 'src/store/push-chat';
 import { Card, GridItemEight, GridLayout } from 'ui';
 
 import PreviewList from '../PreviewList';
-import { getCAIPFromLensID, getIsHandle, getProfileFromDID } from './helper';
+import {
+  getCAIPFromLensID,
+  getIsHandle,
+  getProfileFromDID,
+  getPushEasterEgg
+} from './helper';
 import MessageBody from './MessageBody';
 import MessageHeader from './MessageHeader';
 import PUSHNoConversationSelected from './PUSHNoConversationSelected';
+import IncomingCallModal from './Video/IncomingCallModal';
+import OngoingCall from './Video/OngoingCall';
+import OutgoingCallModal from './Video/OutgoingCallModal';
 
 type MessagePropType = {
   conversationType: ChatTypes;
@@ -53,11 +65,15 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
   const pgpPrivateKey = usePushChatStore((state) => state.pgpPrivateKey);
   const decryptedPgpPvtKey = pgpPrivateKey.decrypted;
   const connectedProfile = usePushChatStore((state) => state.connectedProfile);
+  const videoCallData = usePushChatStore((state) => state.videoCallData);
+  const currentStatus = videoCallData.incoming[0].status;
   const currentProfile = useAppStore((state) => state.currentProfile);
-  const { showOngoingCall, setShowOngoingCall, OngoingCall } = useOngoingCall();
   const [profile, setProfile] = useState<Profile | null | ''>('');
   const [groupInfo, setGroupInfo] = useState<GroupDTO | null | ''>('');
   const [selectedChat, setSelectedChat] = useState<IFeeds>();
+
+  // connect Push Notification Socket
+  usePushNotificationSocket();
 
   useEffect(() => {
     if (!selectedChatId) {
@@ -176,81 +192,90 @@ const Message = ({ conversationType, conversationId }: MessagePropType) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId, conversationType]);
 
+  useEffect(() => {
+    getPushEasterEgg();
+  }, []);
+
   const CHAT_NOT_FOUND = profile === null || groupInfo === null;
 
   if (CHAT_NOT_FOUND) {
     toast.error('Chat Not Found!');
   }
 
+  // If video call is connected then show the ongoing call UI otherwise the messaging UI
+  if (currentStatus >= VideoCallStatus.CONNECTED) {
+    return <OngoingCall />;
+  }
+
   return (
-    <>
-      {showOngoingCall && <OngoingCall />}
-      {!showOngoingCall && (
-        <GridLayout classNameChild="md:gap-8">
-          <MetaTags title={APP_NAME} />
-          <PreviewList className="xs:hidden sm:hidden md:hidden lg:block" />
-          <GridItemEight className="xs:h-[85vh] xs:mx-2 mb-0 sm:mx-2 sm:h-[76vh] md:col-span-8 md:h-[80vh] xl:h-[84vh]">
-            {CHAT_NOT_FOUND ? (
-              <Card className="h-full">
-                <div className="flex h-full flex-col text-center">
-                  <PUSHNoConversationSelected />
-                </div>
-              </Card>
+    <GridLayout classNameChild="md:gap-8 relative">
+      <MetaTags title={APP_NAME} />
+      <PreviewList className="xs:hidden sm:hidden md:hidden lg:block" />
+
+      <GridItemEight className="xs:h-[85vh] xs:mx-2 mb-0 sm:mx-2 sm:h-[76vh] md:col-span-8 md:h-[80vh] xl:h-[84vh]">
+        {CHAT_NOT_FOUND ? (
+          <Card className="h-full">
+            <div className="flex h-full flex-col text-center">
+              <PUSHNoConversationSelected />
+            </div>
+          </Card>
+        ) : (
+          <Card className="relative flex h-full flex-col justify-between">
+            {showLoading || loading ? (
+              <div className="flex h-full flex-grow items-center justify-center">
+                <Loader message={t`Loading messages`} />
+              </div>
             ) : (
-              <Card className="relative flex h-full flex-col justify-between">
-                {showLoading || loading ? (
-                  <div className="flex h-full flex-grow items-center justify-center">
-                    <Loader message={t`Loading messages`} />
-                  </div>
-                ) : (
+              <>
+                {profile !== '' && profile && (
                   <>
-                    {profile !== '' && profile && (
-                      <>
-                        <MessageHeader
-                          profile={profile}
-                          selectedChat={
-                            chatsFeed[selectedChatId] ??
-                            requestsFeed[selectedChatId] ??
-                            selectedChat
-                          }
-                        />
-                        <MessageBody
-                          selectedChat={
-                            chatsFeed[selectedChatId] ??
-                            requestsFeed[selectedChatId] ??
-                            selectedChat
-                          }
-                        />
-                      </>
-                    )}
-                    {groupInfo !== '' && groupInfo && (
-                      <>
-                        <MessageHeader
-                          groupInfo={groupInfo}
-                          selectedChat={
-                            chatsFeed[selectedChatId] ??
-                            requestsFeed[selectedChatId] ??
-                            selectedChat
-                          }
-                        />
-                        <MessageBody
-                          groupInfo={groupInfo}
-                          selectedChat={
-                            chatsFeed[selectedChatId] ??
-                            requestsFeed[selectedChatId] ??
-                            selectedChat
-                          }
-                        />
-                      </>
-                    )}
+                    <MessageHeader
+                      profile={profile}
+                      selectedChat={
+                        chatsFeed[selectedChatId] ??
+                        requestsFeed[selectedChatId] ??
+                        selectedChat
+                      }
+                    />
+                    <MessageBody
+                      selectedChat={
+                        chatsFeed[selectedChatId] ??
+                        requestsFeed[selectedChatId] ??
+                        selectedChat
+                      }
+                    />
                   </>
                 )}
-              </Card>
+                {groupInfo !== '' && groupInfo && (
+                  <>
+                    <MessageHeader
+                      groupInfo={groupInfo}
+                      selectedChat={
+                        chatsFeed[selectedChatId] ??
+                        requestsFeed[selectedChatId] ??
+                        selectedChat
+                      }
+                    />
+                    <MessageBody
+                      groupInfo={groupInfo}
+                      selectedChat={
+                        chatsFeed[selectedChatId] ??
+                        requestsFeed[selectedChatId] ??
+                        selectedChat
+                      }
+                    />
+                  </>
+                )}
+              </>
             )}
-          </GridItemEight>
-        </GridLayout>
-      )}
-    </>
+          </Card>
+        )}
+      </GridItemEight>
+
+      {/* video call modals */}
+      <OutgoingCallModal />
+      <IncomingCallModal />
+    </GridLayout>
   );
 };
 const MessagePage: NextPage = () => {
