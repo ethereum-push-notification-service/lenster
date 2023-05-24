@@ -96,7 +96,7 @@ const OutgoingCallModal = () => {
           />
           <CallButton
             iconSrc={'/push/callendbtn.svg'}
-            styles="focus:outline-none px-[28px] w-[80px] bg-[red]"
+            styles="px-[28px] w-[80px] bg-[red]"
             onClick={disconnectVideoCall}
           />
         </div>
